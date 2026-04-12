@@ -10,11 +10,11 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
-import google.generativeai as genai
+from google import genai
 
 from config import settings
 
-genai.configure(api_key=settings.GEMINI_API_KEY)
+_client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 
 @dataclass
@@ -51,23 +51,23 @@ class ScriptScore:
 
 def analyze_topic(topic: str, video_format: str, duration_sec: float) -> ContentBrief:
     """Analisa o tema e retorna 3 ângulos estratégicos + brief completo."""
-    model = genai.GenerativeModel(settings.GEMINI_MODEL)
+    model = None  # unused with new SDK
     prompt = _build_analysis_prompt(topic, video_format, duration_sec)
-    response = model.generate_content(prompt)
+    response = _client.models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
     return _parse_brief(response.text, topic)
 
 
 def score_script(raw_text: str, topic: str, video_format: str) -> ScriptScore:
     """Avalia o script gerado e retorna score + sugestões de melhoria."""
-    model = genai.GenerativeModel(settings.GEMINI_MODEL)
+    model = None  # unused with new SDK
     prompt = _build_score_prompt(raw_text, topic, video_format)
-    response = model.generate_content(prompt)
+    response = _client.models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
     return _parse_score(response.text)
 
 
 def improve_image_prompt(basic_prompt: str, brief: ContentBrief, scene_label: str) -> str:
     """Aprimora um image_prompt simples com o contexto do brief visual."""
-    model = genai.GenerativeModel(settings.GEMINI_MODEL)
+    model = None  # unused with new SDK
     prompt = f"""Você é um diretor de arte especialista em vídeos virais para redes sociais.
 
 Aprimore este prompt de imagem para o gerador Imagen 3, tornando-o mais impactante e visualmente coerente com o estilo do vídeo.
@@ -89,7 +89,7 @@ Regras:
 
 Responda SOMENTE com o prompt aprimorado, sem explicações."""
 
-    response = model.generate_content(prompt)
+    response = _client.models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
     improved = response.text.strip().strip('"').strip("'")
     return improved if improved else basic_prompt
 

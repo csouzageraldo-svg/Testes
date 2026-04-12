@@ -2,13 +2,10 @@ import io
 from pathlib import Path
 from typing import List
 
-import google.generativeai as genai
 from PIL import Image
 
 from config import settings
 from models.script import Script
-
-genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
 def suggest_image_concepts(script: Script) -> List[str]:
