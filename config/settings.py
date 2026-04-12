@@ -53,6 +53,6 @@ HEYGEN_POLL_INTERVAL_SEC = 15
 HEYGEN_TIMEOUT_SEC = 600  # 10 minutos
 
 # Gemini
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-1.5-flash"
 GEMINI_IMAGEN_MODEL = "imagen-3.0-generate-002"
 GEMINI_VEO_MODEL = "veo-2.0-generate-001"
