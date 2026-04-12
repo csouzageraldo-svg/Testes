@@ -19,25 +19,45 @@ def generate_script(project: Project, feedback: str = "") -> Script:
 
 def _build_prompt(project: Project, feedback: str) -> str:
     duration_min = project.desired_duration_sec / 60
-    feedback_block = f"\n\nAjuste baseado no feedback: {feedback}" if feedback else ""
+    feedback_block = f"\n\nAJUSTE SOLICITADO: {feedback}" if feedback else ""
 
-    return f"""Você é um filmmaker especialista em conteúdo de redes sociais e engajamento.
-Crie um script para um vídeo de avatar no formato {project.video_format.upper()} (9:16) sobre o tema:
-"{project.topic}"
+    brief = project.content_brief
+    brief_block = ""
+    if brief:
+        brief_block = f"""
+BRIEF ESTRATÉGICO (use como base):
+- Ângulo escolhido: {brief.chosen_angle.title}
+- Hook de abertura: {brief.chosen_angle.hook}
+- Gatilho emocional: {brief.chosen_angle.emotional_trigger}
+- Estrutura: {brief.chosen_angle.structure}
+- Mensagens-chave: {", ".join(brief.key_messages)}
+- Estilo visual das imagens: {brief.visual_style}
+- Dica de ritmo: {brief.pacing_tip}
+"""
 
-Duração total: {duration_min:.1f} minuto(s) ({project.desired_duration_sec:.0f} segundos)
+    return f"""Você é um filmmaker e roteirista especialista em conteúdo viral para redes sociais.
+Sua missão é criar scripts que PARAM O SCROLL e geram alto engajamento.
 
-REGRAS OBRIGATÓRIAS:
-1. A cena de índice 0 (abertura) DEVE usar exatamente esta narração:
-   "{settings.OPENING_PHRASE}"
-2. A última cena (encerramento) DEVE usar exatamente esta narração:
-   "{settings.CLOSING_PHRASE}"
-3. Todas as cenas intermediárias devem tratar do tema com informações relevantes e engajantes.
-4. A soma de duration_sec de todas as cenas DEVE ser exatamente {project.desired_duration_sec:.0f} segundos.
-5. Cada cena intermediária deve ter um image_prompt descritivo em inglês para gerar uma imagem de impacto.
-6. Cenas de abertura e encerramento têm image_prompt vazio ("").{feedback_block}
+TEMA: "{project.topic}"
+FORMATO: {project.video_format.upper()} (9:16 — vertical)
+DURAÇÃO: {duration_min:.1f} minuto(s) ({project.desired_duration_sec:.0f} segundos)
+{brief_block}
 
-Responda SOMENTE com um bloco JSON válido neste formato (sem texto adicional fora do JSON):
+TÉCNICAS OBRIGATÓRIAS DE ENGAJAMENTO:
+1. Hook poderoso: os primeiros 3 segundos definem tudo — use pergunta, afirmação chocante ou dado surpreendente
+2. Pattern interrupt: quebre o ritmo a cada 15-20s para manter atenção (dado novo, virada, pergunta retórica)
+3. Storytelling: prefira "mostre, não diga" — use exemplos concretos, não abstrações
+4. Urgência/relevância: por que o espectador precisa saber AGORA?
+5. CTA natural: o encerramento deve fluir como consequência lógica, não forçada
+
+REGRAS FIXAS:
+- Cena índice 0 (Abertura): narração EXATAMENTE "{settings.OPENING_PHRASE}" | image_prompt vazio
+- Última cena (Encerramento): narração EXATAMENTE "{settings.CLOSING_PHRASE}" | image_prompt vazio
+- Soma de duration_sec = {project.desired_duration_sec:.0f} segundos EXATOS
+- image_prompt de cenas de conteúdo: em inglês, cinematográfico, formato portrait 9:16, visualmente impactante
+- Narração em português BR, linguagem natural e direta{feedback_block}
+
+Responda SOMENTE com JSON válido (sem texto fora do bloco):
 ```json
 {{
   "scenes": [
@@ -50,9 +70,9 @@ Responda SOMENTE com um bloco JSON válido neste formato (sem texto adicional fo
     }},
     {{
       "index": 1,
-      "label": "Cena 1 - <título>",
-      "narration": "<texto narrado pelo avatar>",
-      "image_prompt": "<descrição em inglês da imagem de impacto para esta cena>",
+      "label": "Hook — <título impactante>",
+      "narration": "<narração que prende em 3 segundos>",
+      "image_prompt": "<prompt cinematográfico em inglês para Imagen 3, portrait 9:16>",
       "duration_sec": <número>
     }}
   ]
