@@ -49,6 +49,89 @@ class ScriptScore:
     rewrite_suggestion: str       # se overall < 7, sugere reescrita do trecho mais fraco
 
 
+def analyze_briefing(briefing_text: str, video_format: str, duration_sec: float) -> ContentBrief:
+    """
+    Analisa um briefing detalhado (com fontes, dados, temas) fornecido pelo usuário,
+    extrai o tópico central e cria um ContentBrief enriquecido com os dados reais.
+    """
+    duration_min = duration_sec / 60
+    prompt = f"""Você é um estrategista de conteúdo especialista em vídeos virais.
+
+O usuário forneceu um BRIEFING DETALHADO com pesquisas, fontes e temas para criar um vídeo {video_format.upper()} de {duration_min:.1f} minuto(s).
+
+BRIEFING DO USUÁRIO:
+{briefing_text}
+
+Sua tarefa:
+1. Extraia o tema/título central deste briefing
+2. Crie 3 ângulos estratégicos aproveitando os dados e fontes do briefing
+3. Identifique as mensagens-chave mais impactantes presentes no conteúdo
+4. Sugira o estilo visual mais adequado para o formato {video_format.upper()}
+
+IMPORTANTE: Preserve e use os dados reais, estatísticas e fontes do briefing (Gartner, BCG, McKinsey, etc.) — eles são diferenciais de credibilidade.
+
+Responda SOMENTE com JSON válido:
+```json
+{{
+  "topic": "tema central extraído do briefing (curto, até 10 palavras)",
+  "angles": [
+    {{
+      "title": "nome curto do ângulo",
+      "hook": "frase exata para os primeiros 3 segundos — use um dado real do briefing",
+      "structure": "como o conteúdo se desenvolve aproveitando o briefing (2 frases)",
+      "emotional_trigger": "curiosidade|medo|desejo|identificação|urgência|surpresa",
+      "why_it_works": "por que este ângulo gera engajamento aproveitando os dados do briefing"
+    }}
+  ],
+  "recommended_index": 0,
+  "key_messages": ["mensagem com dado real 1", "mensagem com dado real 2", "mensagem com dado real 3"],
+  "visual_style": "descrição do estilo visual adequado",
+  "visual_palette": "paleta de cores recomendada",
+  "pacing_tip": "dica de ritmo para {video_format}",
+  "engagement_tips": [
+    "dica de engajamento aproveitando os dados do briefing 1",
+    "dica de engajamento 2",
+    "dica de engajamento 3"
+  ]
+}}
+```"""
+
+    response = _client.models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
+
+    # Extrai o topic do JSON e monta o ContentBrief
+    import json as _json
+    import re as _re
+    match = _re.search(r"```(?:json)?\s*([\s\S]*?)```", response.text)
+    json_str = match.group(1).strip() if match else response.text.strip()
+    data = _json.loads(json_str)
+
+    extracted_topic = data.get("topic", "Conteúdo estratégico")
+
+    angles = [
+        VideoAngle(
+            title=a["title"],
+            hook=a["hook"],
+            structure=a["structure"],
+            emotional_trigger=a["emotional_trigger"],
+            why_it_works=a["why_it_works"],
+        )
+        for a in data["angles"]
+    ]
+
+    chosen = angles[data.get("recommended_index", 0)]
+
+    return ContentBrief(
+        topic=extracted_topic,
+        chosen_angle=chosen,
+        key_messages=data.get("key_messages", []),
+        visual_style=data.get("visual_style", ""),
+        visual_palette=data.get("visual_palette", ""),
+        pacing_tip=data.get("pacing_tip", ""),
+        engagement_tips=data.get("engagement_tips", []),
+        all_angles=angles,
+    )
+
+
 def analyze_topic(topic: str, video_format: str, duration_sec: float) -> ContentBrief:
     """Analisa o tema e retorna 3 ângulos estratégicos + brief completo."""
     model = None  # unused with new SDK

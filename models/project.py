@@ -18,6 +18,9 @@ class Project:
     # Brief estratégico gerado pelo diretor criativo
     content_brief: Optional["ContentBrief"] = None
 
+    # Briefing detalhado fornecido pelo usuário (fontes, dados, temas)
+    raw_briefing: Optional[str] = None
+
     # Preenchido progressivamente pelo workflow
     script: Optional[Script] = None
     script_score: Optional[object] = None  # ScriptScore

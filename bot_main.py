@@ -20,8 +20,10 @@ from bot.handlers import (
     handle_concept_callback,
     handle_concept_edit_text,
     receive_angle,
+    receive_briefing,
     receive_duration,
     receive_format,
+    receive_mode,
     receive_photo,
     receive_script_feedback,
     receive_topic,
@@ -32,9 +34,11 @@ from bot.handlers import (
 )
 from bot.states import (
     ANGLE,
+    BRIEFING,
     CONCEPT_REVIEW,
     DURATION,
     FORMAT,
+    MODE,
     PHOTO,
     SCRIPT_FEEDBACK,
     SCRIPT_REVIEW,
@@ -48,8 +52,14 @@ def build_application() -> Application:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
+            MODE: [
+                CallbackQueryHandler(receive_mode, pattern=r"^mode:"),
+            ],
             TOPIC: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, receive_topic)
+            ],
+            BRIEFING: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, receive_briefing)
             ],
             FORMAT: [
                 CallbackQueryHandler(receive_format, pattern=r"^format:")

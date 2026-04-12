@@ -24,9 +24,11 @@ from modules import (
 from utils import file_manager
 from bot.states import (
     ANGLE,
+    BRIEFING,
     CONCEPT_REVIEW,
     DURATION,
     FORMAT,
+    MODE,
     PHOTO,
     SCRIPT_FEEDBACK,
     SCRIPT_REVIEW,
@@ -39,6 +41,7 @@ from bot.keyboards import (
     format_keyboard,
     images_approval_keyboard,
     photo_keyboard,
+    start_mode_keyboard,
 )
 
 FMT_NAMES = {"stories": "Stories", "reels": "Reels", "tiktok": "TikTok"}
@@ -170,10 +173,63 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "🎬 *Gerador de Vídeos Com Avatar*\n\n"
         "Olá! Sou o assistente criativo do Carlos.\n"
         "Vou criar um vídeo de alto engajamento para suas redes sociais.\n\n"
-        "Qual é o *tema* do vídeo?",
+        "Como você quer começar?",
         parse_mode="Markdown",
+        reply_markup=start_mode_keyboard(),
     )
-    return TOPIC
+    return MODE
+
+
+async def receive_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+    mode = query.data.split(":")[1]
+
+    if mode == "briefing":
+        await query.edit_message_text(
+            "📋 *Modo Briefing*\n\n"
+            "Cole aqui seu material: temas, fontes, dados, resumos, roteiros rascunho...\n\n"
+            "Vou analisar tudo, extrair o melhor e criar um vídeo de alta performance com esse conteúdo.",
+            parse_mode="Markdown",
+        )
+        return BRIEFING
+    else:
+        await query.edit_message_text(
+            "📝 Qual é o *tema* do vídeo?\n\n"
+            "_Ex: IA e liderança de agentes nas empresas_",
+            parse_mode="Markdown",
+        )
+        return TOPIC
+
+
+async def receive_briefing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    briefing_text = update.message.text.strip()
+    context.user_data["raw_briefing"] = briefing_text
+
+    msg = await update.message.reply_text("🔍 Analisando seu briefing e extraindo o melhor conteúdo…")
+
+    try:
+        # Usa analyze_briefing para extrair topic + ContentBrief do texto detalhado
+        brief = await asyncio.to_thread(
+            content_advisor.analyze_briefing,
+            briefing_text,
+            "reels",  # formato temporário — será atualizado após o usuário escolher
+            90,       # duração temporária
+        )
+        context.user_data["brief_from_briefing"] = brief
+        context.user_data["topic"] = brief.topic
+    except Exception as e:
+        await msg.edit_text(f"❌ Erro ao analisar briefing: {e}\n\nUse /start para recomeçar.")
+        return ConversationHandler.END
+
+    await msg.edit_text(
+        f"✅ Briefing analisado!\n\n"
+        f"📌 Tema extraído: *{brief.topic}*\n\n"
+        f"Escolha o formato do vídeo:",
+        parse_mode="Markdown",
+        reply_markup=format_keyboard(),
+    )
+    return FORMAT
 
 
 async def receive_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -216,19 +272,36 @@ async def receive_duration(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return DURATION
 
     context.user_data["duration_sec"] = minutes * 60
-    msg = await update.message.reply_text("🔍 Analisando tema e criando brief estratégico…")
 
-    try:
-        brief = await asyncio.to_thread(
-            content_advisor.analyze_topic,
-            context.user_data["topic"],
-            context.user_data["format"],
-            context.user_data["duration_sec"],
-        )
-        context.user_data["brief"] = brief
-    except Exception as e:
-        await msg.edit_text(f"❌ Erro na análise: {e}\n\nUse /start para recomeçar.")
-        return ConversationHandler.END
+    # Se veio de briefing, re-analisa com formato e duração corretos
+    if "brief_from_briefing" in context.user_data:
+        msg = await update.message.reply_text("🔍 Refinando análise do briefing com formato e duração…")
+        try:
+            brief = await asyncio.to_thread(
+                content_advisor.analyze_briefing,
+                context.user_data["raw_briefing"],
+                context.user_data["format"],
+                context.user_data["duration_sec"],
+            )
+            context.user_data["brief"] = brief
+            context.user_data["topic"] = brief.topic
+            del context.user_data["brief_from_briefing"]
+        except Exception as e:
+            await msg.edit_text(f"❌ Erro na análise: {e}\n\nUse /start para recomeçar.")
+            return ConversationHandler.END
+    else:
+        msg = await update.message.reply_text("🔍 Analisando tema e criando brief estratégico…")
+        try:
+            brief = await asyncio.to_thread(
+                content_advisor.analyze_topic,
+                context.user_data["topic"],
+                context.user_data["format"],
+                context.user_data["duration_sec"],
+            )
+            context.user_data["brief"] = brief
+        except Exception as e:
+            await msg.edit_text(f"❌ Erro na análise: {e}\n\nUse /start para recomeçar.")
+            return ConversationHandler.END
 
     text = "🎯 *Análise Estratégica — Escolha o Ângulo*\n\n"
     for i, angle in enumerate(brief.all_angles):
@@ -276,6 +349,7 @@ async def receive_angle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         desired_duration_sec=context.user_data["duration_sec"],
     )
     project.content_brief = brief
+    project.raw_briefing = context.user_data.get("raw_briefing")
     project.dirs = file_manager.setup_project_dirs(project.topic)
     context.user_data["project"] = project
 

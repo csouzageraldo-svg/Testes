@@ -34,13 +34,20 @@ BRIEF ESTRATÉGICO (use como base):
 - Dica de ritmo: {brief.pacing_tip}
 """
 
+    raw_briefing_block = ""
+    if project.raw_briefing:
+        raw_briefing_block = f"""
+BRIEFING DETALHADO DO USUÁRIO (use os dados, fontes e estatísticas reais abaixo para enriquecer o script — isso aumenta credibilidade e engajamento):
+{project.raw_briefing}
+"""
+
     return f"""Você é um filmmaker e roteirista especialista em conteúdo viral para redes sociais.
 Sua missão é criar scripts que PARAM O SCROLL e geram alto engajamento.
 
 TEMA: "{project.topic}"
 FORMATO: {project.video_format.upper()} (9:16 — vertical)
 DURAÇÃO: {duration_min:.1f} minuto(s) ({project.desired_duration_sec:.0f} segundos)
-{brief_block}
+{brief_block}{raw_briefing_block}
 
 TÉCNICAS OBRIGATÓRIAS DE ENGAJAMENTO:
 1. Hook poderoso: os primeiros 3 segundos definem tudo — use pergunta, afirmação chocante ou dado surpreendente

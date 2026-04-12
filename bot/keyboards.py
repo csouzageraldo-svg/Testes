@@ -1,6 +1,13 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
+def start_mode_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📝 Tenho um tema", callback_data="mode:topic")],
+        [InlineKeyboardButton("📋 Tenho um briefing pronto", callback_data="mode:briefing")],
+    ])
+
+
 def format_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [
