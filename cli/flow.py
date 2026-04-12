@@ -6,7 +6,6 @@ from modules import (
     image_generator,
     script_generator,
     video_assembler,
-    voice_synthesizer,
 )
 from cli import prompt
 from utils import display, file_manager
@@ -102,22 +101,15 @@ def run_workflow() -> None:
     else:
         display.info("Nenhuma imagem de conteúdo no script. Continuando sem overlay.")
 
-    # ── Passo 5: Voz ──────────────────────────────────────────────────────────
-    display.step(8, TOTAL_STEPS, "Síntese de Voz")
-    display.progress("Sintetizando voz com ElevenLabs")
-    audio_path = project.dirs["audio"] / "narration.mp3"
-    project.audio_path = voice_synthesizer.synthesize_voice(project.script, audio_path)
-    display.success("Áudio gerado.")
-
-    # ── Passo 6: Foto do avatar ────────────────────────────────────────────────
-    display.step(9, TOTAL_STEPS, "Foto do Avatar")
+    # ── Passo 5: Foto do avatar ───────────────────────────────────────────────
+    display.step(8, TOTAL_STEPS, "Foto do Avatar")
     project.avatar_photo_path = prompt.ask_avatar_photo()
 
-    # ── Passo 7: Heygen ────────────────────────────────────────────────────────
-    display.step(10, TOTAL_STEPS, "Geração do Vídeo com Avatar")
+    # ── Passo 6: Heygen (voz nativa + avatar) ────────────────────────────────
+    display.step(9, TOTAL_STEPS, "Geração do Vídeo com Avatar")
     display.progress("Enviando para Heygen (pode levar alguns minutos)")
     project.avatar_video_path = avatar_generator.create_avatar_video(
-        project.audio_path, project.avatar_photo_path
+        project.script.raw_text, project.dirs["avatar"]
     )
     display.success("Vídeo de avatar gerado.")
 

@@ -20,7 +20,6 @@ from modules import (
     image_generator,
     script_generator,
     video_assembler,
-    voice_synthesizer,
 )
 from utils import file_manager
 from bot.states import (
@@ -193,18 +192,7 @@ async def _animate_and_continue(msg: Message, context: ContextTypes.DEFAULT_TYPE
 async def _run_voice_and_video(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
     project: Project = context.user_data["project"]
 
-    # Voz
-    await msg.edit_text("🎙 Sintetizando voz com ElevenLabs…")
-    audio_path = project.dirs["audio"] / "narration.mp3"
-    try:
-        project.audio_path = await asyncio.to_thread(
-            voice_synthesizer.synthesize_voice, project.script, audio_path
-        )
-    except Exception as e:
-        await msg.edit_text(f"❌ Erro na síntese de voz: {e}")
-        return ConversationHandler.END
-
-    # Foto do avatar
+    # Foto do avatar (voz é gerada pelo Heygen)
     await msg.edit_text(
         "📸 *Foto para o avatar*\n\nEnvie sua foto (jpg/png) ou pule para usar o avatar padrão.",
         parse_mode="Markdown",
@@ -510,8 +498,8 @@ async def _generate_heygen(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> 
         )
         project.avatar_video_path = await asyncio.to_thread(
             avatar_generator.create_avatar_video,
-            project.audio_path,
-            project.avatar_photo_path,
+            project.script.raw_text,
+            project.dirs["avatar"],
         )
     except Exception as e:
         await msg.edit_text(f"❌ Erro no Heygen: {e}")
