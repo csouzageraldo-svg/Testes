@@ -2,15 +2,15 @@ from models.project import Project
 from modules import (
     avatar_generator,
     content_advisor,
-    image_animator,
     image_generator,
+    scene_video_generator,
     script_generator,
     video_assembler,
 )
 from cli import prompt
 from utils import display, file_manager
 
-TOTAL_STEPS = 11
+TOTAL_STEPS = 10
 
 
 def run_workflow() -> None:
@@ -32,16 +32,14 @@ def run_workflow() -> None:
     project.dirs = file_manager.setup_project_dirs(topic)
     display.info(f"Pasta de saída: [bold]{project.dirs['base']}[/bold]")
 
-    # ── Passo 2: Análise estratégica (diretor criativo) ────────────────────────
+    # ── Passo 2: Análise estratégica ──────────────────────────────────────────
     display.step(3, TOTAL_STEPS, "Análise Estratégica")
     display.progress("Analisando tema e criando brief com Gemini")
     brief = content_advisor.analyze_topic(topic, fmt, duration_sec)
 
-    # Deixa usuário escolher o ângulo (recomendado já vem primeiro)
     chosen_index = prompt.ask_angle_choice(brief.all_angles)
     brief.chosen_angle = brief.all_angles[chosen_index]
     project.content_brief = brief
-
     display.brief_panel(brief)
 
     # ── Passo 3: Script com engajamento ───────────────────────────────────────
@@ -53,11 +51,8 @@ def run_workflow() -> None:
         display.script_table(project.script.scenes)
         display.timestamps_table(project.script.timestamps)
 
-        # Avalia o script automaticamente
         display.progress("Avaliando engajamento do script")
-        score = content_advisor.score_script(
-            project.script.raw_text, topic, fmt
-        )
+        score = content_advisor.score_script(project.script.raw_text, topic, fmt)
         project.script_score = score
         display.score_panel(score)
 
@@ -65,14 +60,13 @@ def run_workflow() -> None:
             break
         feedback = prompt.ask_script_feedback(score)
 
-    # ── Passo 4: Imagens ───────────────────────────────────────────────────────
-    display.step(5, TOTAL_STEPS, "Conceitos de Imagem")
+    # ── Passo 4: Vídeos de cena com Veo 2 ────────────────────────────────────
+    display.step(5, TOTAL_STEPS, "Conceitos de Cena")
     concepts = image_generator.suggest_image_concepts(project.script)
 
     if concepts:
-        # Aprimora prompts com o brief visual (opcional)
         if prompt.ask_improve_images(brief):
-            display.progress("Aprimorando prompts de imagem com o brief criativo")
+            display.progress("Aprimorando prompts com o brief criativo")
             concepts = [
                 content_advisor.improve_image_prompt(c, brief, project.script.scenes[i + 1].label)
                 for i, c in enumerate(concepts)
@@ -82,48 +76,39 @@ def run_workflow() -> None:
         approved = prompt.ask_concept_approval(concepts)
         project.image_concepts = approved
 
-        display.step(6, TOTAL_STEPS, "Geração de Imagens")
-        display.progress(f"Gerando {len(approved)} imagem(ns) com Gemini Imagen 3")
-        project.image_paths = image_generator.generate_images(
-            approved, project.dirs["images"]
-        )
-        display.success(f"{len(project.image_paths)} imagem(ns) gerada(s).")
-
-        display.step(7, TOTAL_STEPS, "Animação de Imagens")
-        display.progress("Aplicando efeito Ken Burns nas imagens")
-        project.animated_clip_paths = image_animator.animate_images(
-            project.image_paths,
+        display.step(6, TOTAL_STEPS, "Geração de Vídeos de Cena (Veo 2)")
+        display.progress(f"Gerando {len(approved)} vídeo(s) cinematográficos com Gemini Veo 2")
+        project.animated_clip_paths = scene_video_generator.generate_scene_videos(
+            approved,
             project.script.timestamps,
             project.dirs["animated"],
-            resolution=project.output_resolution,
         )
-        display.success("Imagens animadas.")
+        display.success(f"{len(project.animated_clip_paths)} clipe(s) de cena gerado(s).")
     else:
-        display.info("Nenhuma imagem de conteúdo no script. Continuando sem overlay.")
+        display.info("Nenhuma cena de overlay no script. Continuando sem sobreposição.")
 
     # ── Passo 5: Foto do avatar ───────────────────────────────────────────────
-    display.step(8, TOTAL_STEPS, "Foto do Avatar")
+    display.step(7, TOTAL_STEPS, "Foto do Avatar")
     project.avatar_photo_path = prompt.ask_avatar_photo()
 
-    # ── Passo 6: Heygen (voz nativa + avatar) ────────────────────────────────
-    display.step(9, TOTAL_STEPS, "Geração do Vídeo com Avatar")
+    # ── Passo 6: Heygen (avatar + voz nativa) ────────────────────────────────
+    display.step(8, TOTAL_STEPS, "Geração do Avatar (Heygen)")
     display.progress("Enviando para Heygen (pode levar alguns minutos)")
     project.avatar_video_path = avatar_generator.create_avatar_video(
         project.script.raw_text, project.dirs["avatar"]
     )
     display.success("Vídeo de avatar gerado.")
 
-    # ── Passo 8: Montagem final ────────────────────────────────────────────────
-    display.step(11, TOTAL_STEPS, "Montagem do Vídeo Final")
+    # ── Passo 7: Montagem final ────────────────────────────────────────────────
+    display.step(9, TOTAL_STEPS, "Montagem do Vídeo Final")
     display.progress("Montando vídeo final com moviepy")
     project.final_video_path = video_assembler.assemble_final_video(project)
 
     size_mb = project.final_video_path.stat().st_size / (1024 * 1024)
-
-    score_label = ""
-    if project.script_score:
-        score_label = f"\n  Score de engajamento: [bold]{project.script_score.overall}/10[/bold]"
-
+    score_label = (
+        f"\n  Score de engajamento: [bold]{project.script_score.overall}/10[/bold]"
+        if project.script_score else ""
+    )
     display.success(
         f"Vídeo final pronto!{score_label}\n\n"
         f"  Caminho: [bold]{project.final_video_path}[/bold]\n"

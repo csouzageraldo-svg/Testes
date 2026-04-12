@@ -16,8 +16,8 @@ from models.project import Project
 from modules import (
     avatar_generator,
     content_advisor,
-    image_animator,
     image_generator,
+    scene_video_generator,
     script_generator,
     video_assembler,
 )
@@ -113,9 +113,11 @@ async def _show_next_concept(message: Message, context: ContextTypes.DEFAULT_TYP
 
         project.image_concepts = approved
         msg = await message.reply_text(
-            f"✅ {len(approved)} conceito(s) aprovado(s)!\n\n🖼 Gerando imagens com Gemini Imagen 3…"
+            f"✅ {len(approved)} conceito(s) aprovado(s)!\n\n"
+            f"🎬 Gerando vídeos de cena com Gemini Veo 2…\n_(pode levar alguns minutos)_",
+            parse_mode="Markdown",
         )
-        return await _generate_images(msg, context)
+        return await _generate_scene_videos(msg, context)
 
     concept = concepts[idx]
     total = len(concepts)
@@ -127,64 +129,23 @@ async def _show_next_concept(message: Message, context: ContextTypes.DEFAULT_TYP
     return CONCEPT_REVIEW
 
 
-async def _generate_images(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def _generate_scene_videos(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
     project: Project = context.user_data["project"]
     approved = project.image_concepts
 
     try:
-        project.image_paths = await asyncio.to_thread(
-            image_generator.generate_images, approved, project.dirs["images"]
+        project.animated_clip_paths = await asyncio.to_thread(
+            scene_video_generator.generate_scene_videos,
+            approved,
+            project.script.timestamps,
+            project.dirs["animated"],
+        )
+        await msg.edit_text(
+            f"✅ {len(project.animated_clip_paths)} vídeo(s) de cena gerado(s) com Veo 2!"
         )
     except Exception as e:
-        await msg.edit_text(f"❌ Erro ao gerar imagens: {e}\n\nContinuando sem imagens.")
-        project.image_paths = []
-        return await _run_voice_and_video(msg, context)
-
-    await msg.edit_text(f"✅ {len(project.image_paths)} imagem(ns) gerada(s)! Enviando para revisão…")
-
-    # Envia imagens para o usuário revisar
-    sent_any = False
-    for i, path in enumerate(project.image_paths):
-        try:
-            with open(path, "rb") as f:
-                await msg.get_bot().send_photo(
-                    chat_id=msg.chat_id,
-                    photo=f,
-                    caption=f"🖼 Imagem {i + 1}/{len(project.image_paths)}: _{approved[i][:80]}_",
-                    parse_mode="Markdown",
-                )
-            sent_any = True
-        except Exception:
-            pass
-
-    if sent_any:
-        await msg.get_bot().send_message(
-            chat_id=msg.chat_id,
-            text="As imagens acima serão usadas no vídeo. Deseja continuar ou regenerar?",
-            reply_markup=images_approval_keyboard(),
-        )
-        return CONCEPT_REVIEW  # reutiliza estado para capturar callback
-
-    # Se não conseguiu enviar, continua
-    return await _animate_and_continue(msg, context)
-
-
-async def _animate_and_continue(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
-    project: Project = context.user_data["project"]
-
-    if project.image_paths:
-        await msg.edit_text("🎞 Aplicando animação Ken Burns nas imagens…")
-        try:
-            project.animated_clip_paths = await asyncio.to_thread(
-                image_animator.animate_images,
-                project.image_paths,
-                project.script.timestamps,
-                project.dirs["animated"],
-                project.output_resolution,
-            )
-        except Exception as e:
-            await msg.reply_text(f"⚠️ Erro na animação: {e}. Continuando sem animação.")
-            project.animated_clip_paths = []
+        await msg.edit_text(f"⚠️ Veo 2 falhou: {e}\n\nContinuando sem overlay.")
+        project.animated_clip_paths = []
 
     return await _run_voice_and_video(msg, context)
 
@@ -413,14 +374,14 @@ async def handle_concept_callback(update: Update, context: ContextTypes.DEFAULT_
     if parts[0] == "images":
         if parts[1] == "approve":
             await query.edit_message_reply_markup(None)
-            msg = await query.message.reply_text("🎞 Animando imagens…")
-            return await _animate_and_continue(msg, context)
+            msg = await query.message.reply_text("🎬 Gerando vídeos de cena com Veo 2…")
+            return await _generate_scene_videos(msg, context)
         else:  # regenerate
             await query.edit_message_reply_markup(None)
             project: Project = context.user_data["project"]
-            msg = await query.message.reply_text("🔄 Regenerando imagens…")
-            project.image_paths = []
-            return await _generate_images(msg, context)
+            msg = await query.message.reply_text("🔄 Regenerando vídeos de cena…")
+            project.animated_clip_paths = []
+            return await _generate_scene_videos(msg, context)
 
     # Revisão de conceitos
     action = parts[1]
