@@ -1,0 +1,10 @@
+google-generativeai>=0.8.0
+requests>=2.33.0
+python-dotenv>=1.2.0
+moviepy>=2.2.1
+Pillow>=12.0.0
+numpy>=1.25.0
+imageio>=2.37.0
+imageio-ffmpeg>=0.6.0
+rich>=14.0.0
+python-slugify>=8.0.0
