@@ -1,18 +1,15 @@
 import json
 import re
 
-from google import genai
-
 from config import settings
 from models.project import Project
 from models.script import Scene, Script, Timestamp
-
-_client = genai.Client(api_key=settings.GEMINI_API_KEY)
+from utils.gemini_client import get_client
 
 
 def generate_script(project: Project, feedback: str = "") -> Script:
     prompt = _build_prompt(project, feedback)
-    response = _client.models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
+    response = get_client().models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
     return _parse_response(response.text, project)
 
 

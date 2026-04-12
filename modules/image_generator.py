@@ -29,12 +29,10 @@ def generate_images(concepts: List[str], output_dir: Path) -> List[Path]:
 
 
 def _generate_single(prompt: str, dest: Path) -> Path:
-    from google import genai as google_genai
     from google.genai import types
+    from utils.gemini_client import get_client
 
-    client = google_genai.Client(api_key=settings.GEMINI_API_KEY)
-
-    response = client.models.generate_images(
+    response = get_client().models.generate_images(
         model=settings.GEMINI_IMAGEN_MODEL,
         prompt=prompt,
         config=types.GenerateImagesConfig(

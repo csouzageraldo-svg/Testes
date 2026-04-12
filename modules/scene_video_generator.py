@@ -10,13 +10,11 @@ import time
 from pathlib import Path
 from typing import List
 
-from google import genai
 from google.genai import types
 
 from config import settings
 from models.script import Timestamp
-
-_client = genai.Client(api_key=settings.GEMINI_API_KEY)
+from utils.gemini_client import get_client
 
 VEO_MODEL = "veo-2.0-generate-001"
 FALLBACK_TO_IMAGEN = True  # usa Imagen + Ken Burns se Veo 2 falhar
@@ -61,7 +59,7 @@ def _generate_veo2_clip(prompt: str, duration: int, dest: Path) -> Path:
         f"no text, no watermarks, smooth motion, professional lighting."
     )
 
-    operation = _client.models.generate_videos(
+    operation = get_client().models.generate_videos(
         model=VEO_MODEL,
         prompt=enhanced_prompt,
         config=types.GenerateVideoConfig(
@@ -77,7 +75,7 @@ def _generate_veo2_clip(prompt: str, duration: int, dest: Path) -> Path:
         if operation.done:
             break
         time.sleep(5)
-        operation = _client.operations.get(operation)
+        operation = get_client().operations.get(operation)
 
     if not operation.done:
         raise TimeoutError("Veo 2 não completou em 3 minutos.")
@@ -97,7 +95,7 @@ def _fallback_imagen_clip(prompt: str, duration: int, dest: Path) -> Path:
     from google.genai import types as gtypes
 
     # Gera imagem com Imagen 3
-    response = _client.models.generate_images(
+    response = get_client().models.generate_images(
         model=settings.GEMINI_IMAGEN_MODEL,
         prompt=prompt,
         config=gtypes.GenerateImagesConfig(
