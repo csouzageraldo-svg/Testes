@@ -23,6 +23,7 @@ def _optional(key: str, default: str = "") -> str:
 GEMINI_API_KEY = _require("GEMINI_API_KEY")
 ELEVENLABS_API_KEY = _require("ELEVENLABS_API_KEY")
 HEYGEN_API_KEY = _require("HEYGEN_API_KEY")
+TELEGRAM_BOT_TOKEN = _optional("TELEGRAM_BOT_TOKEN", "")
 
 # IDs de voz e avatar
 ELEVENLABS_VOICE_ID = _optional("ELEVENLABS_VOICE_ID", "OpSMhmC9q2omjAZoTkjp")
