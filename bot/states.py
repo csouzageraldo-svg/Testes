@@ -1,0 +1,10 @@
+(
+    TOPIC,
+    FORMAT,
+    DURATION,
+    ANGLE,
+    SCRIPT_REVIEW,
+    SCRIPT_FEEDBACK,
+    CONCEPT_REVIEW,
+    PHOTO,
+) = range(8)
