@@ -1,0 +1,12 @@
+run = "python bot_main.py"
+entrypoint = "bot_main.py"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "python bot_main.py"]
+
+[[ports]]
+localPort = 8080
+externalPort = 80
