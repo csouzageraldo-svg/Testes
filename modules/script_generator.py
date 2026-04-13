@@ -88,31 +88,49 @@ def _parse_response(raw: str, project: Project) -> Script:
     json_str = match.group(1).strip() if match else raw.strip()
 
     data = json.loads(json_str)
-    scenes_data = data["scenes"]
+    # Aceita "scenes" ou "cenas" como chave raiz
+    scenes_data = data.get("scenes") or data.get("cenas") or []
 
     scenes = []
     timestamps = []
     cursor = 0.0
 
-    for item in scenes_data:
+    for i, item in enumerate(scenes_data):
+        # Aceita variações de nomes de campos que o modelo pode usar
+        narration = (
+            item.get("narration")
+            or item.get("narracao")
+            or item.get("narração")
+            or item.get("text")
+            or item.get("texto")
+            or item.get("content")
+            or item.get("speech")
+            or item.get("fala")
+            or ""
+        )
+        label = item.get("label") or item.get("titulo") or item.get("title") or f"Cena {i}"
+        duration = float(item.get("duration_sec") or item.get("duracao") or item.get("duration") or 5)
+        image_prompt = item.get("image_prompt") or item.get("prompt") or item.get("visual") or ""
+        index = item.get("index", i)
+
         ts = Timestamp(
-            scene_index=item["index"],
-            label=item["label"],
+            scene_index=index,
+            label=label,
             start_sec=cursor,
-            end_sec=cursor + item["duration_sec"],
-            element_type="image" if item.get("image_prompt") else "avatar",
+            end_sec=cursor + duration,
+            element_type="image" if image_prompt else "avatar",
         )
         scene = Scene(
-            index=item["index"],
-            label=item["label"],
-            narration=item["narration"],
-            image_prompt=item.get("image_prompt", ""),
-            duration_sec=item["duration_sec"],
+            index=index,
+            label=label,
+            narration=narration,
+            image_prompt=image_prompt,
+            duration_sec=duration,
             timestamp=ts,
         )
         scenes.append(scene)
         timestamps.append(ts)
-        cursor += item["duration_sec"]
+        cursor += duration
 
     return Script(
         topic=project.topic,
