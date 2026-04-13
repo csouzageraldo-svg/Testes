@@ -14,6 +14,30 @@ from config import settings
 from utils.gemini_client import get_client, get_model
 
 
+def _safe_json_loads(raw: str) -> dict:
+    """Extrai e parseia JSON de forma robusta, corrigindo problemas comuns."""
+    # Tenta extrair bloco ```json ... ```
+    match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
+    json_str = match.group(1).strip() if match else raw.strip()
+
+    # Se não achou bloco, procura o primeiro { ... } ou [ ... ]
+    if not match:
+        obj_match = re.search(r"(\{[\s\S]*\})", raw)
+        if obj_match:
+            json_str = obj_match.group(1)
+
+    # Corrige problemas comuns de JSON
+    # Remove vírgulas antes de } ou ]
+    json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
+    # Remove comentários // ...
+    json_str = re.sub(r"//[^\n]*", "", json_str)
+    # Normaliza quebras de linha dentro de strings (escapa \n não escapados)
+    # Remove caracteres de controle inválidos
+    json_str = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", json_str)
+
+    return json.loads(json_str)
+
+
 @dataclass
 class VideoAngle:
     title: str           # ex: "Revelação Surpreendente"
@@ -96,11 +120,7 @@ Responda SOMENTE com JSON válido:
     response = get_client().models.generate_content(model=get_model(), contents=prompt)
 
     # Extrai o topic do JSON e monta o ContentBrief
-    import json as _json
-    import re as _re
-    match = _re.search(r"```(?:json)?\s*([\s\S]*?)```", response.text)
-    json_str = match.group(1).strip() if match else response.text.strip()
-    data = _json.loads(json_str)
+    data = _safe_json_loads(response.text)
 
     extracted_topic = data.get("topic", "Conteúdo estratégico")
 
@@ -242,9 +262,7 @@ Responda SOMENTE com JSON válido:
 
 
 def _parse_brief(raw: str, topic: str) -> ContentBrief:
-    match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
-    json_str = match.group(1).strip() if match else raw.strip()
-    data = json.loads(json_str)
+    data = _safe_json_loads(raw)
 
     angles = [
         VideoAngle(
@@ -272,9 +290,7 @@ def _parse_brief(raw: str, topic: str) -> ContentBrief:
 
 
 def _parse_score(raw: str) -> ScriptScore:
-    match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
-    json_str = match.group(1).strip() if match else raw.strip()
-    data = json.loads(json_str)
+    data = _safe_json_loads(raw)
 
     return ScriptScore(
         overall=data.get("overall", 0),

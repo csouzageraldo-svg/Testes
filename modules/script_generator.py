@@ -83,11 +83,21 @@ Responda SOMENTE com JSON válido (sem texto fora do bloco):
 ```"""
 
 
-def _parse_response(raw: str, project: Project) -> Script:
+def _safe_json_loads(raw: str) -> dict:
     match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
     json_str = match.group(1).strip() if match else raw.strip()
+    if not match:
+        obj_match = re.search(r"(\{[\s\S]*\})", raw)
+        if obj_match:
+            json_str = obj_match.group(1)
+    json_str = re.sub(r",\s*([}\]])", r"\1", json_str)
+    json_str = re.sub(r"//[^\n]*", "", json_str)
+    json_str = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", json_str)
+    return json.loads(json_str)
 
-    data = json.loads(json_str)
+
+def _parse_response(raw: str, project: Project) -> Script:
+    data = _safe_json_loads(raw)
     # Aceita "scenes" ou "cenas" como chave raiz
     scenes_data = data.get("scenes") or data.get("cenas") or []
 
