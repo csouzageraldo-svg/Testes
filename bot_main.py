@@ -102,7 +102,26 @@ async def post_init(app: Application) -> None:
     ])
 
 
+def _start_keepalive(port: int = 8080) -> None:
+    """Servidor HTTP mínimo para manter o Replit acordado."""
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import threading
+
+    class _Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK - CGAvVid_bot running")
+        def log_message(self, *args):
+            pass
+
+    server = HTTPServer(("0.0.0.0", port), _Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    print(f"🌐 Keep-alive: http://0.0.0.0:{port}/")
+
+
 def main() -> None:
+    _start_keepalive()
     app = build_application()
     app.post_init = post_init
     print(f"🤖 CGAvVid_bot iniciado. Acesse t.me/CGAvVid_bot no Telegram.")
