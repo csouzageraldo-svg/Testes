@@ -90,11 +90,14 @@ async def _generate_and_score_script(
 
     await msg.edit_text("📊 Avaliando engajamento do script…")
     try:
-        score = await asyncio.to_thread(
-            content_advisor.score_script,
-            project.script.raw_text,
-            project.topic,
-            project.video_format,
+        score = await asyncio.wait_for(
+            asyncio.to_thread(
+                content_advisor.score_script,
+                project.script.raw_text,
+                project.topic,
+                project.video_format,
+            ),
+            timeout=45.0,
         )
         project.script_score = score
     except Exception:
