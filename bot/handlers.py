@@ -409,15 +409,21 @@ async def script_approved(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         msg = await query.message.reply_text("✅ Script aprovado! Gerando áudio…")
         return await _run_voice_and_video(msg, context)
 
-    # Aprimora prompts de imagem com o brief
+    # Aprimora prompts de imagem com o brief (com timeout por chamada)
     msg = await query.message.reply_text("🎨 Aprimorando conceitos de imagem com o brief criativo…")
     try:
         improved = []
         content_scenes = project.script.content_scenes
         for i, c in enumerate(concepts):
             label = content_scenes[i].label if i < len(content_scenes) else f"Cena {i+1}"
-            imp = await asyncio.to_thread(content_advisor.improve_image_prompt, c, brief, label)
-            improved.append(imp)
+            try:
+                imp = await asyncio.wait_for(
+                    asyncio.to_thread(content_advisor.improve_image_prompt, c, brief, label),
+                    timeout=20.0,
+                )
+                improved.append(imp)
+            except Exception:
+                improved.append(c)  # mantém original se falhar
         concepts = improved
     except Exception:
         pass

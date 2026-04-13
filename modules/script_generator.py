@@ -127,6 +127,19 @@ def _parse_response(raw: str, project: Project) -> Script:
         image_prompt = item.get("image_prompt") or item.get("prompt") or item.get("visual") or ""
         index = item.get("index", i)
 
+        scenes.append((index, label, narration, image_prompt, duration))
+
+    # Normaliza durações se o total estiver muito fora do pedido
+    total_raw = sum(s[4] for s in scenes) or 1
+    target = project.desired_duration_sec
+    scale = target / total_raw if total_raw > target * 1.5 else 1.0
+
+    cursor = 0.0
+    result_scenes, result_timestamps = [], []
+    for (index, label, narration, image_prompt, raw_dur) in scenes:
+        duration = round(raw_dur * scale, 1)
+        duration = max(3.0, duration)
+
         ts = Timestamp(
             scene_index=index,
             label=label,
@@ -142,8 +155,8 @@ def _parse_response(raw: str, project: Project) -> Script:
             duration_sec=duration,
             timestamp=ts,
         )
-        scenes.append(scene)
-        timestamps.append(ts)
+        result_scenes.append(scene)
+        result_timestamps.append(ts)
         cursor += duration
 
     return Script(
@@ -151,6 +164,6 @@ def _parse_response(raw: str, project: Project) -> Script:
         total_duration_sec=cursor,
         opening=settings.OPENING_PHRASE,
         closing=settings.CLOSING_PHRASE,
-        scenes=scenes,
-        timestamps=timestamps,
+        scenes=result_scenes,
+        timestamps=result_timestamps,
     )
