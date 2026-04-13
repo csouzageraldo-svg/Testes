@@ -4,12 +4,12 @@ import re
 from config import settings
 from models.project import Project
 from models.script import Scene, Script, Timestamp
-from utils.gemini_client import get_client
+from utils.gemini_client import get_client, get_model
 
 
 def generate_script(project: Project, feedback: str = "") -> Script:
     prompt = _build_prompt(project, feedback)
-    response = get_client().models.generate_content(model=settings.GEMINI_MODEL, contents=prompt)
+    response = get_client().models.generate_content(model=get_model(), contents=prompt)
     return _parse_response(response.text, project)
 
 
