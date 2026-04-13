@@ -558,17 +558,28 @@ async def skip_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def _generate_heygen(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
     project: Project = context.user_data["project"]
 
+    # Limita texto ao Heygen (max ~1500 chars para evitar rejeição da API)
+    script_text = project.script.raw_text
+    if len(script_text) > 1500:
+        script_text = script_text[:1497] + "..."
+
     try:
         await msg.edit_text(
             "🤖 Gerando vídeo com Heygen…\n"
             "_(isso pode levar 2–5 minutos — vou te avisar quando estiver pronto)_",
             parse_mode="Markdown",
         )
-        project.avatar_video_path = await asyncio.to_thread(
-            avatar_generator.create_avatar_video,
-            project.script.raw_text,
-            project.dirs["avatar"],
+        project.avatar_video_path = await asyncio.wait_for(
+            asyncio.to_thread(
+                avatar_generator.create_avatar_video,
+                script_text,
+                project.dirs["avatar"],
+            ),
+            timeout=660.0,  # 11 minutos máximo
         )
+    except asyncio.TimeoutError:
+        await msg.edit_text("❌ Heygen demorou demais (>11min). Tente /start novamente.")
+        return ConversationHandler.END
     except Exception as e:
         await msg.edit_text(f"❌ Erro no Heygen: {e}")
         return ConversationHandler.END
