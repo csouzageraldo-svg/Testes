@@ -86,9 +86,17 @@ async def _generate_and_score_script(
     project: Project, msg: Message, feedback: str = ""
 ) -> None:
     await msg.edit_text("✍️ Gerando script focado em engajamento…")
-    project.script = await asyncio.to_thread(script_generator.generate_script, project, feedback)
+    project.script = await asyncio.wait_for(
+        asyncio.to_thread(script_generator.generate_script, project, feedback),
+        timeout=90.0,
+    )
+    project.script_score = None  # Score avaliado em background
 
-    await msg.edit_text("📊 Avaliando engajamento do script…")
+
+async def _evaluate_score_background(
+    project: Project, chat_id: int, bot
+) -> None:
+    """Avalia o score em background e envia como mensagem separada."""
     try:
         score = await asyncio.wait_for(
             asyncio.to_thread(
@@ -97,11 +105,21 @@ async def _generate_and_score_script(
                 project.topic,
                 project.video_format,
             ),
-            timeout=45.0,
+            timeout=60.0,
         )
         project.script_score = score
+        score_text = (
+            f"📊 *Score de Engajamento*\n"
+            f"Geral: `{'█' * score.overall}{'░' * (10 - score.overall)} {score.overall}/10`\n"
+            f"Hook:  `{'█' * score.hook_strength}{'░' * (10 - score.hook_strength)} {score.hook_strength}/10`\n"
+            f"Ret.:  `{'█' * score.retention_score}{'░' * (10 - score.retention_score)} {score.retention_score}/10`\n"
+            f"CTA:   `{'█' * score.cta_effectiveness}{'░' * (10 - score.cta_effectiveness)} {score.cta_effectiveness}/10`"
+        )
+        if score.improvements:
+            score_text += "\n\n💡 *Melhorias:*\n" + "\n".join(f"• {i}" for i in score.improvements[:3])
+        await bot.send_message(chat_id=chat_id, text=score_text, parse_mode="Markdown")
     except Exception:
-        project.script_score = None
+        pass  # Score é opcional, não bloqueia o fluxo
 
 
 async def _show_next_concept(message: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -368,6 +386,12 @@ async def receive_angle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         parse_mode="Markdown",
         reply_markup=approval_keyboard(),
     )
+
+    # Score em background — não bloqueia o fluxo
+    asyncio.create_task(
+        _evaluate_score_background(project, query.message.chat_id, query.get_bot())
+    )
+
     return SCRIPT_REVIEW
 
 
