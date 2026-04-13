@@ -33,9 +33,13 @@ BRIEF ESTRATÉGICO (use como base):
 
     raw_briefing_block = ""
     if project.raw_briefing:
+        # Trunca para evitar prompts excessivamente longos
+        briefing_truncated = project.raw_briefing[:1500]
+        if len(project.raw_briefing) > 1500:
+            briefing_truncated += "\n...[resumido]"
         raw_briefing_block = f"""
-BRIEFING DETALHADO DO USUÁRIO (use os dados, fontes e estatísticas reais abaixo para enriquecer o script — isso aumenta credibilidade e engajamento):
-{project.raw_briefing}
+BRIEFING DO USUÁRIO (use os dados e fontes reais para enriquecer o script):
+{briefing_truncated}
 """
 
     return f"""Você é um filmmaker e roteirista especialista em conteúdo viral para redes sociais.

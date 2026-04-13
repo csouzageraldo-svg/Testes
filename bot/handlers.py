@@ -88,7 +88,7 @@ async def _generate_and_score_script(
     await msg.edit_text("✍️ Gerando script focado em engajamento…")
     project.script = await asyncio.wait_for(
         asyncio.to_thread(script_generator.generate_script, project, feedback),
-        timeout=90.0,
+        timeout=180.0,
     )
     project.script_score = None  # Score avaliado em background
 
