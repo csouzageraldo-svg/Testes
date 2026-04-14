@@ -8,12 +8,21 @@ from utils.gemini_client import get_client, get_model
 
 
 def generate_script(project: Project, feedback: str = "") -> Script:
-    prompt = _build_prompt(project, feedback)
-    response = get_client().models.generate_content(model=get_model(), contents=prompt)
-    return _parse_response(response.text, project)
+    # Tenta com prompt completo, depois simplificado se falhar
+    for attempt, use_simple in enumerate([False, True]):
+        try:
+            prompt = _build_prompt(project, feedback, simple=use_simple)
+            response = get_client().models.generate_content(
+                model=get_model(), contents=prompt
+            )
+            return _parse_response(response.text, project)
+        except Exception as e:
+            if attempt == 0:
+                continue  # tenta com prompt simples
+            raise e
 
 
-def _build_prompt(project: Project, feedback: str) -> str:
+def _build_prompt(project: Project, feedback: str, simple: bool = False) -> str:
     duration_min = project.desired_duration_sec / 60
     feedback_block = f"\n\nAJUSTE SOLICITADO: {feedback}" if feedback else ""
 
@@ -31,38 +40,26 @@ BRIEF ESTRATÉGICO (use como base):
 - Dica de ritmo: {brief.pacing_tip}
 """
 
-    raw_briefing_block = ""
-    if project.raw_briefing:
-        # Trunca para evitar prompts excessivamente longos
-        briefing_truncated = project.raw_briefing[:1500]
-        if len(project.raw_briefing) > 1500:
-            briefing_truncated += "\n...[resumido]"
-        raw_briefing_block = f"""
-BRIEFING DO USUÁRIO (use os dados e fontes reais para enriquecer o script):
-{briefing_truncated}
-"""
+    # Briefing resumido (apenas no prompt completo)
+    briefing_block = ""
+    if not simple and project.raw_briefing:
+        briefing_block = f"\nDATOS DO BRIEFING: {project.raw_briefing[:800]}\n"
 
-    return f"""Você é um filmmaker e roteirista especialista em conteúdo viral para redes sociais.
-Sua missão é criar scripts que PARAM O SCROLL e geram alto engajamento.
+    if simple:
+        # Prompt mínimo para garantir resposta rápida
+        return f"""Crie um script de vídeo curto para redes sociais.
+TEMA: {project.topic}
+DURAÇÃO TOTAL: {project.desired_duration_sec:.0f} segundos
+HOOK: {brief.chosen_angle.hook if brief else 'abertura impactante'}
+{feedback_block}
+Cena 0 = abertura com narração EXATAMENTE: "{settings.OPENING_PHRASE}"
+Última cena = encerramento EXATAMENTE: "{settings.CLOSING_PHRASE}"
+Demais cenas em português BR, diretas e engajantes."""
 
+    return f"""Roteirista especialista em vídeos virais. Crie script de {duration_min:.0f} min para {project.video_format.upper()}.
 TEMA: "{project.topic}"
-FORMATO: {project.video_format.upper()} (9:16 — vertical)
-DURAÇÃO: {duration_min:.1f} minuto(s) ({project.desired_duration_sec:.0f} segundos)
-{brief_block}{raw_briefing_block}
-
-TÉCNICAS OBRIGATÓRIAS DE ENGAJAMENTO:
-1. Hook poderoso: os primeiros 3 segundos definem tudo — use pergunta, afirmação chocante ou dado surpreendente
-2. Pattern interrupt: quebre o ritmo a cada 15-20s para manter atenção (dado novo, virada, pergunta retórica)
-3. Storytelling: prefira "mostre, não diga" — use exemplos concretos, não abstrações
-4. Urgência/relevância: por que o espectador precisa saber AGORA?
-5. CTA natural: o encerramento deve fluir como consequência lógica, não forçada
-
-REGRAS FIXAS:
-- Cena índice 0 (Abertura): narração EXATAMENTE "{settings.OPENING_PHRASE}" | image_prompt vazio
-- Última cena (Encerramento): narração EXATAMENTE "{settings.CLOSING_PHRASE}" | image_prompt vazio
-- Soma de duration_sec = {project.desired_duration_sec:.0f} segundos EXATOS
-- image_prompt de cenas de conteúdo: em inglês, cinematográfico, formato portrait 9:16, visualmente impactante
-- Narração em português BR, linguagem natural e direta{feedback_block}
+{brief_block}{briefing_block}
+REGRAS: cena 0 narração="{settings.OPENING_PHRASE}" sem image_prompt. Última cena narração="{settings.CLOSING_PHRASE}" sem image_prompt. Total={project.desired_duration_sec:.0f}s. Narração em PT-BR. image_prompt em inglês, portrait 9:16.{feedback_block}
 
 Responda SOMENTE com JSON válido (sem texto fora do bloco):
 ```json
