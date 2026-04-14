@@ -23,7 +23,7 @@ HEYGEN_V3_VIDEOS_URL       = "https://api.heygen.com/v3/videos"
 HEYGEN_V3_AGENTS_URL       = "https://api.heygen.com/v3/video-agents"
 HEYGEN_STATUS_URL          = "https://api.heygen.com/v1/video_status.get"
 HEYGEN_AVATARS_URL         = "https://api.heygen.com/v2/avatars"
-HEYGEN_VOICES_URL          = "https://api.heygen.com/v1/voice.list"
+HEYGEN_VOICES_URL          = "https://api.heygen.com/v2/voices"
 HEYGEN_PHOTO_UPLOAD        = "https://upload.heygen.com/v1/talking_photo"
 
 # IDs descobertos em runtime
@@ -166,24 +166,47 @@ def create_agent_video(
 # ── Internos ───────────────────────────────────────────────────────────────────
 
 def _submit_v3(script_text: str, photo_path: Optional[Path] = None) -> str:
-    """Submete job via POST /v3/videos."""
+    """Submete job via POST /v3/videos com payload aninhado (mesmo esquema do v2)."""
     voice_id = _discover_voice_id()
 
-    # Determina avatar_id ou talking_photo_id
+    # Monta o character (avatar padrão ou talking photo)
     if photo_path and photo_path.exists():
         try:
             talking_photo_id = _upload_talking_photo(photo_path)
-            avatar_id = talking_photo_id  # v3 aceita talking_photo_id no campo avatar_id
+            character = {
+                "type": "talking_photo",
+                "talking_photo_id": talking_photo_id,
+            }
         except Exception as e:
             print(f"[Heygen] Talking photo falhou ({e}), usando avatar da conta.")
-            avatar_id = _discover_avatar_id()
+            character = {
+                "type": "avatar",
+                "avatar_id": _discover_avatar_id(),
+                "avatar_style": "normal",
+            }
     else:
-        avatar_id = _discover_avatar_id()
+        character = {
+            "type": "avatar",
+            "avatar_id": _discover_avatar_id(),
+            "avatar_style": "normal",
+        }
 
     payload = {
-        "avatar_id": avatar_id,
-        "script":    script_text,
-        "voice_id":  voice_id,
+        "video_inputs": [
+            {
+                "character": character,
+                "voice": {
+                    "type": "text",
+                    "input_text": script_text,
+                    "voice_id": voice_id,
+                },
+                "background": {
+                    "type": "color",
+                    "value": "#1a1a2e",
+                },
+            }
+        ],
+        "dimension": {"width": 1080, "height": 1920},
     }
 
     resp = requests.post(HEYGEN_V3_VIDEOS_URL, json=payload, headers=_headers(), timeout=30)
