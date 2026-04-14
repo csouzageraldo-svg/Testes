@@ -7,4 +7,6 @@
     SCRIPT_FEEDBACK,
     CONCEPT_REVIEW,
     PHOTO,
-) = range(8)
+    MODE,
+    BRIEFING,
+) = range(10)

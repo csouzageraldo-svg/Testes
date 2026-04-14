@@ -24,9 +24,11 @@ from modules import (
 from utils import file_manager
 from bot.states import (
     ANGLE,
+    BRIEFING,
     CONCEPT_REVIEW,
     DURATION,
     FORMAT,
+    MODE,
     PHOTO,
     SCRIPT_FEEDBACK,
     SCRIPT_REVIEW,
@@ -39,6 +41,7 @@ from bot.keyboards import (
     format_keyboard,
     images_approval_keyboard,
     photo_keyboard,
+    start_mode_keyboard,
 )
 
 FMT_NAMES = {"stories": "Stories", "reels": "Reels", "tiktok": "TikTok"}
@@ -170,10 +173,62 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "🎬 *Gerador de Vídeos Com Avatar*\n\n"
         "Olá! Sou o assistente criativo do Carlos.\n"
         "Vou criar um vídeo de alto engajamento para suas redes sociais.\n\n"
-        "Qual é o *tema* do vídeo?",
+        "Como você quer começar?",
         parse_mode="Markdown",
+        reply_markup=start_mode_keyboard(),
     )
-    return TOPIC
+    return MODE
+
+
+async def receive_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+    mode = query.data.split(":")[1]
+
+    if mode == "briefing":
+        await query.edit_message_text(
+            "📋 *Modo Briefing*\n\n"
+            "Cole aqui seu material: temas, fontes, dados, resumos, roteiros rascunho...\n\n"
+            "Vou analisar tudo, extrair o melhor e criar um vídeo de alta performance com esse conteúdo.",
+            parse_mode="Markdown",
+        )
+        return BRIEFING
+    else:
+        await query.edit_message_text(
+            "📝 Qual é o *tema* do vídeo?\n\n"
+            "_Ex: IA e liderança de agentes nas empresas_",
+            parse_mode="Markdown",
+        )
+        return TOPIC
+
+
+async def receive_briefing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    briefing_text = update.message.text.strip()
+    context.user_data["raw_briefing"] = briefing_text
+
+    msg = await update.message.reply_text("🔍 Analisando seu briefing e extraindo o melhor conteúdo…")
+
+    try:
+        brief = await asyncio.to_thread(
+            content_advisor.analyze_briefing,
+            briefing_text,
+            "reels",  # formato temporário — atualizado após o usuário escolher
+            90,       # duração temporária
+        )
+        context.user_data["brief_from_briefing"] = brief
+        context.user_data["topic"] = brief.topic
+    except Exception as e:
+        await msg.edit_text(f"❌ Erro ao analisar briefing: {e}\n\nUse /start para recomeçar.")
+        return ConversationHandler.END
+
+    await msg.edit_text(
+        f"✅ Briefing analisado!\n\n"
+        f"📌 Tema extraído: *{brief.topic}*\n\n"
+        f"Escolha o formato do vídeo:",
+        parse_mode="Markdown",
+        reply_markup=format_keyboard(),
+    )
+    return FORMAT
 
 
 async def receive_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -276,6 +331,7 @@ async def receive_angle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         desired_duration_sec=context.user_data["duration_sec"],
     )
     project.content_brief = brief
+    project.raw_briefing = context.user_data.get("raw_briefing")
     project.dirs = file_manager.setup_project_dirs(project.topic)
     context.user_data["project"] = project
 
@@ -451,17 +507,29 @@ async def skip_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def _generate_heygen(msg: Message, context: ContextTypes.DEFAULT_TYPE) -> int:
     project: Project = context.user_data["project"]
 
+    # Limita texto ao Heygen (max ~1500 chars para evitar rejeição da API)
+    script_text = project.script.raw_text
+    if len(script_text) > 1500:
+        script_text = script_text[:1497] + "..."
+
     try:
         await msg.edit_text(
             "🤖 Gerando vídeo com Heygen…\n"
             "_(isso pode levar 2–5 minutos — vou te avisar quando estiver pronto)_",
             parse_mode="Markdown",
         )
-        project.avatar_video_path = await asyncio.to_thread(
-            avatar_generator.create_avatar_video,
-            project.script.raw_text,
-            project.dirs["avatar"],
+        project.avatar_video_path = await asyncio.wait_for(
+            asyncio.to_thread(
+                avatar_generator.create_avatar_video,
+                script_text,
+                project.dirs["avatar"],
+                project.avatar_photo_path,
+            ),
+            timeout=660.0,  # 11 minutos máximo
         )
+    except asyncio.TimeoutError:
+        await msg.edit_text("❌ Heygen demorou demais (>11min). Tente /start novamente.")
+        return ConversationHandler.END
     except Exception as e:
         await msg.edit_text(f"❌ Erro no Heygen: {e}")
         return ConversationHandler.END
