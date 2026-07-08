@@ -393,3 +393,15 @@ Não sessão nem scroll: **candidaturas qualificadas / semana**, taxa de passage
 - motion com física de precisão e respeito a `prefers-reduced-motion`.
 
 É uma prova de direção, não um build final: fotos, vídeos, logos e matérias entram dos assets do Drive na fase de produção.
+
+### Revisão v9.1 — elementos resgatados do site v7 (a pedido)
+
+Mantida a estratégia e a ordem narrativa; reincorporados os elementos visuais fortes do site atual:
+
+1. **Gráfico "Valor que acumula"** (tese) — serrote tracejado da receita repetida vs curva que acumula da recorrente, com desenho animado no scroll. Substitui o par de células de texto.
+2. **Pilha de matérias** (evidências) — "Sabe o que essas empresas tinham em comum? O mesmo Executivo de Crescimento e Receita." com o card do O Globo (Nextel/Claro R$3,5bi) recriado em código; na produção, entra o screenshot real da matéria.
+3. **Faixa de logos** — "Construído dentro de operações como" + "Formação e ecossistema", em faixas próprias após as evidências. Wordmarks recriados em código; trocar pelos PNGs oficiais de `the-rever-design-system/logos/png`.
+4. **Seção do fundador** (substitui o Lastro areia) — "Fundador · Carlos Geraldo / 20 anos dentro do motor de receita recorrente.", timeline vertical 2025→2002 com pontos verdes e barra "Bilhões gerados em mais de 20 anos", com slot para o retrato real ao fundo.
+5. **Foto de ambiente** (salas) — faixa larga escurecida para a foto real de imersão do acervo.
+
+O Filtro permanece em areia como única inversão clara da página.

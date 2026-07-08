@@ -21,6 +21,7 @@
   --mute-2:#5c5c58;
   --led:#168e7a;
   --led-bright:#1fae95;
+  --teal:#5fd3bc;
   --hair:rgba(247,244,239,.12);
   --hair-sand:rgba(20,20,20,.16);
   --sg:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -100,14 +101,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(20,20,20,.82)
 .tese{border-top:1px solid var(--hair)}
 .tese-statement{font-size:clamp(30px,4.4vw,56px);font-weight:500;letter-spacing:-.02em;line-height:1.14;max-width:24ch;text-wrap:balance}
 .tese-statement em{font-style:normal;color:var(--led-bright)}
-.tese-pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border:1px solid var(--hair);margin:72px 0 56px}
-.tese-cell{background:var(--ink);padding:38px 34px}
-.tese-cell .eyebrow{margin-bottom:14px}
-.tese-cell.on .eyebrow{color:var(--led-bright)}
-.tese-cell p{color:var(--mute);max-width:34ch}
-.tese-cell p b{color:var(--paper);font-weight:500}
+.chart-panel{margin:72px 0 56px;border:1px solid var(--hair);background:
+  linear-gradient(rgba(247,244,239,.028) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(247,244,239,.028) 1px,transparent 1px),
+  linear-gradient(180deg,#171716,#121211);
+  background-size:72px 72px,72px 72px,100% 100%;
+  padding:clamp(24px,4vw,52px)}
+.chart-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--teal);text-transform:uppercase;margin-bottom:30px}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-panel .ln-rec{stroke-dasharray:1;stroke-dashoffset:1}
+.chart-panel.in .ln-rec{transition:stroke-dashoffset 2.4s var(--ease) .25s;stroke-dashoffset:0}
+.chart-panel .ln-rep,.chart-panel .ar-rep{opacity:0;transition:opacity 1.4s var(--ease) .9s}
+.chart-panel .ar-rec{opacity:0;transition:opacity 1.6s var(--ease) 1.2s}
+.chart-panel .dot-end{opacity:0;transition:opacity .6s var(--ease) 2.4s}
+.chart-panel.in .ln-rep,.chart-panel.in .ar-rep,.chart-panel.in .ar-rec,.chart-panel.in .dot-end{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .chart-panel .ln-rec{stroke-dashoffset:0}
+  .chart-panel .ln-rep,.chart-panel .ar-rep,.chart-panel .ar-rec,.chart-panel .dot-end{opacity:1;transition:none}
+}
+.chart-legend{display:grid;grid-template-columns:1fr 1fr;gap:28px;border-top:1px solid var(--hair);margin-top:26px;padding-top:26px}
+.cl-k{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;line-height:1.6}
+.cl-k.rep{color:var(--sand)}
+.cl-k.rec{color:var(--teal)}
+.cl-d{font-size:14px;color:var(--mute);margin-top:8px;max-width:38ch}
 .tese-close{font-size:clamp(19px,2.1vw,25px);font-weight:500;color:var(--paper)}
-@media (max-width:760px){.tese-pair{grid-template-columns:1fr}}
+@media (max-width:640px){.chart-legend{grid-template-columns:1fr}}
 
 /* ── método ── */
 .metodo{border-top:1px solid var(--hair)}
@@ -138,42 +156,71 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(20,20,20,.82)
 @media (prefers-reduced-motion:reduce){.ev-cell.done .cursor{animation:none;opacity:1}}
 .ev-label{margin-top:14px;font-size:14.5px;color:var(--mute);max-width:26ch}
 .ev-note{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mute-2);text-transform:uppercase}
-.mesa{margin-top:88px}
-.mesa-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:28px;flex-wrap:wrap}
-.mesa-head h3{font-size:24px}
-.mesa-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,340px);gap:18px;overflow-x:auto;padding:6px 2px 22px;scroll-snap-type:x proximity}
-.mesa-scroll::-webkit-scrollbar{height:4px}
-.mesa-scroll::-webkit-scrollbar-thumb{background:var(--ink-3)}
-.press{background:var(--ink-2);border:1px solid var(--hair);border-radius:2px;padding:30px 28px;scroll-snap-align:start;display:flex;flex-direction:column;gap:18px;min-height:210px;transition:transform .5s var(--ease),border-color .4s}
-.press:hover{transform:translateY(-8px);border-color:rgba(247,244,239,.28)}
-.press .src{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--mute);text-transform:uppercase}
-.press .hl{font-size:18px;font-weight:500;line-height:1.3;flex:1}
-.press .go{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--led-bright);text-transform:uppercase}
-.evid-cta{margin-top:72px}
+/* pilha de matérias (resgate do site v7) */
+.press-block{margin-top:110px}
+.press-head .kicker{font-size:clamp(20px,2.4vw,30px);color:var(--mute);font-weight:400;letter-spacing:-.01em}
+.press-head h3{font-size:clamp(30px,4.2vw,52px);font-weight:700;letter-spacing:-.02em;line-height:1.08;margin-top:6px;max-width:22ch;text-wrap:balance}
+.stack{position:relative;max-width:480px;margin:72px auto 0;transform-style:preserve-3d}
+.stack .back{position:absolute;inset:0;background:#c9c5bd;border-radius:10px;opacity:.28}
+.stack .back.b1{transform:rotate(-5deg) scale(.97) translate(-26px,14px)}
+.stack .back.b2{transform:rotate(4deg) scale(.98) translate(30px,6px)}
+.article{position:relative;background:#f6f3ee;color:#141414;border-radius:10px;overflow:hidden;box-shadow:0 34px 70px rgba(0,0,0,.55);transition:transform .7s var(--ease)}
+.stack:hover .article{transform:translateY(-8px) rotate(-.6deg)}
+.article .masthead{background:#1a56a4;color:#fff;text-align:center;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:19px;letter-spacing:.08em;padding:13px 0}
+.article .a-body{padding:26px 28px 30px}
+.article h4{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.22;font-weight:700;letter-spacing:0}
+.article .deck{font-size:14.5px;color:#3d3d3d;line-height:1.5;margin-top:12px;font-family:Arial,Helvetica,sans-serif}
+.article .byline{font-size:11.5px;color:#777;margin-top:14px;font-family:Arial,Helvetica,sans-serif}
+.article .byline b{color:#333}
+.article .a-img{margin-top:18px;aspect-ratio:16/10;background:repeating-linear-gradient(-45deg,#e4dfd6 0 2px,#eeeae2 2px 12px);border:1px solid #ddd7cb;display:flex;align-items:flex-end;padding:10px 12px}
+.article .a-img span{font-size:10px;color:#8b857a;font-family:Arial,Helvetica,sans-serif}
+.press-note{margin-top:56px;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mute-2);text-transform:uppercase}
+.evid-cta{margin-top:72px;text-align:center}
 
-/* ── lastro (areia) ── */
-.lastro{background:var(--sand);color:var(--ink)}
-.lastro .eyebrow{color:var(--mute-2)}
-.lastro .lede{color:var(--mute-2)}
-.lastro-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:64px;align-items:start}
-.lastro h2{font-size:clamp(32px,4.2vw,54px);max-width:16ch}
-.lastro-quote{margin-top:34px;font-size:19px;max-width:44ch}
-.lastro-quote b{font-weight:500}
-.portrait{aspect-ratio:4/5;background:repeating-linear-gradient(-45deg,rgba(20,20,20,.07) 0 1px,transparent 1px 9px);border:1px solid var(--hair-sand);display:flex;align-items:flex-end;padding:20px;border-radius:2px}
-.portrait span{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--mute-2);text-transform:uppercase}
-.timeline{margin-top:88px;border-top:1px solid var(--hair-sand);display:grid;grid-template-columns:repeat(7,1fr)}
-.tl-item{padding:26px 18px 10px 0;border-right:1px solid var(--hair-sand);position:relative}
-.tl-item:last-child{border-right:0}
-.tl-item::before{content:'';position:absolute;top:-3px;left:0;width:5px;height:5px;border-radius:50%;background:var(--ink)}
-.tl-item:hover::before{background:var(--led)}
-.tl-year{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute-2)}
-.tl-co{font-weight:500;font-size:17px;margin-top:8px}
-.tl-role{font-size:13.5px;color:var(--mute-2);margin-top:6px;line-height:1.45}
-.cred{margin-top:72px;display:flex;flex-direction:column;gap:20px}
-.cred-row{display:flex;gap:14px 34px;flex-wrap:wrap;align-items:baseline}
-.cred-row .k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--mute-2);text-transform:uppercase;min-width:110px}
-.cred-row .logo{font-family:var(--sg);font-weight:500;font-size:16px;color:var(--mute-2);letter-spacing:.02em}
-@media (max-width:960px){.lastro-grid{grid-template-columns:1fr}.portrait{max-width:380px}.timeline{grid-template-columns:1fr 1fr;border-top:0}.tl-item{border-right:0;border-top:1px solid var(--hair-sand);padding-right:0}}
+/* faixa de logos (resgate do site v7) — trocar wordmarks pelos PNGs oficiais do design system */
+.logoband{border-top:1px solid var(--hair)}
+.logoband .band{padding:38px 0}
+.logoband .band.dim{background:var(--ink-2);border-bottom:1px solid var(--hair)}
+.band-in{max-width:1320px;margin:0 auto;padding:0 4vw;display:flex;align-items:center;justify-content:center;gap:clamp(18px,2.6vw,42px);flex-wrap:wrap}
+.band-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;white-space:nowrap}
+.lg{color:#9a9a94;opacity:.85;display:flex;align-items:center;gap:6px;filter:grayscale(1)}
+.lg svg{display:block;fill:#9a9a94;stroke:#9a9a94}
+.lg-tim b{font-weight:700;font-size:19px;letter-spacing:.02em}
+.lg-oi{width:34px;height:34px;border:2.5px solid #9a9a94;border-radius:50%;justify-content:center;font-weight:700;font-size:14px}
+.lg-sky b{font-weight:700;font-style:italic;font-size:22px;letter-spacing:-.03em}
+.lg-nextel b{font-weight:700;font-size:19px;letter-spacing:-.01em}
+.lg-wine b{font-weight:500;font-size:18px;letter-spacing:.22em}
+.lg-cetrus i{width:10px;height:10px;background:#9a9a94;transform:rotate(45deg);display:inline-block}
+.lg-cetrus b{font-weight:500;font-size:18px;text-transform:lowercase}
+.lg-pet{width:38px;height:38px;border:1.5px solid #9a9a94;border-radius:50%;justify-content:center;font-weight:700;font-size:12px}
+.lg-sanar b{font-weight:700;font-size:19px;text-transform:lowercase}
+.lg-usp b{font-weight:700;font-size:27px;letter-spacing:.03em;color:transparent;-webkit-text-stroke:1.4px #9a9a94}
+.lg-singularity b{font-weight:700;font-style:italic;font-size:27px}
+
+/* fundador (resgate do site v7 — retrato real entra como .founder-photo) */
+.founder{position:relative;background:#101010;overflow:hidden;border-top:1px solid var(--hair)}
+.founder-bg{position:absolute;inset:0;background:
+  radial-gradient(640px 560px at 62% 12%, rgba(247,244,239,.075), transparent 68%);pointer-events:none}
+.founder-in{position:relative;max-width:880px;margin:0 auto;padding:0 6vw}
+.founder h2{font-size:clamp(32px,4.4vw,52px);font-weight:700;margin-top:18px;max-width:18ch}
+.founder .lede{margin-top:22px}
+.ftl{margin-top:56px;border:1px solid var(--hair);background:rgba(16,16,16,.55);backdrop-filter:blur(3px)}
+.ftl-row{display:grid;grid-template-columns:86px 30px 1fr;gap:14px;align-items:start;padding:22px 26px;border-bottom:1px solid var(--hair)}
+.ftl-year{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--sand);padding-top:3px}
+.ftl-dot{width:9px;height:9px;border-radius:50%;background:var(--led);margin-top:6px;box-shadow:0 0 0 4px rgba(22,142,122,.16)}
+.ftl-co{font-weight:700;font-size:17px}
+.ftl-sec{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;margin-top:5px}
+.ftl-role{font-size:14.5px;color:#c9c4ba;margin-top:4px}
+.ftl-bar{display:flex;justify-content:space-between;align-items:center;padding:20px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--teal);text-transform:uppercase}
+.ftl-bar i{font-style:normal;font-size:16px}
+.founder-cred{margin-top:34px;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--mute-2);text-transform:uppercase;line-height:2}
+@media (max-width:560px){.ftl-row{grid-template-columns:64px 20px 1fr;padding:18px 18px}}
+
+/* foto de ambiente (resgate do site v7 — foto real do acervo entra aqui) */
+.ambiente{margin-bottom:60px;position:relative;border:1px solid var(--hair);border-radius:4px;overflow:hidden;aspect-ratio:16/5;min-height:200px;background:
+  linear-gradient(180deg,rgba(20,20,20,.35),rgba(20,20,20,.78)),
+  repeating-linear-gradient(-45deg,#201d19 0 2px,#191714 2px 13px)}
+.ambiente span{position:absolute;left:22px;bottom:18px;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:rgba(247,244,239,.55);text-transform:uppercase}
 
 /* ── salas ── */
 .salas{border-top:1px solid var(--hair)}
@@ -251,7 +298,7 @@ footer{border-top:1px solid var(--hair);padding:56px 0 64px}
     <div class="nav-links">
       <a href="#metodo">Método</a>
       <a href="#evidencias">Evidências</a>
-      <a href="#lastro">Lastro</a>
+      <a href="#fundador">Fundador</a>
       <a href="#salas">Salas</a>
     </div>
     <a class="nav-cta" href="#candidatura">Candidatura</a>
@@ -285,14 +332,45 @@ footer{border-top:1px solid var(--hair);padding:56px 0 64px}
   <div class="wrap">
     <p class="eyebrow rv">A tese</p>
     <h2 class="tese-statement rv d1" style="margin-top:22px">Faturar mais, mais vezes e por mais tempo para o mesmo cliente <em>não exige assinatura.</em> Exige estratégia, método e operação.</h2>
-    <div class="tese-pair rv d2">
-      <div class="tese-cell">
-        <p class="eyebrow">Receita repetida</p>
-        <p>Depende de vender de novo. Todo mês, <b>a conta reinicia.</b></p>
-      </div>
-      <div class="tese-cell on">
-        <p class="eyebrow">Receita recorrente <span class="dot">●</span></p>
-        <p>Volta sozinha. Todo mês, <b>a base trabalha.</b></p>
+    <div class="chart-panel rv d2">
+      <p class="chart-label">Valor que acumula</p>
+      <svg class="chart-svg" viewBox="0 0 1000 540" role="img" aria-label="Gráfico: receita repetida oscila e zera; receita recorrente acumula ao longo do tempo">
+        <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#5fd3bc" flood-opacity=".45"/>
+          </filter>
+          <linearGradient id="fill-rec" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5fd3bc" stop-opacity=".16"/>
+            <stop offset="1" stop-color="#5fd3bc" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="fill-rep" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e8dfd0" stop-opacity=".07"/>
+            <stop offset="1" stop-color="#e8dfd0" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- moldura -->
+        <path d="M120 40 V500 H960" fill="none" stroke="rgba(247,244,239,.14)" stroke-width="1"/>
+        <line x1="120" y1="155" x2="960" y2="155" stroke="rgba(247,244,239,.06)"/>
+        <line x1="120" y1="270" x2="960" y2="270" stroke="rgba(247,244,239,.06)"/>
+        <line x1="120" y1="385" x2="960" y2="385" stroke="rgba(247,244,239,.06)"/>
+        <!-- receita repetida: serrote que zera -->
+        <path class="ar-rep" d="M130 500 L200 330 L270 500 L340 318 L410 500 L480 322 L550 500 L620 308 L690 500 L760 312 L830 500 L905 300 L905 500 Z" fill="url(#fill-rep)"/>
+        <path class="ln-rep" d="M130 500 L200 330 L270 500 L340 318 L410 500 L480 322 L550 500 L620 308 L690 500 L760 312 L830 500 L905 300" fill="none" stroke="#e8dfd0" stroke-width="2.5" stroke-dasharray="8 9" stroke-linecap="round" opacity=".8"/>
+        <circle class="dot-end" cx="905" cy="300" r="7" fill="#e8dfd0"/>
+        <!-- receita recorrente: curva que acumula -->
+        <path class="ar-rec" d="M130 498 C330 486 430 430 545 330 C660 230 790 130 905 108 L905 500 L130 500 Z" fill="url(#fill-rec)"/>
+        <path class="ln-rec" pathLength="1" d="M130 498 C330 486 430 430 545 330 C660 230 790 130 905 108" fill="none" stroke="#5fd3bc" stroke-width="3.5" stroke-linecap="round" filter="url(#glow)"/>
+        <circle class="dot-end" cx="905" cy="108" r="8" fill="#5fd3bc"/>
+      </svg>
+      <div class="chart-legend">
+        <div>
+          <p class="cl-k rep">Receita repetida: esforço que zera</p>
+          <p class="cl-d">Depende de vender de novo. Todo mês, a conta reinicia.</p>
+        </div>
+        <div>
+          <p class="cl-k rec">Adicionar · Escalar · Reter · Rentabilizar</p>
+          <p class="cl-d">Volta sozinha. Todo mês, a base trabalha.</p>
+        </div>
       </div>
     </div>
     <p class="tese-close rv d1">Se vender ficou mais caro, desperdiçar cliente ficou insustentável.</p>
@@ -371,45 +449,74 @@ footer{border-top:1px solid var(--hair);padding:56px 0 64px}
     </div>
     <p class="ev-note rv">Números de operações reais, sem atribuição · Detalhes em conversa</p>
 
-    <div class="mesa rv">
-      <div class="mesa-head">
-        <h3>Na imprensa</h3>
-        <p class="eyebrow">Fatos públicos · Fontes originais linkadas</p>
+    <div class="press-block rv">
+      <div class="press-head">
+        <p class="kicker">Sabe o que essas empresas tinham em comum?</p>
+        <h3>O mesmo Executivo de Crescimento e Receita.</h3>
       </div>
-      <div class="mesa-scroll">
-        <article class="press"><p class="src">Veículo · Ano</p><p class="hl">Headline da matéria pública entra aqui, com marca e número — fato público.</p><span class="go">Ler na fonte →</span></article>
-        <article class="press"><p class="src">Veículo · Ano</p><p class="hl">Segunda matéria do acervo de evidências (pasta Matérias do Drive).</p><span class="go">Ler na fonte →</span></article>
-        <article class="press"><p class="src">Veículo · Ano</p><p class="hl">Terceira matéria — o único lugar do site onde número encontra marca.</p><span class="go">Ler na fonte →</span></article>
-        <article class="press"><p class="src">Veículo · Ano</p><p class="hl">Quarta matéria do acervo.</p><span class="go">Ler na fonte →</span></article>
+      <!-- recriação do card de matéria; na produção, entra o screenshot real da matéria (pasta Matérias do Drive) -->
+      <div class="stack">
+        <div class="back b1"></div>
+        <div class="back b2"></div>
+        <article class="article">
+          <div class="masthead">O GLOBO</div>
+          <div class="a-body">
+            <h4>Dona da Claro compra Nextel no Brasil por R$ 3,5 bi para avançar em Rio e São Paulo</h4>
+            <p class="deck">Empresa é a 5ª maior operadora do país, com 3,3 milhões de linhas móveis ativas. Aquisição será livre de dívidas</p>
+            <p class="byline"><b>Bruno Rosa e Com agências</b><br>18/03/2019 · Atualizado em 18/03/2019</p>
+            <div class="a-img"><span>Foto da matéria original entra aqui · Arquivo</span></div>
+          </div>
+        </article>
       </div>
+      <p class="press-note">Fatos públicos · Fontes originais linkadas · Acervo completo na mesa de evidências</p>
     </div>
     <div class="evid-cta rv"><a class="btn btn-solid" href="#candidatura">Iniciar candidatura</a></div>
   </div>
 </section>
 
-<section class="lastro" id="lastro">
-  <div class="wrap">
-    <div class="lastro-grid">
-      <div>
-        <p class="eyebrow rv">O lastro</p>
-        <h2 class="rv d1" style="margin-top:18px">Vinte anos dentro das salas onde a recorrência foi inventada.</h2>
-        <p class="lastro-quote rv d2">Por décadas, a competência de construir receita que volta ficou trancada em telecom, TV por assinatura e clubes de base instalada. A The Rever existe para abrir essas salas. <b>Carlos Geraldo é a prova — não o produto.</b></p>
-      </div>
-      <div class="portrait rv d2"><span>Retrato / vídeo 4:5 · Carlos Geraldo · 20 anos de recorrência</span></div>
+<div class="logoband rv">
+  <div class="band dim">
+    <div class="band-in">
+      <span class="band-label">Construído dentro de operações como</span>
+      <!-- trocar wordmarks pelos PNGs oficiais: the-rever-design-system/logos/png -->
+      <span class="lg lg-tim"><svg width="24" height="17" viewBox="0 0 24 17"><rect y="0" width="16" height="3.2" rx="1"/><rect y="6.8" width="24" height="3.2" rx="1"/><rect y="13.6" width="16" height="3.2" rx="1"/></svg><b>TIM</b></span>
+      <span class="lg lg-oi"><b>oi</b></span>
+      <span class="lg lg-sky"><b>SKY</b></span>
+      <span class="lg lg-nextel"><b>nextel</b></span>
+      <span class="lg lg-wine"><b>WINE</b></span>
+      <span class="lg lg-cetrus"><i></i><b>cetrus</b></span>
+      <span class="lg lg-pet"><b>+Pet</b></span>
+      <span class="lg lg-sanar"><b>sanar</b></span>
     </div>
-    <div class="timeline rv">
-      <div class="tl-item"><p class="tl-year">2002</p><p class="tl-co">TIM</p><p class="tl-role">Rede de varejo: de 2 para 150 lojas</p></div>
-      <div class="tl-item"><p class="tl-year">2011</p><p class="tl-co">Oi</p><p class="tl-role">Estratégia B2B de grandes contas</p></div>
-      <div class="tl-item"><p class="tl-year">2013</p><p class="tl-co">SKY</p><p class="tl-role">Retenção em base de TV paga</p></div>
-      <div class="tl-item"><p class="tl-year">2014</p><p class="tl-co">Nextel</p><p class="tl-role">Migração de base e venda da operação</p></div>
-      <div class="tl-item"><p class="tl-year">2018</p><p class="tl-co">Wine</p><p class="tl-role">Growth do maior clube de vinhos do mundo</p></div>
-      <div class="tl-item"><p class="tl-year">2024</p><p class="tl-co">Cetrus/Sanar</p><p class="tl-role">CMO/CCO pós-fusão</p></div>
-      <div class="tl-item"><p class="tl-year">2025</p><p class="tl-co">+Pet</p><p class="tl-role">CRO · reestruturação 360</p></div>
+  </div>
+  <div class="band">
+    <div class="band-in">
+      <span class="band-label">Formação e ecossistema</span>
+      <span class="lg lg-mit"><svg width="52" height="26" viewBox="0 0 52 26"><rect x="0" y="0" width="7" height="26"/><rect x="10" y="0" width="7" height="17"/><rect x="20" y="0" width="7" height="26"/><rect x="30" y="9" width="7" height="17"/><rect x="40" y="0" width="7" height="26"/><rect x="30" y="0" width="7" height="5"/></svg></span>
+      <span class="lg lg-usp"><b>USP</b></span>
+      <span class="lg lg-singularity"><b>S</b></span>
     </div>
-    <div class="cred rv">
-      <div class="cred-row"><span class="k">Operações</span><span class="logo">TIM</span><span class="logo">Oi</span><span class="logo">SKY</span><span class="logo">Nextel</span><span class="logo">Wine</span><span class="logo">Cetrus</span><span class="logo">Sanar</span><span class="logo">+Pet</span></div>
-      <div class="cred-row"><span class="k">Formação</span><span class="logo">MIT Professional Education</span><span class="logo">MIT Sloan</span><span class="logo">MBA USP</span><span class="logo">Singularity</span></div>
+  </div>
+</div>
+
+<section class="founder" id="fundador">
+  <!-- retrato real do Carlos entra como imagem de fundo desta seção (Drive 99_Assets), escurecido como no v7 -->
+  <div class="founder-bg" aria-hidden="true"></div>
+  <div class="founder-in">
+    <p class="eyebrow rv">Fundador <span class="dot">·</span> Carlos Geraldo</p>
+    <h2 class="rv d1">20 anos dentro do motor de receita recorrente.</h2>
+    <p class="lede rv d2">Telecom, assinatura, educação e saúde. Bases instaladas, MRR, churn, LTV, monetização de carteira e operações com IA rodando de verdade. Carlos Geraldo é a prova — não o produto.</p>
+    <div class="ftl rv">
+      <div class="ftl-row"><span class="ftl-year">2025</span><span class="ftl-dot"></span><div><p class="ftl-co">+Pet</p><p class="ftl-sec">Plano saúde</p><p class="ftl-role">Chief Revenue &amp; Innovation Officer</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2024</span><span class="ftl-dot"></span><div><p class="ftl-co">Cetrus / Sanar</p><p class="ftl-sec">Educação / Medicina</p><p class="ftl-role">Chief Marketing &amp; Commercial Officer</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2018</span><span class="ftl-dot"></span><div><p class="ftl-co">Wine</p><p class="ftl-sec">Assinatura / Varejo</p><p class="ftl-role">Diretor de Growth</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2014</span><span class="ftl-dot"></span><div><p class="ftl-co">Nextel Brasil</p><p class="ftl-sec">Assinatura / Telecom</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2013</span><span class="ftl-dot"></span><div><p class="ftl-co">SKY Brasil</p><p class="ftl-sec">Assinatura / Telecom TV</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2011</span><span class="ftl-dot"></span><div><p class="ftl-co">Oi Telecom</p><p class="ftl-sec">Corporate / Telecom</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2002</span><span class="ftl-dot"></span><div><p class="ftl-co">TIM Brasil</p><p class="ftl-sec">Varejo / Telecom</p></div></div>
+      <div class="ftl-bar"><span>Bilhões gerados em mais de 20 anos</span><i>+</i></div>
     </div>
+    <p class="founder-cred rv">Formação — MIT Professional Education · MIT Sloan · MBA USP · Singularity University</p>
   </div>
 </section>
 
@@ -419,6 +526,8 @@ footer{border-top:1px solid var(--hair);padding:56px 0 64px}
       <p class="eyebrow rv">As salas</p>
       <h2 class="rv d1">Quatro salas. Uma engenharia.</h2>
     </div>
+    <!-- foto real de imersão/sala (acervo do Drive) entra aqui, escurecida como no v7 -->
+    <div class="ambiente rv"><span>Sala de construção · Imersão The Rever — foto real do acervo</span></div>
     <div class="salas-grid">
       <article class="sala lab rv">
         <p class="tag">Porta de entrada</p>
