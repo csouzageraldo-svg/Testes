@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulário de Candidatura · Componente The Rever</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ BASE THE REVER — copiar UMA vez para o <head> do site ══ */
+:root{--ink:#141414;--ink-2:#1b1b1a;--ink-3:#242422;--paper:#f7f4ef;--sand:#e8dfd0;--mute:#8a8a8a;--mute-2:#5c5c58;--led:#168e7a;--led-bright:#1fae95;--teal:#5fd3bc;--hair:rgba(247,244,239,.12);--sg:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--sg);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding:90px 6vw}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.eyebrow .dot{color:var(--led)}
+h1,h2,h3{font-weight:500;letter-spacing:-.02em;line-height:1.06;text-wrap:balance}
+.section-head{display:flex;flex-direction:column;gap:18px;margin-bottom:64px}
+.section-head h2{font-size:clamp(34px,4.6vw,58px);max-width:18ch}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:16px 30px;border-radius:2px;display:inline-block;transition:background .35s var(--ease),color .35s,border-color .35s;cursor:pointer}
+.btn-solid{background:var(--paper);color:var(--ink);border:1px solid var(--paper)}
+.btn-solid:hover,.btn-solid:focus-visible{background:var(--led);border-color:var(--led);color:var(--paper)}
+.btn-ghost{color:var(--mute);border:1px solid transparent;padding-left:0}
+.btn-ghost:hover{color:var(--paper)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+/* ══ FIM DA BASE ══ */
+
+/* ── CSS DO COMPONENTE: Formulário de Candidatura ── */
+.cand-panel{background:var(--ink-2);border:1px solid var(--hair);border-radius:2px;padding:64px 6vw;max-width:860px;margin:0 auto}
+.cand-panel h2{font-size:clamp(28px,3.4vw,42px);margin:16px 0 40px;max-width:18ch}
+.cand-panel form{display:grid;grid-template-columns:1fr 1fr;gap:26px 22px}
+.field{display:flex;flex-direction:column;gap:9px}
+.field.full{grid-column:1/-1}
+.cand-panel label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.cand-panel input,.cand-panel select,.cand-panel textarea{background:var(--ink);border:1px solid var(--hair);border-radius:2px;color:var(--paper);font-family:var(--sg);font-size:16px;padding:14px 16px;transition:border-color .3s;width:100%}
+.cand-panel select{appearance:none;background-image:linear-gradient(45deg,transparent 49%,var(--mute) 50%),linear-gradient(135deg,var(--mute) 50%,transparent 51%);background-position:calc(100% - 22px) 55%,calc(100% - 16px) 55%;background-size:6px 6px;background-repeat:no-repeat}
+.cand-panel textarea{min-height:120px;resize:vertical}
+.cand-panel input:focus-visible,.cand-panel select:focus-visible,.cand-panel textarea:focus-visible{outline:none;border-color:var(--led)}
+.cand-panel ::placeholder{color:var(--mute-2)}
+.cand-actions{grid-column:1/-1;display:flex;flex-direction:column;gap:18px;margin-top:8px}
+.cand-actions .btn{width:fit-content}
+.cand-micro{font-size:13.5px;color:var(--mute-2)}
+.cand-ok{display:none;font-family:var(--mono);font-size:14px;color:var(--led-bright);padding:22px 0}
+.cand-panel.sent form{display:none}
+.cand-panel.sent .cand-ok{display:block}
+@media (max-width:640px){.cand-panel form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══ MARKUP DO COMPONENTE: Formulário de Candidatura ══ -->
+<section class="wrap" id="candidatura">
+  <div class="cand-panel rv">
+    <p class="eyebrow">Candidatura</p>
+    <h2>A conversa é uma qualificação. Não um pitch.</h2>
+    <!-- PRODUÇÃO: apontar action/fetch para o backend ou serviço de formulário -->
+    <form id="candForm" novalidate>
+      <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" autocomplete="name" required></div>
+      <div class="field"><label for="f-email">E-mail</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="f-empresa">Empresa</label><input id="f-empresa" name="empresa" type="text" autocomplete="organization" required></div>
+      <div class="field"><label for="f-fat">Faturamento anual</label>
+        <select id="f-fat" name="faturamento" required>
+          <option value="" selected disabled>Selecionar faixa</option>
+          <option>R$10–30MM</option><option>R$30–100MM</option><option>+R$100MM</option><option>Abaixo de R$10MM</option>
+        </select></div>
+      <div class="field"><label for="f-modelo">O modelo hoje</label>
+        <select id="f-modelo" name="modelo" required>
+          <option value="" selected disabled>Selecionar</option>
+          <option>Transacional</option><option>Misto</option><option>Majoritariamente recorrente</option>
+        </select></div>
+      <div class="field"><label for="f-sala">Sala de interesse</label>
+        <select id="f-sala" name="sala">
+          <option>Lab</option><option>Council</option><option>Advisor</option><option>Studio</option>
+          <option selected>Ainda não sei — resposta válida</option>
+        </select></div>
+      <div class="field full"><label for="f-dor">Onde o balde está furado hoje?</label><textarea id="f-dor" name="dor" placeholder="Churn, margem, aquisição cara, base parada — no seu contexto."></textarea></div>
+      <div class="cand-actions">
+        <button class="btn btn-solid" type="submit">Enviar candidatura</button>
+        <p class="cand-micro">Sem turma aberta. Sem urgência. Respondemos toda candidatura qualificada em até 5 dias úteis.</p>
+      </div>
+    </form>
+    <p class="cand-ok">● Candidatura recebida. Falamos em até 5 dias úteis.</p>
+  </div>
+</section>
+<!-- ══ FIM DO MARKUP ══ -->
+
+<script>
+/* Reveal on scroll — copiar UMA vez (ou substituir pelo seu GSAP ScrollTrigger) */
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.18,rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rv').forEach(function(el){io.observe(el)})})();
+</script>
+<script>
+document.getElementById('candForm').addEventListener('submit',function(ev){
+  ev.preventDefault();
+  /* PRODUÇÃO: enviar os dados aqui (fetch/action) antes de confirmar */
+  this.closest('.cand-panel').classList.add('sent');
+});
+</script>
+</body>
+</html>

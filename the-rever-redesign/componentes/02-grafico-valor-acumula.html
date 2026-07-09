@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gráfico Valor que Acumula · Componente The Rever</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ BASE THE REVER — copiar UMA vez para o <head> do site ══ */
+:root{--ink:#141414;--ink-2:#1b1b1a;--ink-3:#242422;--paper:#f7f4ef;--sand:#e8dfd0;--mute:#8a8a8a;--mute-2:#5c5c58;--led:#168e7a;--led-bright:#1fae95;--teal:#5fd3bc;--hair:rgba(247,244,239,.12);--sg:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--sg);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding:90px 6vw}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.eyebrow .dot{color:var(--led)}
+h1,h2,h3{font-weight:500;letter-spacing:-.02em;line-height:1.06;text-wrap:balance}
+.section-head{display:flex;flex-direction:column;gap:18px;margin-bottom:64px}
+.section-head h2{font-size:clamp(34px,4.6vw,58px);max-width:18ch}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:16px 30px;border-radius:2px;display:inline-block;transition:background .35s var(--ease),color .35s,border-color .35s;cursor:pointer}
+.btn-solid{background:var(--paper);color:var(--ink);border:1px solid var(--paper)}
+.btn-solid:hover,.btn-solid:focus-visible{background:var(--led);border-color:var(--led);color:var(--paper)}
+.btn-ghost{color:var(--mute);border:1px solid transparent;padding-left:0}
+.btn-ghost:hover{color:var(--paper)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+/* ══ FIM DA BASE ══ */
+
+/* ── CSS DO COMPONENTE: Gráfico Valor que Acumula ── */
+.tese-statement{font-size:clamp(30px,4.4vw,56px);font-weight:500;line-height:1.14;max-width:24ch}
+.tese-statement em{font-style:normal;color:var(--led-bright)}
+.chart-panel{margin:72px 0 0;border:1px solid var(--hair);background:
+  linear-gradient(rgba(247,244,239,.028) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(247,244,239,.028) 1px,transparent 1px),
+  linear-gradient(180deg,#171716,#121211);
+  background-size:72px 72px,72px 72px,100% 100%;
+  padding:clamp(24px,4vw,52px)}
+.chart-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--teal);text-transform:uppercase;margin-bottom:30px}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-panel .ln-rec{stroke-dasharray:1;stroke-dashoffset:1}
+.chart-panel.in .ln-rec{transition:stroke-dashoffset 2.4s var(--ease) .25s;stroke-dashoffset:0}
+.chart-panel .ln-rep,.chart-panel .ar-rep{opacity:0;transition:opacity 1.4s var(--ease) .9s}
+.chart-panel .ar-rec{opacity:0;transition:opacity 1.6s var(--ease) 1.2s}
+.chart-panel .dot-end{opacity:0;transition:opacity .6s var(--ease) 2.4s}
+.chart-panel.in .ln-rep,.chart-panel.in .ar-rep,.chart-panel.in .ar-rec,.chart-panel.in .dot-end{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .chart-panel .ln-rec{stroke-dashoffset:0}
+  .chart-panel .ln-rep,.chart-panel .ar-rep,.chart-panel .ar-rec,.chart-panel .dot-end{opacity:1;transition:none}}
+.chart-legend{display:grid;grid-template-columns:1fr 1fr;gap:28px;border-top:1px solid var(--hair);margin-top:26px;padding-top:26px}
+.cl-k{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;line-height:1.6}
+.cl-k.rep{color:var(--sand)}
+.cl-k.rec{color:var(--teal)}
+.cl-d{font-size:14px;color:var(--mute);margin-top:8px;max-width:38ch}
+@media (max-width:640px){.chart-legend{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══ MARKUP DO COMPONENTE: Gráfico Valor que Acumula ══ -->
+<section class="wrap">
+  <p class="eyebrow rv">A tese</p>
+  <h2 class="tese-statement rv d1" style="margin-top:22px">Faturar mais, mais vezes e por mais tempo para o mesmo cliente <em>não exige assinatura.</em> Exige estratégia, método e operação.</h2>
+  <div class="chart-panel rv d2">
+    <p class="chart-label">Valor que acumula</p>
+    <svg class="chart-svg" viewBox="0 0 1000 540" role="img" aria-label="Gráfico: receita repetida oscila e zera; receita recorrente acumula ao longo do tempo">
+      <defs>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#5fd3bc" flood-opacity=".45"/>
+        </filter>
+        <linearGradient id="fill-rec" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#5fd3bc" stop-opacity=".16"/><stop offset="1" stop-color="#5fd3bc" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="fill-rep" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e8dfd0" stop-opacity=".07"/><stop offset="1" stop-color="#e8dfd0" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M120 40 V500 H960" fill="none" stroke="rgba(247,244,239,.14)" stroke-width="1"/>
+      <line x1="120" y1="155" x2="960" y2="155" stroke="rgba(247,244,239,.06)"/>
+      <line x1="120" y1="270" x2="960" y2="270" stroke="rgba(247,244,239,.06)"/>
+      <line x1="120" y1="385" x2="960" y2="385" stroke="rgba(247,244,239,.06)"/>
+      <path class="ar-rep" d="M130 500 L200 330 L270 500 L340 318 L410 500 L480 322 L550 500 L620 308 L690 500 L760 312 L830 500 L905 300 L905 500 Z" fill="url(#fill-rep)"/>
+      <path class="ln-rep" d="M130 500 L200 330 L270 500 L340 318 L410 500 L480 322 L550 500 L620 308 L690 500 L760 312 L830 500 L905 300" fill="none" stroke="#e8dfd0" stroke-width="2.5" stroke-dasharray="8 9" stroke-linecap="round" opacity=".8"/>
+      <circle class="dot-end" cx="905" cy="300" r="7" fill="#e8dfd0"/>
+      <path class="ar-rec" d="M130 498 C330 486 430 430 545 330 C660 230 790 130 905 108 L905 500 L130 500 Z" fill="url(#fill-rec)"/>
+      <path class="ln-rec" pathLength="1" d="M130 498 C330 486 430 430 545 330 C660 230 790 130 905 108" fill="none" stroke="#5fd3bc" stroke-width="3.5" stroke-linecap="round" filter="url(#glow)"/>
+      <circle class="dot-end" cx="905" cy="108" r="8" fill="#5fd3bc"/>
+    </svg>
+    <div class="chart-legend">
+      <div><p class="cl-k rep">Receita repetida: esforço que zera</p><p class="cl-d">Depende de vender de novo. Todo mês, a conta reinicia.</p></div>
+      <div><p class="cl-k rec">Adicionar · Escalar · Reter · Rentabilizar</p><p class="cl-d">Volta sozinha. Todo mês, a base trabalha.</p></div>
+    </div>
+  </div>
+</section>
+<!-- ══ FIM DO MARKUP ══ -->
+
+<script>
+/* Reveal on scroll — copiar UMA vez (ou substituir pelo seu GSAP ScrollTrigger) */
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.18,rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rv').forEach(function(el){io.observe(el)})})();
+</script>
+
+</body>
+</html>
