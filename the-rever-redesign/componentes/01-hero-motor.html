@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero + Motor de Recorrência · Componente The Rever</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ BASE THE REVER — copiar UMA vez para o <head> do site ══ */
+:root{--ink:#141414;--ink-2:#1b1b1a;--ink-3:#242422;--paper:#f7f4ef;--sand:#e8dfd0;--mute:#8a8a8a;--mute-2:#5c5c58;--led:#168e7a;--led-bright:#1fae95;--teal:#5fd3bc;--hair:rgba(247,244,239,.12);--sg:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--sg);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding:90px 6vw}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.eyebrow .dot{color:var(--led)}
+h1,h2,h3{font-weight:500;letter-spacing:-.02em;line-height:1.06;text-wrap:balance}
+.section-head{display:flex;flex-direction:column;gap:18px;margin-bottom:64px}
+.section-head h2{font-size:clamp(34px,4.6vw,58px);max-width:18ch}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:16px 30px;border-radius:2px;display:inline-block;transition:background .35s var(--ease),color .35s,border-color .35s;cursor:pointer}
+.btn-solid{background:var(--paper);color:var(--ink);border:1px solid var(--paper)}
+.btn-solid:hover,.btn-solid:focus-visible{background:var(--led);border-color:var(--led);color:var(--paper)}
+.btn-ghost{color:var(--mute);border:1px solid transparent;padding-left:0}
+.btn-ghost:hover{color:var(--paper)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+/* ══ FIM DA BASE ══ */
+
+/* ── CSS DO COMPONENTE: Hero + Motor de Recorrência ── */
+.hero{padding:110px 0 60px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:48px;align-items:center}
+.hero h1{font-size:clamp(42px,6.2vw,84px);margin:26px 0 20px}
+.hero-line{display:block;overflow:hidden}
+.hero-line span{display:block;transform:translateY(110%);transition:transform 1.1s var(--ease)}
+.hero.loaded .hero-line:nth-child(1) span{transition-delay:.1s;transform:none}
+.hero.loaded .hero-line:nth-child(2) span{transition-delay:.22s;transform:none}
+.hero.loaded .hero-line:nth-child(3) span{transition-delay:.34s;transform:none}
+@media (prefers-reduced-motion:reduce){.hero-line span{transform:none!important;transition:none!important}}
+.hero-slogan{font-size:clamp(19px,2vw,24px);font-weight:500;margin-bottom:22px}
+.hero-slogan em{font-style:normal;color:var(--led-bright)}
+.hero-sub{color:var(--mute);max-width:54ch;margin-bottom:42px}
+.cta-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.hero-meta{margin-top:64px;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--mute-2);text-transform:uppercase}
+.hero-meta i{font-style:normal;color:var(--led);margin:0 10px}
+.engine-panel{position:relative;aspect-ratio:5/5.4;min-height:340px}
+.engine-panel canvas{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:960px){.hero-grid{grid-template-columns:1fr}.engine-panel{max-width:440px;margin:0 auto}}
+</style>
+</head>
+<body>
+
+<!-- ══ MARKUP DO COMPONENTE: Hero + Motor de Recorrência ══ -->
+<header class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow rv">Desenvolvimento executivo <span class="dot">·</span> Receita recorrente</p>
+      <h1 aria-label="Sua receita começa do zero todo mês?">
+        <span class="hero-line"><span>Sua receita</span></span>
+        <span class="hero-line"><span>começa do zero</span></span>
+        <span class="hero-line"><span>todo mês?</span></span>
+      </h1>
+      <p class="hero-slogan rv d2">Receita recorrente não é assinatura. <em>É método.</em></p>
+      <p class="hero-sub rv d3">Um ambiente fechado onde donos e executivos constroem um motor de receita que não recomeça do zero — com método, operação e 20 anos de lastro real.</p>
+      <div class="cta-row rv d4">
+        <a class="btn btn-solid" href="#candidatura">Iniciar candidatura</a>
+        <a class="btn btn-ghost" href="#metodo">Conhecer o método ↓</a>
+      </div>
+      <p class="hero-meta rv d4">Sala fechada <i>·</i> Acesso por candidatura <i>·</i> +R$10MM</p>
+    </div>
+    <div class="engine-panel rv d2" aria-hidden="true"><canvas id="engine"></canvas></div>
+  </div>
+</header>
+<!-- ══ FIM DO MARKUP ══ -->
+
+<script>
+/* Reveal on scroll — copiar UMA vez (ou substituir pelo seu GSAP ScrollTrigger) */
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.18,rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rv').forEach(function(el){io.observe(el)})})();
+</script>
+<script>
+(function(){
+var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setupCanvas(cv){
+  var dpr=Math.min(devicePixelRatio||1,2);
+  function resize(){var r=cv.getBoundingClientRect();cv.width=r.width*dpr;cv.height=r.height*dpr}
+  resize();addEventListener('resize',resize);
+  return {ctx:cv.getContext('2d'),dpr:dpr};
+}
+function drawGear(ctx,g,rot,alpha,color,lw){
+  var teeth=Math.max(8,Math.round(g.r/7)),depth=Math.max(4,g.r*0.09);
+  ctx.save();ctx.translate(g.x,g.y);ctx.rotate(rot);ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();
+  var steps=teeth*8;
+  for(var i=0;i<=steps;i++){
+    var a=(i/steps)*Math.PI*2,sq=Math.sin(a*teeth);
+    var rr=g.r+(sq>0.35?depth:0)-depth/2;
+    if(i===0)ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);else ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);
+  }
+  ctx.closePath();ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,g.r*0.62,0,Math.PI*2);ctx.stroke();
+  for(var s=0;s<3;s++){var sa=s*(Math.PI*2/3);
+    ctx.beginPath();ctx.moveTo(Math.cos(sa)*g.r*0.16,Math.sin(sa)*g.r*0.16);ctx.lineTo(Math.cos(sa)*g.r*0.60,Math.sin(sa)*g.r*0.60);ctx.stroke();}
+  ctx.beginPath();ctx.arc(0,0,g.r*0.10,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+}
+requestAnimationFrame(function(){document.querySelector('.hero').classList.add('loaded')});
+var engineCv=document.getElementById('engine');
+if(engineCv){
+  var E=setupCanvas(engineCv),mouse={x:.5,y:.5},hoverIdx=-1;
+  engineCv.parentElement.addEventListener('pointermove',function(ev){
+    var r=engineCv.getBoundingClientRect();
+    mouse.x=(ev.clientX-r.left)/r.width;mouse.y=(ev.clientY-r.top)/r.height;
+  });
+  function layout(w,h){
+    var u=Math.min(w,h)/560;
+    var gears=[
+      {label:'ADICIONAR',r:104*u,x:w*0.40,y:h*0.30,dir:1},
+      {label:'ESCALAR',r:76*u,dir:-1},
+      {label:'RETER',r:90*u,dir:-1},
+      {label:'RENTABILIZAR',r:62*u,dir:1}];
+    function attach(a,b,deg){var rad=deg*Math.PI/180,d=a.r+b.r+6;b.x=a.x+Math.cos(rad)*d;b.y=a.y+Math.sin(rad)*d}
+    attach(gears[0],gears[1],28);attach(gears[0],gears[2],105);attach(gears[2],gears[3],22);
+    var ia={label:'IA',r:30*u,dir:1};attach(gears[1],ia,95);
+    return {gears:gears,ia:ia,u:u};
+  }
+  function frame(t){
+    var w=engineCv.width/E.dpr,h=engineCv.height/E.dpr,ctx=E.ctx;
+    ctx.setTransform(E.dpr,0,0,E.dpr,0,0);ctx.clearRect(0,0,w,h);
+    var L=layout(w,h),px=(mouse.x-.5)*10,py=(mouse.y-.5)*10;
+    ctx.translate(px,py);
+    var base=reduced?0:t*0.00018;
+    hoverIdx=-1;
+    if(!reduced){var mx=mouse.x*w-px,my=mouse.y*h-py;
+      L.gears.forEach(function(g,i){if(Math.hypot(mx-g.x,my-g.y)<g.r+10)hoverIdx=i})}
+    var speed=hoverIdx>=0?0.35:1;
+    var cx=0,cy=0;L.gears.forEach(function(g){cx+=g.x;cy+=g.y});cx/=L.gears.length;cy/=L.gears.length;
+    function labelAt(g,text,color){
+      var ang=Math.atan2(g.y-cy,g.x-cx);
+      var lx=g.x+Math.cos(ang)*(g.r+24*L.u),ly=g.y+Math.sin(ang)*(g.r+24*L.u);
+      lx=Math.min(Math.max(lx,52),w-52);ly=Math.min(Math.max(ly,16),h-8);
+      ctx.save();ctx.font='500 '+Math.max(9,10*L.u)+'px "JetBrains Mono", monospace';
+      ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(text,lx,ly+4);ctx.restore();
+    }
+    L.gears.forEach(function(g,i){
+      var rot=g.dir*base*speed*(100/g.r)+i*0.6,hot=i===hoverIdx;
+      drawGear(ctx,g,rot,hot?0.95:0.55,hot?'#f7f4ef':'#8a8a8a',hot?1.4:1.1);
+      labelAt(g,g.label,hot?'#f7f4ef':'rgba(138,138,138,.75)');
+    });
+    var ia=L.ia;
+    drawGear(ctx,ia,-base*speed*(100/ia.r)+1.2,0.95,'#168e7a',1.3);
+    labelAt(ia,'IA','#168e7a');
+    if(!reduced)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+})();
+</script>
+</body>
+</html>

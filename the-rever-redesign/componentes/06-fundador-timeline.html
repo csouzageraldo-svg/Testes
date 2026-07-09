@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fundador + Timeline · Componente The Rever</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ BASE THE REVER — copiar UMA vez para o <head> do site ══ */
+:root{--ink:#141414;--ink-2:#1b1b1a;--ink-3:#242422;--paper:#f7f4ef;--sand:#e8dfd0;--mute:#8a8a8a;--mute-2:#5c5c58;--led:#168e7a;--led-bright:#1fae95;--teal:#5fd3bc;--hair:rgba(247,244,239,.12);--sg:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--sg);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding:90px 6vw}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.eyebrow .dot{color:var(--led)}
+h1,h2,h3{font-weight:500;letter-spacing:-.02em;line-height:1.06;text-wrap:balance}
+.section-head{display:flex;flex-direction:column;gap:18px;margin-bottom:64px}
+.section-head h2{font-size:clamp(34px,4.6vw,58px);max-width:18ch}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:16px 30px;border-radius:2px;display:inline-block;transition:background .35s var(--ease),color .35s,border-color .35s;cursor:pointer}
+.btn-solid{background:var(--paper);color:var(--ink);border:1px solid var(--paper)}
+.btn-solid:hover,.btn-solid:focus-visible{background:var(--led);border-color:var(--led);color:var(--paper)}
+.btn-ghost{color:var(--mute);border:1px solid transparent;padding-left:0}
+.btn-ghost:hover{color:var(--paper)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+/* ══ FIM DA BASE ══ */
+
+/* ── CSS DO COMPONENTE: Fundador + Timeline ── */
+.founder{position:relative;background:#101010;overflow:hidden;padding:120px 0}
+.founder-bg{position:absolute;inset:0;background:radial-gradient(640px 560px at 62% 12%, rgba(247,244,239,.075), transparent 68%);pointer-events:none}
+/* PRODUÇÃO: retrato real como fundo —
+   .founder-bg{background:linear-gradient(rgba(16,16,16,.72),rgba(16,16,16,.9)),url(retrato.jpg) top right/cover no-repeat} */
+.founder-in{position:relative;max-width:880px;margin:0 auto;padding:0 6vw}
+.founder h2{font-size:clamp(32px,4.4vw,52px);font-weight:700;margin-top:18px;max-width:18ch}
+.founder .lede{color:var(--mute);max-width:62ch;margin-top:22px}
+.ftl{margin-top:56px;border:1px solid var(--hair);background:rgba(16,16,16,.55);backdrop-filter:blur(3px)}
+.ftl-row{display:grid;grid-template-columns:86px 30px 1fr;gap:14px;align-items:start;padding:22px 26px;border-bottom:1px solid var(--hair)}
+.ftl-year{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--sand);padding-top:3px}
+.ftl-dot{width:9px;height:9px;border-radius:50%;background:var(--led);margin-top:6px;box-shadow:0 0 0 4px rgba(22,142,122,.16)}
+.ftl-co{font-weight:700;font-size:17px}
+.ftl-sec{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;margin-top:5px}
+.ftl-role{font-size:14.5px;color:#c9c4ba;margin-top:4px}
+.ftl-bar{display:flex;justify-content:space-between;align-items:center;padding:20px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--teal);text-transform:uppercase}
+.ftl-bar i{font-style:normal;font-size:16px}
+.founder-cred{margin-top:34px;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--mute-2);text-transform:uppercase;line-height:2}
+@media (max-width:560px){.ftl-row{grid-template-columns:64px 20px 1fr;padding:18px 18px}}
+</style>
+</head>
+<body>
+
+<!-- ══ MARKUP DO COMPONENTE: Fundador + Timeline ══ -->
+<section class="founder" id="fundador">
+  <div class="founder-bg" aria-hidden="true"></div>
+  <div class="founder-in">
+    <p class="eyebrow rv">Fundador <span class="dot">·</span> Carlos Geraldo</p>
+    <h2 class="rv d1">20 anos dentro do motor de receita recorrente.</h2>
+    <p class="lede rv d2">Telecom, assinatura, educação e saúde. Bases instaladas, MRR, churn, LTV, monetização de carteira e operações com IA rodando de verdade. Carlos Geraldo é a prova — não o produto.</p>
+    <div class="ftl rv">
+      <div class="ftl-row"><span class="ftl-year">2025</span><span class="ftl-dot"></span><div><p class="ftl-co">+Pet</p><p class="ftl-sec">Plano saúde</p><p class="ftl-role">Chief Revenue &amp; Innovation Officer</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2024</span><span class="ftl-dot"></span><div><p class="ftl-co">Cetrus / Sanar</p><p class="ftl-sec">Educação / Medicina</p><p class="ftl-role">Chief Marketing &amp; Commercial Officer</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2018</span><span class="ftl-dot"></span><div><p class="ftl-co">Wine</p><p class="ftl-sec">Assinatura / Varejo</p><p class="ftl-role">Diretor de Growth</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2014</span><span class="ftl-dot"></span><div><p class="ftl-co">Nextel Brasil</p><p class="ftl-sec">Assinatura / Telecom</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2013</span><span class="ftl-dot"></span><div><p class="ftl-co">SKY Brasil</p><p class="ftl-sec">Assinatura / Telecom TV</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2011</span><span class="ftl-dot"></span><div><p class="ftl-co">Oi Telecom</p><p class="ftl-sec">Corporate / Telecom</p></div></div>
+      <div class="ftl-row"><span class="ftl-year">2002</span><span class="ftl-dot"></span><div><p class="ftl-co">TIM Brasil</p><p class="ftl-sec">Varejo / Telecom</p></div></div>
+      <div class="ftl-bar"><span>Bilhões gerados em mais de 20 anos</span><i>+</i></div>
+    </div>
+    <p class="founder-cred rv">Formação — MIT Professional Education · MIT Sloan · MBA USP · Singularity University</p>
+  </div>
+</section>
+<!-- ══ FIM DO MARKUP ══ -->
+
+<script>
+/* Reveal on scroll — copiar UMA vez (ou substituir pelo seu GSAP ScrollTrigger) */
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.18,rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rv').forEach(function(el){io.observe(el)})})();
+</script>
+
+</body>
+</html>
