@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --fig: #ece9e4;
+  --prop: #2fb3b0;
+  --accent2: #5aa9e6;
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  @apply bg-ink-900 text-bone-100 font-sans antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+@layer components {
+  .card { @apply rounded-2xl bg-ink-800 border border-ink-700/70 p-4; }
+  .card-tight { @apply rounded-xl bg-ink-800 border border-ink-700/70 p-3; }
+  .h1 { @apply text-2xl font-semibold tracking-tight text-bone-50; }
+  .h2 { @apply text-lg font-semibold text-bone-50; }
+  .h3 { @apply text-sm font-semibold uppercase tracking-wider text-bone-400; }
+  .muted { @apply text-bone-400; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition active:scale-[.98] disabled:opacity-40 disabled:pointer-events-none; }
+  .btn-primary { @apply btn bg-petrol-500 text-ink-950 hover:bg-petrol-400; }
+  .btn-secondary { @apply btn bg-ink-700 text-bone-50 hover:bg-ink-600; }
+  .btn-danger { @apply btn bg-danger/90 text-ink-950; }
+  .btn-ghost { @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-bone-300 hover:bg-ink-700 hover:text-bone-50; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full border border-ink-600 px-3 py-1.5 text-sm text-bone-300 transition; }
+  .chip-on { @apply border-petrol-500 bg-petrol-500/15 text-petrol-300; }
+  .input { @apply w-full rounded-xl border border-ink-600 bg-ink-850 px-3 py-2.5 text-bone-50 placeholder:text-bone-400/60 focus:border-petrol-500 focus:outline-none; }
+  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wider text-bone-400; }
+  .badge { @apply inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide; }
+  .warn-field { @apply border-warn bg-warn/10; }
+}
+
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 76px); }
+input[type='range'] { accent-color: #14a3a6; }

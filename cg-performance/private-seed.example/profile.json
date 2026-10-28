@@ -1,0 +1,13 @@
+{
+  "displayName": "Atleta Exemplo",
+  "birthDate": "1990-01-01",
+  "heightCm": 175,
+  "crossfitStart": "2026-01-01",
+  "declaredFrequency": 3,
+  "goals": { "bodyFatTarget": [15, 18], "weightTarget": [75, 80], "sessionsPerWeek": [3, 5], "text": ["Objetivo de exemplo"] },
+  "limitations": ["Exemplo de limitação relatada (não é diagnóstico)"],
+  "personalLog": [
+    { "date": "2026-01-10", "title": "Exemplo de treino em casa", "location": "home",
+      "items": [{ "exerciseId": "push_up", "reps": 10, "sets": 3, "completed": true }], "notes": "Relato livre" }
+  ]
+}

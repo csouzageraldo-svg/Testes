@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+*.local
+# Dados pessoais do atleta: NUNCA versionar (repositório público). Ver README > Dados privados.
+private-seed/
+server/data/
+e2e/out/
+*.tsbuildinfo
