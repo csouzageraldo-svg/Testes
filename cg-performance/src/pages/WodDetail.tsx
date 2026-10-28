@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, Chips, ConfidenceBadge, Notice, Page, Slider, SourceBadge } from '../components/ui';
+import { Card, Chips, ConfidenceBadge, ConfirmButton, Notice, Page, Slider, SourceBadge } from '../components/ui';
 import { WodEditor, type WodDraft } from '../components/WodEditor';
 import { db } from '../db/db';
 import { audit, markBoxPerformed, updatePrescribed } from '../db/repo';
@@ -111,7 +111,7 @@ export default function WodDetail() {
       <Card title={`Histórico de alterações (${revisions.length})`}>
         {revisions.map((r) => <div key={r.id} className="text-xs text-bone-400">{new Date(r.at).toLocaleString('pt-BR')} — {r.reason}</div>)}
       </Card>
-      <button className="btn-ghost justify-center text-danger" onClick={async () => { if (confirm('Apagar este WOD e seus vínculos?')) { await db.prescribed.delete(w.id); if (w.performedId) await db.performed.delete(w.performedId); await audit('prescribed.delete', w.id); nav('/historico'); } }}>Apagar este WOD</button>
+      <div className="flex justify-center"><ConfirmButton label="Apagar este WOD" confirmLabel="Sim, apagar WOD e vínculos" onConfirm={async () => { await db.prescribed.delete(w.id); if (w.performedId) await db.performed.delete(w.performedId); await audit('prescribed.delete', w.id); nav('/historico'); }} /></div>
     </Page>
   );
 }

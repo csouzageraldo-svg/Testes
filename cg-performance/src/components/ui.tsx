@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { SourceType } from '../domain/schemas';
 
@@ -94,4 +94,16 @@ export function Empty({ children }: { children: ReactNode }) {
 export function Notice({ tone = 'info', children }: { tone?: 'info' | 'warn' | 'danger'; children: ReactNode }) {
   const cls = tone === 'danger' ? 'border-danger/60 bg-danger/10 text-bone-50' : tone === 'warn' ? 'border-warn/60 bg-warn/10 text-bone-50' : 'border-petrol-600/60 bg-petrol-600/10 text-bone-100';
   return <div role={tone === 'danger' ? 'alert' : undefined} className={`rounded-xl border p-3 text-sm ${cls}`}>{children}</div>;
+}
+
+/** Confirmação em dois toques (diálogos nativos de confirmação não aparecem em todos os ambientes). */
+export function ConfirmButton({ label, confirmLabel, onConfirm, className = 'btn-ghost text-danger' }: { label: string; confirmLabel: string; onConfirm: () => void | Promise<void>; className?: string }) {
+  const [armed, setArmed] = useState(false);
+  if (!armed) return <button type="button" className={className} onClick={() => setArmed(true)}>{label}</button>;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <button type="button" className="btn-danger px-3 py-2 text-sm" onClick={async () => { setArmed(false); await onConfirm(); }}>{confirmLabel}</button>
+      <button type="button" className="btn-ghost" onClick={() => setArmed(false)}>Cancelar</button>
+    </span>
+  );
 }

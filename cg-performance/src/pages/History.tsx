@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Card, Chips, Empty, Notice, Page, SourceBadge } from '../components/ui';
+import { Card, Chips, ConfirmButton, Empty, Notice, Page, SourceBadge } from '../components/ui';
 import { db } from '../db/db';
 import { audit } from '../db/repo';
 import type { PerformedWorkout, PrescribedWorkout } from '../db/types';
@@ -70,7 +70,7 @@ export default function History() {
               {r.w.items.map((it, i) => <div key={i}>• {itemLine(it)}</div>)}
               {!r.w.items.length && <div className="text-bone-400">Sem detalhes de execução registrados.</div>}
               {r.w.notes && <div className="text-bone-400">“{r.w.notes}”</div>}
-              <button className="btn-ghost text-danger" onClick={async () => { if (confirm('Apagar este registro de treino?')) { await db.performed.delete(r.w.id); await audit('performed.delete', r.w.id); } }}>Apagar registro</button>
+              <ConfirmButton label="Apagar registro" confirmLabel="Sim, apagar" onConfirm={async () => { await db.performed.delete(r.w.id); await audit('performed.delete', r.w.id); }} />
             </div>
           )}
         </Card>

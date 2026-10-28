@@ -33,6 +33,14 @@ npm run e2e                       # screenshots em e2e/out/
 
 No Windows, basta dar dois cliques em `cg-performance\iniciar.bat` (instala, gera o build e abre em http://localhost:8787).
 
+## Versão hospedada (abrir pelo link, sem instalar)
+
+```bash
+npx vite build --mode hosted --outDir dist-hosted
+```
+
+Gera uma build estática publicável em qualquer endereço (caminhos relativos, navegação em memória, sem service worker) e **sem nenhum dado do `private-seed/`**. Nessa versão: os dados ficam no navegador do aparelho; a sincronização oficial e o OCR de prints podem não funcionar (sem backend e com rede restrita), e as exportações aparecem na tela para copiar em vez de baixar.
+
 ## Dados privados (importante: o repositório é público)
 
 Perfil, composição corporal, fotos da casa e prints **não são versionados**. Coloque-os em `cg-performance/private-seed/` (ignorada pelo git), seguindo `private-seed.example/`:

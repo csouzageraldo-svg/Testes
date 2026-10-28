@@ -1,11 +1,22 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+// `--mode hosted`: build publicável como página estática (caminho relativo, sem service worker,
+// sem dados do private-seed, roteamento em memória). Ver README > Versão hospedada.
+export default defineConfig(({ mode }) => {
+  const hosted = mode === 'hosted';
+  return {
+  base: hosted ? './' : '/',
+  define: { 'import.meta.env.VITE_HOSTED': JSON.stringify(hosted ? '1' : '') },
+  resolve: {
+    alias: hosted ? [{ find: /^\.\.\/seed\/private$/, replacement: fileURLToPath(new URL('./src/seed/private.empty.ts', import.meta.url)) }] : [],
+  },
   plugins: [
     react(),
     VitePWA({
+      disable: hosted,
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
@@ -48,4 +59,5 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['tests/setup.ts'],
   },
+};
 });

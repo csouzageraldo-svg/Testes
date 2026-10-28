@@ -7,3 +7,4 @@ private-seed/
 server/data/
 e2e/out/
 *.tsbuildinfo
+dist-hosted

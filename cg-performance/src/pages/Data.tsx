@@ -1,17 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Card, Notice, Page } from '../components/ui';
+import { Card, ConfirmButton, Notice, Page } from '../components/ui';
 import { ATHLETE_ID, db } from '../db/db';
 import { audit, exportBackup, importBackup, revise, toCSV, wipeAll } from '../db/repo';
 import type { AthleteProfile } from '../db/types';
 import { buildChatSummary } from '../domain/exportSummary';
 import { useProfile } from '../lib/hooks';
-import { downloadText, localDate } from '../lib/util';
+import { downloadText as saveFile, localDate } from '../lib/util';
+
+const HOSTED = !!import.meta.env.VITE_HOSTED;
 
 export default function Data() {
   const profile = useProfile();
   const [p, setP] = useState<AthleteProfile | null>(null);
   const [sensitive, setSensitive] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [exported, setExported] = useState<Array<{ name: string; text: string }>>([]);
+  // Na versão hospedada downloads são bloqueados: o conteúdo aparece abaixo para copiar.
+  const downloadText = (name: string, text: string, mime?: string) => {
+    if (HOSTED) setExported((x) => [...x.filter((e) => e.name !== name), { name, text }]);
+    else saveFile(name, text, mime);
+  };
   useEffect(() => { if (profile && !p) { setP(profile); setSensitive(profile.consents.healthDataInExports); } }, [profile, p]);
 
   async function saveProfile() {
@@ -72,6 +80,18 @@ export default function Data() {
           <button className="btn-secondary" data-testid="export-chat" onClick={exportChat}>Resumo para ChatGPT/Claude (Markdown)</button>
         </div>
       </Card>
+      {exported.length > 0 && (
+        <Card title="Conteúdo exportado" right={<button className="btn-ghost" onClick={() => setExported([])}>fechar</button>}>
+          <p className="mb-2 text-xs text-bone-400">Nesta versão no navegador o download direto é bloqueado. Copie o conteúdo e salve num arquivo com o nome indicado.</p>
+          {exported.map((e) => (
+            <div key={e.name} className="mb-3">
+              <div className="mb-1 flex items-center justify-between gap-2 text-xs"><span className="break-all text-bone-300">{e.name}</span>
+                <button className="btn-secondary px-3 py-1.5 text-xs" onClick={async (ev) => { try { await navigator.clipboard.writeText(e.text); setMsg(`${e.name} copiado.`); } catch { const ta = (ev.currentTarget.parentElement?.nextElementSibling as HTMLTextAreaElement | null); ta?.select(); setMsg('Selecionei o texto: use Copiar do seu aparelho.'); } }}>Copiar</button></div>
+              <textarea className="input font-mono text-[11px]" rows={6} readOnly value={e.text} />
+            </div>
+          ))}
+        </Card>
+      )}
       <Card title="Restaurar / outro dispositivo">
         <p className="mb-2 text-xs text-bone-400">Sem conta na nuvem nesta versão: para usar em outro aparelho, exporte o JSON aqui e importe lá. (Sincronização autenticada está no ROADMAP.)</p>
         <label className="btn-secondary w-full cursor-pointer">Importar backup JSON
@@ -79,7 +99,7 @@ export default function Data() {
         </label>
       </Card>
       <Card title="Apagar">
-        <button className="btn-danger w-full" onClick={async () => { if (confirm('Apagar TODOS os dados deste dispositivo? Esta ação não pode ser desfeita.')) { await wipeAll(); location.href = '/'; } }}>Apagar todos os dados locais</button>
+        <ConfirmButton className="btn-danger w-full" label="Apagar todos os dados locais" confirmLabel="Confirmar: apagar tudo (não tem volta)" onConfirm={async () => { await wipeAll(); location.reload(); }} />
       </Card>
     </Page>
   );
