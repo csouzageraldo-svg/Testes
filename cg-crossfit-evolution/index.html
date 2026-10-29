@@ -163,12 +163,12 @@ const GROUPS = {
 };
 const GK = ["core", "sup", "pernas", "cardio"];
 const LOCAIS = {
-  casa:   { label: "Casa", eq: ["halter", "sandbag", "barra", "banco", "bike", "elastico", "kb"], quiet: false },
+  casa:   { label: "Casa", eq: ["barra", "rack", "halter", "sandbag", "banco", "bike", "elastico", "kb"], quiet: false },
   sem:    { label: "Sem equipamento", eq: [], quiet: false },
   hotel:  { label: "Academia do hotel", eq: ["halter", "banco", "bike", "esteira"], quiet: false },
   quarto: { label: "Quarto", eq: [], quiet: true },
 };
-const EQ_LABEL = { halter: "halteres", sandbag: "sandbag", barra: "barra", banco: "banco", bike: "bike", elastico: "elástico", kb: "alça de kettlebell", esteira: "esteira" };
+const EQ_LABEL = { halter: "halteres", sandbag: "sandbag", barra: "barra", rack: "rack", banco: "banco", bike: "bike", elastico: "elástico", kb: "alça de kettlebell", esteira: "esteira" };
 
 // Peso de cada grupo por movimento [core, superiores, pernas, fôlego]. Inclui movimentos do box fora da biblioteca de casa.
 const W = {
@@ -183,6 +183,7 @@ const W = {
   dead_bug: [1,0,0,0], sit_up: [1,0,0,0], jackknife: [1,0,0,0], mountain_climber: [.55,.15,0,.3],
   superman: [.8,.1,.1,0], burpee_step: [.2,.25,.25,.3], db_snatch: [.15,.35,.35,.15], sandbag_clean: [.25,.25,.4,.1],
   march: [.15,0,.25,.6], farmer_carry: [.5,.3,.2,0], jump_squat: [0,0,.7,.3], arm_circles: [0,.5,0,0], cat_cow: [.5,0,0,0],
+  bb_press: [.15,.85,0,0], push_jerk: [.1,.6,.3,0],
   inchworm: [.4,.3,.2,0], hamstring: [0,0,.3,0], ski: [.1,.4,.2,.3], muscle_up: [.2,.8,0,0], rope_climb: [.2,.8,0,0],
 };
 
@@ -203,6 +204,13 @@ const PH = {
   kb_swing: [["kb_swing_0", "Em pé, carga nas mãos"], ["kb_swing_1", "Quadril para trás e projete a carga à frente com o quadril"]],
   glute_bridge: [["glute_bridge_0", "Deitado, joelhos dobrados"], ["glute_bridge_1", "Suba o quadril apertando o glúteo"]],
   jump_squat: [["jump_squat_0", "Agache"], ["jump_squat_1", "Salte estendendo o corpo todo"]],
+  back_squat: [["back_squat_0", "Barra no trapézio, saia do rack"], ["back_squat_1", "Quadril abaixo do joelho, suba empurrando o chão"]],
+  front_squat: [["front_squat_0", "Barra na frente dos ombros, cotovelos altos"], ["front_squat_1", "Desça com o tronco em pé"]],
+  bench_press: [["bench_press_0", "Barra sobre os ombros, braços estendidos"], ["bench_press_1", "Desça até tocar o peito e empurre"]],
+  bb_press: [["bb_press_0", "Barra na frente dos ombros (em casa: em pé)"], ["bb_press_1", "Empurre até travar os braços"]],
+  push_jerk: [["push_jerk_0", "Barra nos ombros, pequena flexão de joelhos"], ["push_jerk_1", "Empurre e receba com os joelhos dobrados"]],
+  clean: [["clean_0", "Barra no chão, costas firmes, ombros à frente da barra"], ["clean_1", "Estenda o quadril e receba nos ombros"]],
+  snatch: [["snatch_0", "Pegada larga, quadril baixo, costas firmes"], ["snatch_1", "Explosão: puxe e receba com os braços travados em cima"]],
   thruster: [["thruster_0", "Carga nos ombros"], ["thruster_1", "Agache e, ao subir, empurre acima da cabeça"]],
   db_snatch: [["db_snatch_1", "Carga entre os pés, costas retas"], ["db_snatch_0", "Explosão do quadril até o braço travado em cima"]],
   sandbag_clean: [["sandbag_clean_0", "Abrace o saco no chão"], ["sandbag_clean_1", "Leve até o ombro e fique em pé"]],
@@ -231,11 +239,11 @@ const PH = {
   run: [["run_0", "Passadas curtas"], ["run_1", "Acelere aos poucos"]],
 };
 const IMG = (k) => `img/${k}.jpg`;
-function mediaHTML(id) {
+function mediaHTML(id, impl = "") {
   const anim = M3.ok && FIG[id] && M3.mode === "anim";
   return `<div class="media">
     ${M3.ok && FIG[id] ? `<div class="mtoggle" role="group" aria-label="Ver como"><button data-act="view" data-mode="anim" aria-pressed="${anim}">Animação</button><button data-act="view" data-mode="foto" aria-pressed="${!anim}">Fotos</button></div>` : ""}
-    ${anim ? `<canvas class="stage3d" data-anim="${id}" width="900" height="600" role="img" aria-label="Animação 3D: ${esc(LIB[id]?.pt || id)}"></canvas>` : stepsHTML(id)}
+    ${anim ? `<canvas class="stage3d" data-anim="${id}" data-impl="${esc(impl)}" width="900" height="600" role="img" aria-label="Animação 3D: ${esc(LIB[id]?.pt || id)}"></canvas>` : stepsHTML(id)}
   </div>`;
 }
 function stepsHTML(id) {
@@ -254,6 +262,11 @@ const RACK = { ua: 38, la: -160 }, OVER = { ua: 180, la: 180 };
 const PLANK_TOP = P({ torso: 115, th: -65, sh: -65 }), PLANK_LOW = P({ torso: 99, th: -81, sh: -81, ua: -100, la: 10 });
 const LYING = { torso: -90, th: 90, sh: 0 }, QUAD = P({ torso: 90, th: 0, sh: -90 });
 const SQ_LOW = P({ torso: 140, th: 105, sh: -35, ua: 5, la: 5 });
+// Braços acompanham a inclinação do tronco (ângulos absolutos)
+const rot = (o, d) => ({ ua: o.ua + d, la: o.la + d });
+const FRONT = { ua: 80, la: -110 };
+const PULL0 = P({ torso: 108, th: 68, sh: -14, ua: 2, la: 2 }), PULL1 = P({ torso: 135, th: 30, sh: -8, ua: 0, la: 0 });
+const PULL2 = P({ torso: 188, th: -4, sh: -4, ua: 8, la: 8, lift: 5 }), PULL3 = P({ torso: 182, ua: -35, la: 115, lift: 3 });
 const F = (frames, extra) => Object.assign({ frames, anchor: "ground", props: [], cycle: 2.8 }, extra || {});
 const FIG = {
   march: F([P({ th: 90, sh: 0, ua: 60, la: 120, ua2: -30, la2: 20 }), P({ th2: 90, sh2: 0, ua2: 60, la2: 120, ua: -30, la: 20 })], { cycle: 1.6 }),
@@ -265,10 +278,18 @@ const FIG = {
   goblet_squat: F([P({ ua: 25, la: 165 }), P({ torso: 155, th: 100, sh: -28, ua: 50, la: 175 })], { hand: "dumbbell1" }),
   lunge: F([STAND, P({ th: 85, sh: 0, th2: -15, sh2: -95 })]),
   bulgarian: F([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], { props: ["bench_back"], cycle: 3.2 }),
-  deadlift: F([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell", cycle: 3.4 }),
+  deadlift: F([PULL0, P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell", cycle: 3.4 }),
   kb_swing: F([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ torso: 150, th: 10, sh: -2, ua: 30, la: 30 }), P({ ua: 90, la: 90 })], { hand: "kettlebell", cycle: 2.2 }),
   glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: 88, la: 88 }), P({ torso: -68, head: -22, th: 110, sh: 25, ua: 90, la: 90 })]),
   jump_squat: F([SQUAT, P({ ua: 160, la: 160, lift: 25 })], { cycle: 2 }),
+  // Barra: "back" = no trapézio, "front" = na frente dos ombros, "hands" = nas mãos
+  back_squat: F([P({ ua: -40, la: 151 }), P({ torso: 145, th: 100, sh: -28, ua: -75, la: 116 })], { bar: "back", cycle: 3.2 }),
+  front_squat: F([P(FRONT), P(Object.assign({ torso: 160, th: 105, sh: -35 }, rot(FRONT, -20)))], { bar: "front", cycle: 3.2 }),
+  bench_press: F([P(Object.assign({}, LYING, OVER)), P(Object.assign({}, LYING, { ua: 67, la: -149 }))], { bar: "hands", props: ["bench_under"], cycle: 3 }),
+  bb_press: F([P({ ua: 25, la: -173 }), P(OVER)], { bar: "hands", cycle: 2.8 }),
+  push_jerk: F([P(FRONT), P(Object.assign({ torso: 178, th: 28, sh: -22 }, FRONT)), P(Object.assign({ lift: 4 }, OVER)), P(Object.assign({ th: 30, sh: -24 }, OVER)), P(OVER)], { bar: "hands", cycle: 3.4 }),
+  clean: F([PULL0, PULL1, PULL2, PULL3, P(Object.assign({ torso: 165, th: 45, sh: -25 }, rot(FRONT, -15))), P(FRONT), P({ ua: 20, la: 175 }), P({ ua: 5, la: 5 })], { bar: "hands", cycle: 5.5 }),
+  snatch: F([P({ torso: 108, th: 66, sh: -13, ua: 5, la: 5 }), PULL1, PULL2, PULL3, P({ torso: 175, th: 20, sh: -12, ua: 20, la: 175 }), P(Object.assign({ torso: 168, th: 45, sh: -25 }, OVER)), P(OVER), P({ ua: 20, la: 175 }), P({ ua: 5, la: 5 })], { bar: "hands", cycle: 6 }),
   thruster: F([P(RACK), P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(OVER)], { hand: "dumbbell" }),
   db_snatch: F([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 12, la2: 25 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], { hand: "dumbbell1" }),
   sandbag_clean: F([P({ torso: 105, th: 70, sh: -15, ua: 10, la: 40 }), P({ torso: 150, th: 55, sh: -15, ua: 30, la: 120 }), P({ ua: 28, la: 150 }), P({ ua: 28, la: 150 })], { hand: "sandbag", cycle: 4 }),
@@ -433,6 +454,13 @@ function init3D() {
     const db1 = dumbbell(), db2 = dumbbell();
     const kb = new T.Group(); { const b = new T.Mesh(new T.SphereGeometry(8, 18, 14), RED); b.position.y = -9; b.castShadow = true; kb.add(b); const h = new T.Mesh(new T.TorusGeometry(4.5, 1.3, 8, 16, Math.PI), RED); h.position.y = -2; h.rotation.y = Math.PI / 2; kb.add(h); props.add(kb); }
     const sandbag = new T.Mesh(new T.CapsuleGeometry(7.5, 20, 6, 12), GREY); sandbag.rotation.x = Math.PI / 2; sandbag.castShadow = true; props.add(sandbag);
+    // Barra olímpica (eixo lateral = z) com anilhas bumper de 45 cm
+    const PLATE = lin(0x1c1f1e, 0.8), LOGO = lin(0x6fcf3a, 0.6);
+    const barbell = new T.Group(); {
+      const cyl = (r, len, m, z) => { const c = new T.Mesh(new T.CylinderGeometry(r, r, len, 24), m); c.rotation.x = Math.PI / 2; c.position.z = z; c.castShadow = true; barbell.add(c); return c; };
+      cyl(1.4, 132, STEEL, 0); for (const k of [-1, 1]) { cyl(2.5, 30, STEEL, k * 81); cyl(3.6, 2, STEEL, k * 66.5); cyl(22.5, 6, PLATE, k * 71); cyl(14, 6.3, LOGO, k * 71); cyl(15, 6.6, PLATE, k * 71); cyl(22.5, 4, PLATE, k * 76.5); }
+      props.add(barbell);
+    }
     const bench = new T.Group(); { const top = new T.Mesh(new T.BoxGeometry(1, 1, 1), GREY); top.castShadow = true; top.receiveShadow = true; bench.add(top); bench.userData.top = top; props.add(bench); }
     const band = new T.Mesh(new T.CylinderGeometry(1.1, 1.1, 1, 6), BAND); props.add(band);
     const bike = new T.Group(); {
@@ -446,7 +474,7 @@ function init3D() {
     const to3 = (p, z) => new T.Vector3(p[0], GROUND + 3 - p[1], z);
     const seg = (mesh, a, b) => { v1.copy(a); v2.copy(b); mesh.position.copy(v1).add(v2).multiplyScalar(0.5); dv.copy(v2).sub(v1).normalize(); mesh.quaternion.setFromUnitVectors(up, dv); };
     const place = (mesh, p) => mesh.position.copy(p);
-    function pose(id, s) {
+    function pose(id, s, impl) {
       const zN = Z.sho, zH = Z.hip;
       const sho = to3(s.sho, 0), hip = to3(s.hip, 0), mid = to3(s.mid, 0);
       // braços: lado da frente em +z, lado de trás em -z
@@ -465,16 +493,23 @@ function init3D() {
       seg(parts.neck, sho, neck);
       dv.copy(head).sub(sho).normalize(); headG.position.copy(head).addScaledVector(dv, -1); headG.quaternion.setFromUnitVectors(up, dv);
       // equipamento
-      const fig = FIG[id];
+      const fig = FIG[id], bar = fig.bar || (/barra/.test(impl || "") ? "hands" : null), hand = bar ? null : fig.hand;
       for (const c of props.children) c.visible = false;
       const hN = to3(s.hand, zN), hF = to3(s.hand2, -zN), hMid = hN.clone().add(hF).multiplyScalar(0.5);
-      if (fig.hand === "dumbbell") { db1.visible = db2.visible = true; db1.position.copy(hN); db2.position.copy(hF); }
-      if (fig.hand === "dumbbell1") { db1.visible = true; db1.position.copy(fig === FIG.goblet_squat ? hMid : hN); }
-      if (fig.hand === "kettlebell") { kb.visible = true; kb.position.copy(hMid); }
-      if (fig.hand === "sandbag") { sandbag.visible = true; sandbag.position.copy(hMid); }
-      if (fig.hand === "band" || fig.hand === "band_up") {
-        band.visible = true; const a = hMid, b = fig.hand === "band" ? to3(s.foot, 0) : new T.Vector3(a.x, a.y + 90, 0);
+      if (hand === "dumbbell") { db1.visible = db2.visible = true; db1.position.copy(hN); db2.position.copy(hF); }
+      if (hand === "dumbbell1") { db1.visible = true; db1.position.copy(fig === FIG.goblet_squat ? hMid : hN); }
+      if (hand === "kettlebell") { kb.visible = true; kb.position.copy(hMid); }
+      if (hand === "sandbag") { sandbag.visible = true; sandbag.position.copy(hMid); }
+      if (hand === "band" || hand === "band_up") {
+        band.visible = true; const a = hMid, b = hand === "band" ? to3(s.foot, 0) : new T.Vector3(a.x, a.y + 90, 0);
         band.scale.set(1, a.distanceTo(b), 1); seg(band, a, b);
+      }
+      if (bar) {
+        barbell.visible = true;
+        const td = [s.sho[0] - s.hip[0], s.sho[1] - s.hip[1]], n = Math.hypot(td[0], td[1]) || 1, u = [td[0] / n, td[1] / n], pp = [-u[1], u[0]];
+        const at = (a, b) => to3([s.sho[0] + u[0] * a + pp[0] * b, s.sho[1] + u[1] * a + pp[1] * b], 0);
+        barbell.position.copy(bar === "back" ? at(2, -6) : bar === "front" ? at(1, 8) : hMid);
+        barbell.position.y = Math.max(barbell.position.y, 22.5);
       }
       const box = (x0, x1, yTop) => { bench.visible = true; const t = bench.userData.top; t.scale.set(x1 - x0, Math.max(2, yTop), 26); t.position.set((x0 + x1) / 2, yTop / 2, 0); };
       if (fig.props.includes("bench_under")) box(hip.x - 62, hip.x + 10, hip.y - 9);
@@ -489,19 +524,22 @@ function init3D() {
     }
     // Enquadramento: caixa de todas as poses do exercício
     const frame = {};
-    function framing(id) {
-      if (frame[id]) return frame[id];
+    function framing(id, wide) {
+      const key = id + (wide ? "|bar" : "");
+      if (frame[key]) return frame[key];
       const fig = FIG[id]; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
       for (let i = 0; i <= 16; i++) { const s = skeleton(poseAt(fig, i / 16), fig.anchor); for (const k in s) { x0 = Math.min(x0, s[k][0]); x1 = Math.max(x1, s[k][0]); y0 = Math.min(y0, s[k][1]); y1 = Math.max(y1, s[k][1]); } }
       if (fig.props.includes("bike")) x1 = Math.max(x1, x0 + 110);
+      if (wide) { x0 -= 30; x1 += 30; y0 -= 26; y1 = Math.max(y1, GROUND) + 34; }
       const cx = (x0 + x1) / 2, cy = GROUND + 3 - (y0 + y1) / 2, size = Math.max((x1 - x0 + 30) / 1.5, y1 - y0 + 38);
-      return (frame[id] = { cx, cy, size });
+      return (frame[key] = { cx, cy, size });
     }
     function draw(canvas, id, t) {
       const fig = FIG[id]; if (!fig) return;
+      const impl = canvas.dataset.impl || "", wide = !!fig.bar || /barra/.test(impl);
       const ph = REDUCED_MOTION ? 0.3 : (t / 1000 / (fig.cycle * 1.15)) % 1;
-      pose(id, skeleton(poseAt(fig, ph), fig.anchor));
-      const f = framing(id), dist = f.size / (2 * Math.tan((camera.fov * Math.PI) / 360)) * 0.98;
+      pose(id, skeleton(poseAt(fig, ph), fig.anchor), impl);
+      const f = framing(id, wide), dist = f.size / (2 * Math.tan((camera.fov * Math.PI) / 360)) * 0.98;
       const yaw = 0.55 + (REDUCED_MOTION ? 0 : Math.sin(t / 4200) * 0.18), pitch = 0.2;
       camera.position.set(f.cx + Math.sin(yaw) * dist * Math.cos(pitch), f.cy + Math.sin(pitch) * dist, Math.cos(yaw) * dist * Math.cos(pitch));
       camera.lookAt(f.cx, f.cy, 0);
@@ -541,11 +579,19 @@ const LIB = Object.fromEntries([
   X("goblet_squat", "Agachamento goblet", "Goblet squat", "pernas", [["halter"], ["kb"], ["sandbag"]], ["Carga colada no peito", "Agache com o peito aberto"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Desça entre os joelhos"] }),
   X("lunge", "Avanço", "Lunge", "pernas", [[]], ["Em pé", "Passo à frente, joelho de trás perto do chão"], { m: "G", base: 12, sec: 2.6, tips: ["Tronco reto", "Alterne as pernas"] }),
   X("bulgarian", "Agachamento búlgaro", "Bulgarian split squat", "pernas", [["banco"]], ["Pé de trás no banco", "Desça na vertical"], { m: "G", base: 8, sec: 3, strength: true, tips: ["Faça os dois lados"] }),
-  X("deadlift", "Levantamento terra", "Deadlift", "pernas", [["halter"], ["sandbag"], ["barra"]], ["Costas retas, carga junto às canelas", "Empurre o chão", "Termine em pé, quadril estendido"], { m: "W", base: 10, sec: 3.5, load: true, quiet: false, strength: true, tips: ["Carga sempre perto das pernas"] }),
+  X("deadlift", "Levantamento terra", "Deadlift", "pernas", [["barra"], ["halter"], ["sandbag"]], ["Costas retas, carga junto às canelas", "Empurre o chão", "Termine em pé, quadril estendido"], { m: "W", base: 10, sec: 3.5, load: true, quiet: false, strength: true, tips: ["Carga sempre perto das pernas"] }),
   X("kb_swing", "Kettlebell swing", "Kettlebell swing", "pernas", [["kb"], ["halter"]], ["Quadril para trás, carga entre as pernas", "Estenda o quadril com força", "Carga na altura dos olhos"], { m: "W", base: 15, sec: 2.2, load: true, quiet: false, tips: ["O impulso vem do quadril"] }),
   X("glute_bridge", "Ponte de glúteo", "Glute bridge", "pernas", [[]], ["Deitado, joelhos dobrados", "Suba o quadril apertando o glúteo"], { m: "G", base: 15, sec: 2.5, warm: true, tips: ["Desça devagar"] }),
   X("jump_squat", "Agachamento com salto", "Jump squat", "pernas", [[]], ["Agache", "Salte estendendo tudo"], { m: "G", base: 10, sec: 2.2, quiet: false, jump: true, tips: ["Aterrisse macio"] }),
-  X("thruster", "Thruster", "Thruster", "full", [["halter"], ["sandbag"], ["barra"]], ["Carga nos ombros", "Agachamento completo", "Suba e empurre acima da cabeça"], { m: "W", base: 10, sec: 3, load: true, quiet: false, tips: ["A subida das pernas ajuda o empurre"] }),
+  X("thruster", "Thruster", "Thruster", "full", [["barra", "rack"], ["halter"], ["sandbag"]], ["Carga nos ombros", "Agachamento completo", "Suba e empurre acima da cabeça"], { m: "W", base: 10, sec: 3, load: true, quiet: false, tips: ["A subida das pernas ajuda o empurre"] }),
+  // LPO e força com barra (em casa: barra olímpica, anilhas bumper e rack)
+  X("back_squat", "Agachamento com barra", "Back squat", "pernas", [["barra", "rack"]], ["Barra no trapézio, saia do rack", "Agache abaixo da linha do joelho", "Suba empurrando o chão"], { m: "W", base: 5, sec: 3.5, load: true, quiet: false, strength: true, tips: ["Sozinho: deixe 1–2 repetições na reserva", "Joelhos acompanham a ponta dos pés"] }),
+  X("front_squat", "Agachamento frontal", "Front squat", "pernas", [["barra", "rack"]], ["Barra na frente dos ombros, cotovelos altos", "Desça com o tronco em pé", "Suba sem deixar o cotovelo cair"], { m: "W", base: 5, sec: 3.5, load: true, quiet: false, strength: true, tips: ["Pegada solta, só os dedos na barra"] }),
+  X("bench_press", "Supino com barra", "Bench press", "sup", [["barra", "rack", "banco"]], ["Deitado, barra sobre os ombros", "Desça até tocar o peito", "Empurre até estender"], { m: "W", base: 5, sec: 3, load: true, quiet: false, strength: true, tips: ["Sem parceiro: carga com 2 repetições na reserva e sem presilhas", "Escápulas encaixadas no banco"] }),
+  X("bb_press", "Desenvolvimento com barra", "Strict press", "sup", [["barra", "rack"], ["barra"]], ["Barra na frente dos ombros", "Empurre reto, cabeça passa à frente", "Trave os braços acima da cabeça"], { m: "W", base: 5, sec: 3, load: true, quiet: false, strength: true, tips: ["Glúteo e abdômen firmes, sem jogar o quadril"] }),
+  X("push_jerk", "Push jerk", "Push jerk", "sup", [["barra", "rack"], ["barra"]], ["Barra nos ombros", "Flexão curta dos joelhos e explosão", "Receba com os joelhos dobrados e braços travados"], { m: "W", base: 5, sec: 3, load: true, quiet: false, strength: true, oly: true, tips: ["O impulso vem das pernas", "Fique em pé com a barra estável"] }),
+  X("clean", "Power clean", "Power clean", "full", [["barra"]], ["Barra no chão, costas firmes", "Suba a barra junto ao corpo e estenda o quadril", "Receba nos ombros com os joelhos levemente dobrados"], { m: "W", base: 5, sec: 4, load: true, quiet: false, strength: true, oly: true, tips: ["Barra perto do corpo", "Cotovelos rápidos para a frente"] }),
+  X("snatch", "Power snatch", "Power snatch", "full", [["barra"]], ["Pegada larga, barra no chão", "Explosão do quadril, barra junto ao corpo", "Receba acima da cabeça com os braços travados"], { m: "W", base: 4, sec: 4.5, load: true, quiet: false, strength: true, oly: true, tips: ["Comece só com a barra", "Bumpers permitem largar a barra com segurança"] }),
   X("db_snatch", "Snatch com halter", "Dumbbell snatch", "full", [["halter"]], ["Halter entre os pés, costas retas", "Explosão do quadril, puxe alto", "Braço travado acima da cabeça"], { m: "W", base: 10, sec: 2.8, load: true, quiet: false, tips: ["Alterne o braço"] }),
   X("sandbag_clean", "Sandbag ao ombro", "Sandbag to shoulder", "full", [["sandbag"]], ["Abrace o saco no chão", "Leve ao colo", "Jogue sobre um ombro"], { m: "W", base: 8, sec: 4.5, load: true, quiet: false, tips: ["Alterne o ombro"] }),
   X("farmer_carry", "Caminhada do fazendeiro", "Farmer's carry", "core", [["halter"], ["sandbag"]], ["Carga ao lado do corpo, ombros para trás, passos curtos"], { m: "W", unit: "s", base: 40, load: true, tips: ["Abdômen firme"] }),
@@ -554,7 +600,7 @@ const LIB = Object.fromEntries([
   X("decline_push_up", "Flexão com pés elevados", "Decline push-up", "sup", [["banco"], []], [], { m: "G", base: 8, sec: 3, strength: true, tips: ["Mais ombro que a flexão normal", "Sem banco: pés na cama ou num degrau"] }),
   X("db_press", "Desenvolvimento com halter", "Dumbbell strict press", "sup", [["halter"]], ["Halteres nos ombros", "Empurre até esticar os braços"], { m: "W", base: 10, sec: 3, load: true, strength: true, tips: ["Abdômen e glúteo firmes"] }),
   X("db_push_press", "Push press com halter", "Dumbbell push press", "sup", [["halter"]], ["Halteres nos ombros", "Flexione um pouco os joelhos", "Estenda as pernas e empurre"], { m: "W", base: 10, sec: 2.6, load: true, tips: ["As pernas dão o impulso"] }),
-  X("db_row", "Remada curvada", "Bent-over row", "sup", [["halter"], ["sandbag"]], ["Tronco inclinado, braços estendidos", "Puxe o cotovelo para trás"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Costas retas"] }),
+  X("db_row", "Remada curvada", "Bent-over row", "sup", [["barra"], ["halter"], ["sandbag"]], ["Tronco inclinado, braços estendidos", "Puxe o cotovelo para trás"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Costas retas"] }),
   X("band_row", "Remada com elástico", "Band row", "sup", [["elastico"]], ["Sentado, elástico nos pés", "Puxe até as costelas"], { m: "G", base: 15, sec: 2.5, tips: ["Aproxime as escápulas"] }),
   X("band_pulldown", "Puxada com elástico", "Band pulldown", "sup", [["elastico"]], ["Ajoelhado, braços para cima", "Puxe os cotovelos até o tronco"], { m: "G", base: 15, sec: 2.5, tips: ["Elástico preso no alto da porta"] }),
   X("db_curl", "Rosca bíceps", "Biceps curl", "sup", [["halter"], ["elastico"]], ["Braços estendidos", "Dobre os cotovelos colados no corpo"], { m: "W", base: 12, sec: 2.5, load: true, tips: ["Desça devagar"] }),
@@ -576,7 +622,7 @@ const LIB = Object.fromEntries([
 
 // Padrão de movimento: o WOD não repete o mesmo padrão. Isolados (rosca, tríceps) ficam fora do WOD.
 const PAT = {
-  air_squat: "squat", goblet_squat: "squat", jump_squat: "squat", thruster: "squat", lunge: "lunge", bulgarian: "lunge",
+  air_squat: "squat", goblet_squat: "squat", back_squat: "squat", front_squat: "squat", bench_press: "push_h", bb_press: "push_v", push_jerk: "push_v", clean: "oly", snatch: "oly", jump_squat: "squat", thruster: "squat", lunge: "lunge", bulgarian: "lunge",
   deadlift: "hinge", kb_swing: "hinge", db_snatch: "hinge", sandbag_clean: "hinge", glute_bridge: "hinge",
   push_up: "push_h", push_up_incline: "push_h", db_bench_press: "push_h", decline_push_up: "push_h", db_press: "push_v", db_push_press: "push_v",
   db_row: "pull", band_row: "pull", band_pulldown: "pull", farmer_carry: "carry",
@@ -592,7 +638,7 @@ const ALIASES = {
   "double under": "double_under", "double-under": "double_under", "corda": "double_under", "row": "row", "remo": "row", "run": "run", "corrida": "run",
   "toes to bar": "toes_to_bar", "toes-to-bar": "toes_to_bar", "t2b": "toes_to_bar", "box jump": "box_jump", "wall ball": "wall_ball", "step over": "step_up",
   "step up": "step_up", "echo bike": "bike", "assault bike": "bike", "bike": "bike", "pull-up": "pull_up", "pull up": "pull_up", "chin-up": "pull_up",
-  "barra fixa": "pull_up", "z-press": "db_press", "strict press": "db_press", "shoulder press": "db_press", "push press": "db_push_press", "push-up": "push_up",
+  "barra fixa": "pull_up", "z-press": "db_press", "strict press": "bb_press", "shoulder press": "bb_press", "desenvolvimento": "bb_press", "push jerk": "push_jerk", "split jerk": "push_jerk", "power clean": "clean", "hang clean": "clean", "power snatch": "snatch", "hang snatch": "snatch", "agachamento frontal": "front_squat", "agachamento costas": "back_squat", "push press": "db_push_press", "push-up": "push_up",
   "flexao": "push_up", "squat": "air_squat", "agachamento": "air_squat", "sit-up": "sit_up", "abdominal": "sit_up", "plank": "plank", "prancha": "plank",
   "hollow": "jackknife", "v-up": "jackknife", "jackknife": "jackknife", "mountain climber": "mountain_climber", "goblet": "goblet_squat", "sandbag": "sandbag_clean",
   "remada": "db_row", "bent over row": "db_row", "farmer": "farmer_carry", "ski": "ski", "muscle-up": "muscle_up", "rope climb": "rope_climb",
@@ -744,14 +790,17 @@ function generate(brief, seed) {
   // 2) Força ou Skill
   if (a.strength) {
     const sFoco = foco === "core" || foco === "cardio" ? "sup" : foco === "corpo" ? (r() < 0.5 ? "pernas" : "sup") : foco;
-    const lift = choose((e) => e.strength && ok(e), (e) => relevance(e, sFoco) + (e.load ? 0.3 : 0), used, r);
+    // Com barra: alterna força (agachamento, supino, press, terra) e LPO (clean, snatch, jerk), como numa aula de CrossFit.
+    const wantOly = foco === "corpo" || r() < 0.35;
+    const lift = choose((e) => e.strength && ok(e), (e) => relevance(e, sFoco) + (e.load ? 0.3 : 0) + (usable(e, local)?.includes("barra") ? 0.45 : 0) + (wantOly && e.oly ? 0.8 : 0), used, r);
     if (lift) {
       const weighted = lift.load && usable(lift, local).length;
-      const scheme = weighted ? (sFoco === "pernas" ? { sets: 5, reps: 5, rest: 120 } : { sets: 4, reps: 8, rest: 90 }) : { sets: 4, reps: tired ? 6 : 8, rest: 60 };
+      const barbell = usable(lift, local).includes("barra");
+      const scheme = lift.oly ? { sets: 5, reps: 3, rest: 120 } : weighted && barbell ? { sets: 5, reps: 5, rest: 120 } : weighted ? (sFoco === "pernas" ? { sets: 5, reps: 5, rest: 120 } : { sets: 4, reps: 8, rest: 90 }) : { sets: 4, reps: tired ? 6 : 8, rest: 60 };
       const sets = Math.max(3, Math.min(6, Math.round((a.strength * 60) / (scheme.reps * lift.sec + scheme.rest))));
       partes.push({
-        tipo: "strength", nome: `${weighted ? "Força" : "Skill"} · ${a.strength} min`, formato: "sets",
-        regra: weighted ? `${sets} séries de ${scheme.reps} · descanso ${scheme.rest}s. Suba a carga a cada série até ficar pesada com boa técnica.` : `${sets} séries de ${scheme.reps}, descendo em 3 segundos · descanso ${scheme.rest}s.`,
+        tipo: "strength", nome: `${lift.oly ? "LPO" : weighted ? "Força" : "Skill"} · ${a.strength} min`, formato: "sets",
+        regra: lift.oly ? `${sets} séries de ${scheme.reps} · descanso ${scheme.rest}s. Técnica primeiro: comece com a barra vazia e suba aos poucos.` : weighted ? `${sets} séries de ${scheme.reps} · descanso ${scheme.rest}s. Suba a carga a cada série até ficar pesada com boa técnica.` : `${sets} séries de ${scheme.reps}, descendo em 3 segundos · descanso ${scheme.rest}s.`,
         itens: [item(lift, local, { reps: `${sets}×${scheme.reps}` })], peso: weighted,
       });
     } else a.wod += a.strength;
@@ -881,14 +930,14 @@ function renderHoje() {
       ${fb.livre ? `<div class="row"><input type="number" id="livre" min="10" max="90" step="5" value="${fb.tempo}" style="width:110px" aria-label="Minutos"><span class="small muted">minutos (10 a 90)</span></div>` : ""}</div>
     <div class="field"><span class="lbl">Foco</span>${chips("foco", [["sugerido", `Sugerido: ${FOCOS[s.foco]}`], ["core", "Core"], ["sup", "Superiores"], ["pernas", "Pernas"], ["corpo", "Corpo todo"], ["cardio", "Fôlego"]], fb.foco)}</div>
     <div class="field"><span class="lbl">Como você está</span>${chips("estado", [["bem", "Bem"], ["cansado", "Cansado"], ["dor", "Com dor ou doente"]], fb.estado)}</div>
-    ${fb.local === "casa" ? `<p class="small muted">Casa: halteres, sandbag 20 kg, barra, banco, bike, elásticos e alça de kettlebell.</p>` : fb.local === "quarto" ? `<p class="small muted">Quarto: só exercícios silenciosos, sem saltos.</p>` : ""}
+    ${fb.local === "casa" ? `<p class="small muted">Casa: barra olímpica com anilhas, rack, banco, halteres, sandbag 20 kg, bike, elásticos e alça de kettlebell.</p>` : fb.local === "quarto" ? `<p class="small muted">Quarto: só exercícios silenciosos, sem saltos.</p>` : ""}
     <button class="btn" data-act="gerar">Montar treino</button>
   </section>`;
 }
 function exCard(it, pi, ii, current) {
   const e = LIB[it.id], last = it.load ? lastLoad(it.id) : null;
   return `<article class="ex ${current ? "now" : ""}" data-ex="${pi}-${ii}">
-    ${mediaHTML(it.id)}
+    ${mediaHTML(it.id, it.impl)}
     <div class="body">
       <div class="row between"><span class="qty">${esc(it.qty)}</span><button class="ghost" data-act="trocar" data-p="${pi}" data-i="${ii}">Trocar</button></div>
       <span class="name">${esc(e.pt)}</span>
