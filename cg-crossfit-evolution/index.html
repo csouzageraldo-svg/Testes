@@ -109,8 +109,8 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
 .steps.c2 { grid-template-columns: 1fr 1fr; }
 .steps.c3 { grid-template-columns: 1fr 1fr 1fr; }
 .step { background: var(--soft); display: flex; flex-direction: column; min-width: 0; }
-.step svg { width: 100%; height: auto; display: block; }
-.steps.c1 .step svg { max-height: 210px; }
+.step { margin: 0; }
+.step img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: var(--soft); }
 .step .cap { display: flex; gap: 6px; padding: 6px 8px 8px; font-size: 13px; line-height: 1.3; }
 .step .n { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: var(--surface); font: 700 13px/20px var(--display); text-align: center; }
 .ex .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--surface); }
@@ -118,10 +118,10 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
 .ex .name { font: 700 22px/1.1 var(--display); text-transform: uppercase; }
 .ex ul { margin: 2px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
 .last { font-size: 14px; font-weight: 600; color: var(--sup); }
-.mini { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.mini { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
 .mini:first-of-type { border-top: 0; }
-.mini .thumb { width: 96px; background: var(--soft); border-radius: 8px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
-.mini .thumb svg { width: 100%; height: auto; display: block; }
+.mini .thumb { width: 112px; background: var(--soft); border-radius: 8px; overflow: hidden; }
+.mini .thumb img { width: 100%; height: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
 .mini b { display: block; font-size: 16px; }
 .gtag { font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 4px 8px; border-radius: 6px; color: #fff; display: inline-block; }
 .done-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -136,7 +136,7 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
 .hist .item .x { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
 .links a { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }
 .links li { padding: 4px 0; }
-@media (max-width: 380px) { .balance { grid-template-columns: 1fr; justify-items: center; } .balance .bars { width: 100%; } .steps.c3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 380px) { .balance { grid-template-columns: 1fr; justify-items: center; } .balance .bars { width: 100%; } }
 </style>
 
 <div class="wrap" id="app"><p class="muted">Carregando…</p></div>
@@ -171,169 +171,63 @@ const W = {
   lunge: [.1,0,.85,.05], bulgarian: [.1,0,.9,0], clean: [.15,.3,.45,.1], wall_walk: [.35,.65,0,0], double_under: [0,.05,.25,.7],
   row: [.1,.3,.25,.35], run: [0,0,.3,.7], toes_to_bar: [.7,.3,0,0], box_jump: [0,0,.6,.4], wall_ball: [.1,.3,.4,.2],
   clean_jerk: [.15,.4,.35,.1], air_squat: [.1,0,.8,.1], step_up: [0,0,.7,.3], bike: [0,0,.3,.7], pull_up: [.15,.85,0,0],
-  db_press: [.15,.85,0,0], push_up: [.2,.8,0,0], push_up_incline: [.2,.8,0,0], pike_push_up: [.2,.8,0,0], db_push_press: [.1,.65,.25,0],
+  db_press: [.15,.85,0,0], push_up: [.2,.8,0,0], push_up_incline: [.2,.8,0,0], decline_push_up: [.2,.8,0,0], db_push_press: [.1,.65,.25,0],
   db_row: [.15,.85,0,0], band_row: [.1,.9,0,0], db_curl: [0,1,0,0], triceps_ext: [0,1,0,0], db_bench_press: [0,1,0,0],
   band_pulldown: [.1,.9,0,0], goblet_squat: [.15,.05,.8,0], glute_bridge: [.3,0,.7,0], plank: [.85,.15,0,0], side_plank: [.9,.1,0,0],
-  dead_bug: [1,0,0,0], hollow_hold: [1,0,0,0], sit_up: [1,0,0,0], tuck_up: [1,0,0,0], mountain_climber: [.55,.15,0,.3],
+  dead_bug: [1,0,0,0], sit_up: [1,0,0,0], jackknife: [1,0,0,0], mountain_climber: [.55,.15,0,.3],
   superman: [.8,.1,.1,0], burpee_step: [.2,.25,.25,.3], db_snatch: [.15,.35,.35,.15], sandbag_clean: [.25,.25,.4,.1],
-  march: [.15,0,.25,.6], farmer_carry: [.5,.3,.2,0], jump_squat: [0,0,.7,.3], shoulder_pass: [0,.5,0,0], cat_cow: [.5,0,0,0],
-  hip_hinge: [.2,0,.4,0], hamstring: [0,0,.3,0], ski: [.1,.4,.2,.3], muscle_up: [.2,.8,0,0], rope_climb: [.2,.8,0,0],
+  march: [.15,0,.25,.6], farmer_carry: [.5,.3,.2,0], jump_squat: [0,0,.7,.3], arm_circles: [0,.5,0,0], cat_cow: [.5,0,0,0],
+  inchworm: [.4,.3,.2,0], hamstring: [0,0,.3,0], ski: [.1,.4,.2,.3], muscle_up: [.2,.8,0,0], rope_climb: [.2,.8,0,0],
 };
 
-/* ============================== FIGURAS ============================== */
-// Boneco em vista lateral; ângulos em graus: 0 = para baixo, 90 = para frente, 180 = para cima, -90 = para trás.
-const L = { torso: 50, ua: 27, la: 25, th: 38, sh: 38, head: 11 };
-const GROUND = 182;
-const P = (o) => Object.assign({ hx: 100, torso: 180, ua: 0, la: 0, th: 0, sh: 0 }, o);
-const STAND = P({}), ARMS_FWD = P({ ua: 90, la: 90 }), SQUAT = P({ torso: 145, th: 100, sh: -28, ua: 95, la: 95 });
-const RACK = { ua: 100, la: -150 }, OVER = { ua: 180, la: 180 };
-const PLANK_TOP = P({ torso: 115, th: -65, sh: -65 }), PLANK_LOW = P({ torso: 99, th: -81, sh: -81, ua: -100, la: 10 });
-const LYING = { torso: -90, th: 90, sh: 0 }, QUAD = P({ torso: 90, th: 0, sh: -90 });
-const SQ_LOW = P({ torso: 140, th: 105, sh: -35 });
-// F(frames, opções). Cada frame = uma etapa ilustrada.
-const F = (frames, extra) => Object.assign({ frames, anchor: "ground", props: [] }, extra || {});
-const FIG = {
-  march: F([P({ th: 90, sh: 0, ua: 60, la: 120, ua2: -30, la2: 20 }), P({ th2: 90, sh2: 0, ua2: 60, la2: 120, ua: -30, la: 20 })]),
-  shoulder_pass: F([P({ ua: 60, la: 60 }), P(OVER), P({ ua: -60, la: -60 })], { hand: "band" }),
-  cat_cow: F([P(Object.assign({}, QUAD, { bend: 14, head: 30 })), P(Object.assign({}, QUAD, { bend: -12, head: -25 }))]),
-  hip_hinge: F([P({ ua: 30, la: 60 }), P({ torso: 100, th: 12, sh: -4, ua: 30, la: 60 })]),
-  hamstring: F([P({ ua: 0, la: 0 }), P({ torso: 95, th: 18, sh: 0, ua: 5, la: 5 })]),
-  air_squat: F([ARMS_FWD, SQUAT]),
-  goblet_squat: F([P({ ua: 25, la: 165 }), P({ torso: 155, th: 100, sh: -28, ua: 50, la: 175 })], { hand: "dumbbell1" }),
-  lunge: F([STAND, P({ th: 85, sh: 0, th2: -15, sh2: -95 })]),
-  bulgarian: F([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], { props: ["bench_back"] }),
-  deadlift: F([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell" }),
-  kb_swing: F([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ torso: 150, th: 10, sh: -2, ua: 30, la: 30 }), P({ ua: 90, la: 90 })], { hand: "kettlebell" }),
-  glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: -100, la: -100 }), P({ torso: -112, th: 108, sh: 15, ua: -100, la: -100 })]),
-  jump_squat: F([SQUAT, P({ ua: 160, la: 160, lift: 25 })]),
-  thruster: F([P(RACK), P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(OVER)], { hand: "dumbbell" }),
-  db_snatch: F([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 30, la2: 60 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], { hand: "dumbbell1" }),
-  sandbag_clean: F([P({ torso: 105, th: 70, sh: -15, ua: 10, la: 60 }), P({ torso: 160, th: 60, sh: -20, ua: 40, la: 150 }), P({ ua: -150, la: 30 })], { hand: "sandbag" }),
-  farmer_carry: F([P({ th: 25, sh: -10, th2: -20, sh2: -20 })], { hand: "dumbbell" }),
-  push_up: F([PLANK_TOP, PLANK_LOW]),
-  push_up_incline: F([P({ torso: 128, th: -52, sh: -52, ua: 30, la: 30 }), P({ torso: 115, th: -65, sh: -65, ua: -80, la: 40 })], { props: ["bench_hands"] }),
-  pike_push_up: F([P({ torso: 45, th: -35, sh: -35, ua: 5, la: 5 }), P({ torso: 50, th: -35, sh: -35, ua: -70, la: 30 })]),
-  db_press: F([P({ ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell" }),
-  db_push_press: F([P({ ua: 60, la: 170 }), P({ torso: 178, th: 30, sh: -20, ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell" }),
-  db_row: F([P({ torso: 110, th: 25, sh: -10, ua: 0, la: 0 }), P({ torso: 110, th: 25, sh: -10, ua: -70, la: 20 })], { hand: "dumbbell" }),
-  band_row: F([P({ torso: 178, th: 90, sh: 90, ua: 90, la: 90 }), P({ torso: 185, th: 90, sh: 90, ua: -30, la: 85 })], { hand: "band" }),
-  band_pulldown: F([P(Object.assign({ th: 0, sh: -90 }, OVER)), P({ th: 0, sh: -90, ua: 25, la: 160 })], { hand: "band_up" }),
-  db_curl: F([P({}), P({ ua: 5, la: 150 })], { hand: "dumbbell" }),
-  triceps_ext: F([P({ ua: 170, la: 20 }), P(OVER)], { hand: "dumbbell" }),
-  db_bench_press: F([P(Object.assign({}, LYING, { ua: 30, la: 175 })), P(Object.assign({}, LYING, OVER))], { hand: "dumbbell", props: ["bench_under"] }),
-  plank: F([P({ torso: 98, th: -82, sh: -82, ua: 0, la: 90 })]),
-  side_plank: F([P({ torso: 114, th: -66, sh: -66, ua: 0, la: 0, ua2: 180, la2: 180 })]),
-  dead_bug: F([P(Object.assign({}, LYING, { th: 180, sh: 90 }, OVER)), P(Object.assign({}, LYING, { th: 120, sh: 115, th2: 180, sh2: 90, ua: -100, la: -100, ua2: 180, la2: 180 }))]),
-  hollow_hold: F([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100, bend: 5 })]),
-  sit_up: F([P({ torso: -90, th: 60, sh: -40, ua: -90, la: -90 }), P({ torso: 145, th: 60, sh: -40, ua: 120, la: 120 })]),
-  tuck_up: F([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100 }), P({ torso: -140, th: 150, sh: 10, ua: 100, la: 100, bend: 8 })]),
-  mountain_climber: F([P(Object.assign({}, PLANK_TOP, { th: 70, sh: -60 })), P(Object.assign({}, PLANK_TOP, { th2: 70, sh2: -60 }))]),
-  superman: F([P({ torso: 90, th: -90, sh: -90, ua: 90, la: 90 }), P({ torso: 100, th: -100, sh: -100, ua: 100, la: 100 })]),
-  burpee: F([STAND, SQ_LOW, PLANK_TOP, P({ torso: 92, th: -88, sh: -88, ua: -110, la: 10 }), P(Object.assign({ lift: 20 }, OVER))]),
-  burpee_step: F([SQ_LOW, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55 }), PLANK_TOP, STAND]),
-  bike: F([P({ torso: 130, ua: 100, la: 100, th: 100, sh: 10, th2: 45, sh2: -20 })], { anchor: "seat", props: ["bike"] }),
-  run: F([P({ torso: 172, th: 45, sh: -10, th2: -30, sh2: -80, ua: -40, la: 50, ua2: 40, la2: 110 })]),
+/* ============================== FOTOS DAS ETAPAS ============================== */
+// Fotos reais do Free Exercise DB (github.com/yuhonas/free-exercise-db, domínio público).
+// PH[id] = [[arquivo, legenda], ...] na ordem do movimento. "foto" avisa quando a foto usa outro equipamento.
+const PH = {
+  march: [["march_0", "Joelho alto, braço oposto à frente"], ["march_1", "Troque de perna no ritmo"]],
+  arm_circles: [["arm_circles_0", "Braços abertos na altura dos ombros"], ["arm_circles_1", "Faça círculos pequenos e depois grandes"]],
+  cat_cow: [["cat_cow_0", "Quatro apoios, costas arredondadas"], ["cat_cow_1", "Afunde o peito e alongue os braços"]],
+  inchworm: [["inchworm_0", "Mãos no chão, caminhe com elas à frente"], ["inchworm_1", "Chegue na prancha e volte caminhando"]],
+  hamstring: [["hamstring_0", "Em pé, pernas estendidas"], ["hamstring_1", "Desça o tronco e segure"]],
+  air_squat: [["air_squat_0", "Pés na largura dos ombros"], ["air_squat_1", "Quadril abaixo do joelho, volte"]],
+  goblet_squat: [["goblet_squat_0", "Carga colada no peito"], ["goblet_squat_1", "Agache com o peito aberto"]],
+  lunge: [["lunge_0", "Em pé, dê um passo à frente"], ["lunge_1", "Joelho de trás quase no chão"]],
+  bulgarian: [["bulgarian_0", "Pernas afastadas (em casa: pé de trás no banco)"], ["bulgarian_1", "Desça na vertical"]],
+  deadlift: [["deadlift_0", "Costas retas, carga junto às canelas"], ["deadlift_1", "Empurre o chão e termine em pé"]],
+  kb_swing: [["kb_swing_0", "Em pé, carga nas mãos"], ["kb_swing_1", "Quadril para trás e projete a carga à frente com o quadril"]],
+  glute_bridge: [["glute_bridge_0", "Deitado, joelhos dobrados"], ["glute_bridge_1", "Suba o quadril apertando o glúteo"]],
+  jump_squat: [["jump_squat_0", "Agache"], ["jump_squat_1", "Salte estendendo o corpo todo"]],
+  thruster: [["thruster_0", "Carga nos ombros"], ["thruster_1", "Agache e, ao subir, empurre acima da cabeça"]],
+  db_snatch: [["db_snatch_1", "Carga entre os pés, costas retas"], ["db_snatch_0", "Explosão do quadril até o braço travado em cima"]],
+  sandbag_clean: [["sandbag_clean_0", "Abrace o saco no chão"], ["sandbag_clean_1", "Leve até o ombro e fique em pé"]],
+  farmer_carry: [["farmer_carry_0", "Pegue a carga com as costas retas"], ["farmer_carry_1", "Caminhe com ombros para trás"]],
+  push_up: [["push_up_0", "Corpo reto, braços estendidos"], ["push_up_1", "Peito quase no chão, volte"]],
+  push_up_incline: [["push_up_incline_0", "Mãos no banco ou caixa"], ["push_up_incline_1", "Desça o peito até o apoio"]],
+  decline_push_up: [["decline_push_up_0", "Pés no banco, mãos no chão"], ["decline_push_up_1", "Desça o peito, volte"]],
+  db_press: [["db_press_0", "Halteres na altura dos ombros"], ["db_press_1", "Empurre até esticar os braços"]],
+  db_push_press: [["db_push_press_0", "Carga nos ombros, flexione um pouco os joelhos"], ["db_push_press_1", "Estenda as pernas e empurre para cima"]],
+  db_row: [["db_row_0", "Tronco inclinado, braços estendidos"], ["db_row_1", "Puxe os cotovelos para trás"]],
+  band_row: [["band_row_0", "Sentado, braços estendidos (em casa: elástico nos pés)"], ["band_row_1", "Puxe até as costelas"]],
+  band_pulldown: [["band_pulldown_0", "Braços para cima (em casa: elástico no alto da porta)"], ["band_pulldown_1", "Puxe os cotovelos até o tronco"]],
+  db_curl: [["db_curl_0", "Braços estendidos"], ["db_curl_1", "Dobre os cotovelos colados no corpo"]],
+  triceps_ext: [["triceps_ext_0", "Carga atrás da cabeça"], ["triceps_ext_1", "Estique o braço"]],
+  db_bench_press: [["db_bench_press_0", "Deitado, halteres na linha do peito"], ["db_bench_press_1", "Empurre até esticar"]],
+  plank: [["plank_0", "Apoie os antebraços"], ["plank_1", "Corpo reto, segure respirando"]],
+  side_plank: [["side_plank_0", "De lado, cotovelo abaixo do ombro"], ["side_plank_1", "Suba o quadril e segure"]],
+  dead_bug: [["dead_bug_0", "Deitado, braços e joelhos para cima"], ["dead_bug_1", "Estique braço e perna opostos"]],
+  sit_up: [["sit_up_0", "Deitado, joelhos dobrados"], ["sit_up_1", "Suba o tronco até os joelhos"]],
+  jackknife: [["jackknife_0", "Deitado, braços para trás"], ["jackknife_1", "Mãos e pés se encontram no alto"]],
+  mountain_climber: [["mountain_climber_0", "Prancha alta, um joelho à frente"], ["mountain_climber_1", "Troque as pernas rápido"]],
+  superman: [["superman_0", "De bruços, braços à frente"], ["superman_1", "Eleve braços e pernas juntos"]],
+  burpee: [["air_squat_1", "Agache"], ["push_up_0", "Mãos no chão, pule para a prancha"], ["push_up_1", "Peito no chão"], ["jump_squat_1", "Volte e salte"]],
+  burpee_step: [["air_squat_1", "Agache e apoie as mãos"], ["mountain_climber_0", "Um pé de cada vez para trás"], ["push_up_0", "Prancha"], ["air_squat_0", "Volte e fique em pé"]],
+  bike: [["bike_0", "Banco na altura do quadril"], ["bike_1", "Pedale em ritmo forte"]],
+  run: [["run_0", "Passadas curtas"], ["run_1", "Acelere aos poucos"]],
 };
-
-const dirv = (d) => [Math.sin(d * Math.PI / 180), Math.cos(d * Math.PI / 180)];
-const add = (p, d, l) => [p[0] + d[0] * l, p[1] + d[1] * l];
-function skeleton(p, anchor) {
-  const hip = [p.hx, 0], td = dirv(p.torso), sho = add(hip, td, L.torso);
-  const mid = [(hip[0] + sho[0]) / 2, (hip[1] + sho[1]) / 2], perp = [-td[1], td[0]];
-  const s = { hip, sho, ctrl: add(mid, perp, -(p.bend || 0)), head: add(sho, dirv(p.torso + (p.head || 0)), L.head + 3) };
-  s.elb = add(sho, dirv(p.ua), L.ua); s.hand = add(s.elb, dirv(p.la), L.la);
-  s.elb2 = add(sho, dirv(p.ua2 ?? p.ua), L.ua); s.hand2 = add(s.elb2, dirv(p.la2 ?? p.la), L.la);
-  s.knee = add(hip, dirv(p.th), L.th); s.foot = add(s.knee, dirv(p.sh), L.sh);
-  s.knee2 = add(hip, dirv(p.th2 ?? p.th), L.th); s.foot2 = add(s.knee2, dirv(p.sh2 ?? p.sh), L.sh);
-  s.toe = add(s.foot, [Math.cos(p.sh * Math.PI / 180), -Math.sin(p.sh * Math.PI / 180)], 10);
-  const sh2 = p.sh2 ?? p.sh; s.toe2 = add(s.foot2, [Math.cos(sh2 * Math.PI / 180), -Math.sin(sh2 * Math.PI / 180)], 10);
-  let dy;
-  if (anchor === "seat") dy = 112 - hip[1];
-  else {
-    const ys = [s.foot[1], s.foot2[1], s.knee[1], s.knee2[1], s.hand[1], s.hand2[1], hip[1], sho[1], s.head[1] + L.head, s.elb[1], s.elb2[1]];
-    dy = GROUND - Math.max(...ys) - (p.lift || 0);
-  }
-  for (const k in s) s[k] = [s[k][0], s[k][1] + dy];
-  return s;
-}
-const f1 = (n) => n.toFixed(1);
-const pt = (p) => `${f1(p[0])},${f1(p[1])}`;
-function propSVG(fig, s) {
-  const out = [];
-  for (const pr of fig.props) {
-    if (pr === "bench_under") out.push(`<rect x="${f1(s.hip[0] - 62)}" y="${f1(s.hip[1] + 8)}" width="74" height="9" rx="3" fill="var(--prop)"/><rect x="${f1(s.hip[0] - 50)}" y="${f1(s.hip[1] + 15)}" width="6" height="${f1(GROUND + 6 - s.hip[1] - 15)}" fill="var(--prop)"/><rect x="${f1(s.hip[0] - 2)}" y="${f1(s.hip[1] + 15)}" width="6" height="${f1(GROUND + 6 - s.hip[1] - 15)}" fill="var(--prop)"/>`);
-    if (pr === "bench_hands") out.push(`<rect x="${f1(s.hand[0] - 24)}" y="${f1(s.hand[1] + 5)}" width="44" height="${f1(GROUND + 6 - s.hand[1] - 5)}" rx="3" fill="var(--prop)" opacity=".5"/>`);
-    if (pr === "bench_back") out.push(`<rect x="${f1(s.foot2[0] - 22)}" y="${f1(s.foot2[1] + 6)}" width="36" height="${f1(GROUND + 6 - s.foot2[1] - 6)}" rx="3" fill="var(--prop)" opacity=".5"/>`);
-    if (pr === "bike") out.push(`<g stroke="var(--prop)" stroke-width="5" fill="none" stroke-linecap="round"><line x1="${s.hip[0] - 14}" y1="${f1(s.hip[1] + 9)}" x2="${s.hip[0] + 12}" y2="${f1(s.hip[1] + 9)}"/><line x1="${s.hip[0]}" y1="${f1(s.hip[1] + 9)}" x2="${s.hip[0] + 14}" y2="${GROUND}"/><line x1="${s.hip[0] - 10}" y1="${GROUND}" x2="${s.hip[0] + 80}" y2="${GROUND}"/><line x1="${s.hip[0] + 64}" y1="${GROUND}" x2="${s.hip[0] + 70}" y2="${f1(s.hand[1] + 6)}"/><circle cx="${s.hip[0] + 22}" cy="${f1(s.hip[1] + 54)}" r="15"/></g>`);
-  }
-  return out.join("");
-}
-function handSVG(fig, s) {
-  const h = fig.hand, out = [];
-  const db = (p) => `<g fill="var(--sup)"><rect x="${f1(p[0] - 11)}" y="${f1(p[1] - 5)}" width="22" height="10" rx="3"/><rect x="${f1(p[0] - 13)}" y="${f1(p[1] - 9)}" width="7" height="18" rx="2"/><rect x="${f1(p[0] + 6)}" y="${f1(p[1] - 9)}" width="7" height="18" rx="2"/></g>`;
-  if (h === "dumbbell") out.push(db(s.hand2), db(s.hand));
-  if (h === "dumbbell1") out.push(db(s.hand));
-  if (h === "kettlebell") out.push(`<circle cx="${f1(s.hand[0])}" cy="${f1(s.hand[1] + 12)}" r="11" fill="var(--pernas)"/><path d="M${f1(s.hand[0] - 6)},${f1(s.hand[1] + 4)} Q${f1(s.hand[0])},${f1(s.hand[1] - 6)} ${f1(s.hand[0] + 6)},${f1(s.hand[1] + 4)}" stroke="var(--pernas)" stroke-width="3.5" fill="none"/>`);
-  if (h === "sandbag") out.push(`<rect x="${f1(s.hand[0] - 20)}" y="${f1(s.hand[1] - 10)}" width="40" height="20" rx="9" fill="var(--prop)"/>`);
-  if (h === "band") out.push(`<path d="M${pt(s.hand)} Q${f1((s.hand[0] + s.foot[0]) / 2 + 12)},${f1((s.hand[1] + s.foot[1]) / 2)} ${pt(s.foot)}" stroke="var(--cardio)" stroke-width="4" fill="none" stroke-dasharray="7 4"/>`);
-  if (h === "band_up") out.push(`<line x1="${f1(s.hand[0])}" y1="${f1(s.hand[1])}" x2="${f1(s.hand[0])}" y2="-30" stroke="var(--cardio)" stroke-width="4" stroke-dasharray="7 4"/>`);
-  return out.join("");
-}
-function bodySVGFig(s) {
-  const limb = (a, b, c, far) => `<polyline points="${pt(a)} ${pt(b)} ${pt(c)}" fill="none" stroke="var(${far ? "--fig-far" : "--fig"})" stroke-width="${far ? 11 : 13}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const foot = (a, b, far) => `<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="var(${far ? "--fig-far" : "--fig"})" stroke-width="${far ? 8 : 9}" stroke-linecap="round"/>`;
-  return [
-    limb(s.hip, s.knee2, s.foot2, true), foot(s.foot2, s.toe2, true), limb(s.sho, s.elb2, s.hand2, true),
-    `<path d="M${pt(s.hip)} Q${pt(s.ctrl)} ${pt(s.sho)}" fill="none" stroke="var(--fig)" stroke-width="20" stroke-linecap="round"/>`,
-    limb(s.hip, s.knee, s.foot, false), foot(s.foot, s.toe, false), limb(s.sho, s.elb, s.hand, false),
-    `<circle cx="${f1(s.head[0])}" cy="${f1(s.head[1])}" r="${L.head + 1}" fill="var(--fig)"/>`,
-  ].join("");
-}
-// Seta do movimento: aponta do ponto que mais se desloca até onde ele vai na etapa seguinte.
-function arrowSVG(a, b) {
-  let best = null;
-  for (const k of ["hand", "hip", "head", "knee", "foot", "sho"]) {
-    const d = Math.hypot(b[k][0] - a[k][0], b[k][1] - a[k][1]);
-    if (!best || d > best.d) best = { k, d };
-  }
-  if (!best || best.d < 14) return "";
-  const p0 = a[best.k], p1 = b[best.k];
-  const ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
-  const off = 18; // afasta a seta do corpo
-  const nx = -Math.sin(ang) * off, ny = Math.cos(ang) * off;
-  const len = Math.min(best.d * 0.75, 70);
-  const sx = p0[0] + nx, sy = p0[1] + ny, ex = sx + Math.cos(ang) * len, ey = sy + Math.sin(ang) * len;
-  const h1 = [ex - Math.cos(ang - 0.5) * 11, ey - Math.sin(ang - 0.5) * 11], h2 = [ex - Math.cos(ang + 0.5) * 11, ey - Math.sin(ang + 0.5) * 11];
-  return `<g stroke="var(--arrow)" stroke-width="4" stroke-linecap="round" fill="none"><line x1="${f1(sx)}" y1="${f1(sy)}" x2="${f1(ex)}" y2="${f1(ey)}"/><polyline points="${pt(h1)} ${f1(ex)},${f1(ey)} ${pt(h2)}"/></g>`;
-}
-const VB = {};
-function viewBoxFor(id) {
-  if (VB[id]) return VB[id];
-  const fig = FIG[id]; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-  for (const fr of fig.frames) {
-    const s = skeleton(fr, fig.anchor);
-    for (const k in s) { const r = k === "head" ? L.head + 8 : 16; x0 = Math.min(x0, s[k][0] - r); x1 = Math.max(x1, s[k][0] + r); y0 = Math.min(y0, s[k][1] - r); y1 = Math.max(y1, s[k][1] + r); }
-  }
-  if (fig.props.includes("bike")) x1 = Math.max(x1, 192);
-  if (fig.props.includes("bench_under")) x0 -= 8;
-  y1 = Math.max(y1, GROUND + 12);
-  let w = x1 - x0, h = y1 - y0;
-  const ar = Math.min(2.2, Math.max(0.85, w / h));
-  if (w / h < ar) { const nw = h * ar; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ar; y0 -= (nh - h); h = nh; }
-  return (VB[id] = { box: `${f1(x0)} ${f1(y0)} ${f1(w)} ${f1(h)}`, ar });
-}
-function stepSVG(id, i) {
-  const fig = FIG[id], fr = fig.frames, s = skeleton(fr[i], fig.anchor);
-  const next = i + 1 < fr.length ? skeleton(fr[i + 1], fig.anchor) : null;
-  return `<svg viewBox="${viewBoxFor(id).box}" role="img" aria-label="Etapa ${i + 1}: ${esc(LIB[id]?.steps?.[i] ?? "")}">
-    <line x1="-60" y1="${GROUND + 6}" x2="260" y2="${GROUND + 6}" stroke="var(--line)" stroke-width="3"/>
-    ${propSVG(fig, s)}${bodySVGFig(s)}${handSVG(fig, s)}${next ? arrowSVG(s, next) : ""}</svg>`;
-}
+const IMG = (k) => `img/${k}.jpg`;
 function stepsHTML(id) {
-  const fig = FIG[id], n = fig.frames.length, e = LIB[id];
-  const wide = viewBoxFor(id).ar > 1.5;
-  const cols = n === 1 || (wide && n <= 2) ? (n === 1 ? "c1" : "c1") : n === 2 ? "c2" : n === 3 ? "c3" : "c2";
-  return `<div class="steps ${wide && n > 1 ? "c1" : cols}">${fig.frames.map((_, i) => `<div class="step">${stepSVG(id, i)}<div class="cap">${n > 1 ? `<span class="n">${i + 1}</span>` : ""}<span>${esc(e.steps[i] || "")}</span></div></div>`).join("")}</div>`;
+  const ph = PH[id] || [], cols = ph.length === 1 ? "c1" : "c2";
+  return `<div class="steps ${cols}">${ph.map(([k, cap], i) => `<figure class="step"><img src="${IMG(k)}" alt="${esc(cap)}" loading="lazy" width="600" height="400"><figcaption class="cap"><span class="n">${i + 1}</span><span>${esc(cap)}</span></figcaption></figure>`).join("")}</div>`;
 }
 
 /* ============================== BIBLIOTECA ============================== */
@@ -341,9 +235,9 @@ function stepsHTML(id) {
 const X = (id, pt, en, g, eq, steps, o) => Object.assign({ id, pt, en, g, eq, steps, quiet: true, unit: "reps", base: 10, sec: 2.5, load: false, tips: [] }, o);
 const LIB = Object.fromEntries([
   X("march", "Marcha com joelho alto", "High-knee march", "cardio", [[]], ["Suba um joelho até o quadril", "Troque de perna no ritmo"], { m: "M", unit: "s", base: 45, warm: true, tips: ["Braços acompanham", "Sem bater o pé no chão"] }),
-  X("shoulder_pass", "Rotação de ombro com elástico", "Band pass-through", "mob", [["elastico"], []], ["Braços esticados à frente", "Passe por cima da cabeça", "Leve para trás do corpo"], { warm: true, base: 10, sec: 4, tips: ["Sem elástico: use uma toalha"] }),
+  X("arm_circles", "Círculos de braço", "Arm circles", "mob", [[]], [], { warm: true, unit: "s", base: 30, tips: ["Comece pequeno e aumente o círculo", "Inverta o sentido na metade"] }),
   X("cat_cow", "Gato e camelo", "Cat-cow", "mob", [[]], ["Arredonde as costas", "Afunde a coluna e olhe à frente"], { warm: true, cool: true, base: 8, sec: 4, tips: ["Siga a respiração"] }),
-  X("hip_hinge", "Dobradiça de quadril", "Hip hinge", "mob", [[]], ["Em pé, mãos no quadril", "Quadril para trás, costas retas"], { warm: true, base: 10, sec: 3, tips: ["Sinta alongar atrás da coxa"] }),
+  X("inchworm", "Inchworm (caminhada com as mãos)", "Inchworm", "mob", [[]], [], { warm: true, base: 5, sec: 8, tips: ["Pernas o mais esticadas possível", "Volte caminhando com as mãos"] }),
   X("hamstring", "Alongamento de posterior", "Hamstring stretch", "mob", [[]], ["Em pé, pernas estendidas", "Desça o tronco e segure"], { cool: true, unit: "s", base: 40, tips: ["Joelhos levemente soltos", "Sem forçar"] }),
   X("air_squat", "Agachamento livre", "Air squat", "pernas", [[]], ["Pés na largura dos ombros", "Quadril abaixo do joelho, volte"], { m: "G", base: 15, sec: 2, warm: true, tips: ["Calcanhar no chão", "Joelho aponta para o pé"] }),
   X("goblet_squat", "Agachamento goblet", "Goblet squat", "pernas", [["halter"], ["kb"], ["sandbag"]], ["Carga colada no peito", "Agache com o peito aberto"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Desça entre os joelhos"] }),
@@ -359,7 +253,7 @@ const LIB = Object.fromEntries([
   X("farmer_carry", "Caminhada do fazendeiro", "Farmer's carry", "core", [["halter"], ["sandbag"]], ["Carga ao lado do corpo, ombros para trás, passos curtos"], { m: "W", unit: "s", base: 40, load: true, tips: ["Abdômen firme"] }),
   X("push_up", "Flexão de braço", "Push-up", "sup", [[]], ["Corpo reto, braços estendidos", "Desça até o peito quase tocar"], { m: "G", base: 12, sec: 2.5, tips: ["Quadril alinhado"] }),
   X("push_up_incline", "Flexão inclinada", "Incline push-up", "sup", [["banco"], []], ["Mãos no banco, corpo reto", "Desça o peito até o banco"], { m: "G", base: 12, sec: 2.3, tips: ["Versão mais leve da flexão"] }),
-  X("pike_push_up", "Flexão pike", "Pike push-up", "sup", [[]], ["Quadril alto, em V invertido", "Cabeça desce à frente das mãos"], { m: "G", base: 8, sec: 3, strength: true, tips: ["Prepara para o HSPU"] }),
+  X("decline_push_up", "Flexão com pés elevados", "Decline push-up", "sup", [["banco"], []], [], { m: "G", base: 8, sec: 3, strength: true, tips: ["Mais ombro que a flexão normal", "Sem banco: pés na cama ou num degrau"] }),
   X("db_press", "Desenvolvimento com halter", "Dumbbell strict press", "sup", [["halter"]], ["Halteres nos ombros", "Empurre até esticar os braços"], { m: "W", base: 10, sec: 3, load: true, strength: true, tips: ["Abdômen e glúteo firmes"] }),
   X("db_push_press", "Push press com halter", "Dumbbell push press", "sup", [["halter"]], ["Halteres nos ombros", "Flexione um pouco os joelhos", "Estenda as pernas e empurre"], { m: "W", base: 10, sec: 2.6, load: true, tips: ["As pernas dão o impulso"] }),
   X("db_row", "Remada curvada", "Bent-over row", "sup", [["halter"], ["sandbag"]], ["Tronco inclinado, braços estendidos", "Puxe o cotovelo para trás"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Costas retas"] }),
@@ -371,9 +265,9 @@ const LIB = Object.fromEntries([
   X("plank", "Prancha", "Plank", "core", [[]], ["Cotovelos abaixo dos ombros, corpo reto, respire"], { m: "G", unit: "s", base: 40, tips: ["Quadril alinhado"] }),
   X("side_plank", "Prancha lateral", "Side plank", "core", [[]], ["Apoio em um braço, quadril alto; troque o lado"], { m: "G", unit: "s", base: 30, tips: ["Faça os dois lados"] }),
   X("dead_bug", "Dead bug", "Dead bug", "core", [[]], ["Deitado, braços e joelhos para cima", "Estique braço e perna opostos"], { m: "G", base: 12, sec: 3, warm: true, tips: ["Lombar colada no chão"] }),
-  X("hollow_hold", "Canoinha (hollow hold)", "Hollow hold", "core", [[]], ["Lombar no chão, braços e pernas suspensos"], { m: "G", unit: "s", base: 25, tips: ["Dobre os joelhos para facilitar"] }),
+
   X("sit_up", "Abdominal completo", "Sit-up", "core", [[]], ["Deitado, mãos atrás da cabeça", "Suba e toque à frente dos pés"], { m: "G", base: 15, sec: 2.5, tips: ["Sola dos pés juntas"] }),
-  X("tuck_up", "Abdominal grupado", "Tuck-up", "core", [[]], ["Deitado, corpo estendido", "Joelhos e peito se encontram"], { m: "G", base: 12, sec: 2.5, tips: ["Volte controlando"] }),
+  X("jackknife", "Abdominal canivete", "Jackknife sit-up", "core", [[]], [], { m: "G", base: 12, sec: 2.8, tips: ["Braços e pernas sobem juntos", "Dobre os joelhos para facilitar"] }),
   X("mountain_climber", "Escalador", "Mountain climber", "core", [[]], ["Prancha alta, um joelho no peito", "Troque as pernas rápido"], { m: "G", base: 30, sec: 0.8, tips: ["Quadril baixo"] }),
   X("superman", "Super-homem", "Superman", "core", [[]], ["De bruços, braços à frente", "Eleve braços e pernas juntos"], { m: "G", base: 12, sec: 3, cool: true, tips: ["Segure 2 segundos em cima"] }),
   X("burpee", "Burpee", "Burpee", "cardio", [[]], ["Em pé", "Agache e apoie as mãos", "Pule para a prancha", "Peito no chão", "Volte e salte com palmas"], { m: "G", base: 10, sec: 4, quiet: false, jump: true, tips: ["Ritmo constante, sem estourar"] }),
@@ -386,9 +280,9 @@ const LIB = Object.fromEntries([
 const PAT = {
   air_squat: "squat", goblet_squat: "squat", jump_squat: "squat", thruster: "squat", lunge: "lunge", bulgarian: "lunge",
   deadlift: "hinge", kb_swing: "hinge", db_snatch: "hinge", sandbag_clean: "hinge", glute_bridge: "hinge",
-  push_up: "push_h", push_up_incline: "push_h", db_bench_press: "push_h", pike_push_up: "push_v", db_press: "push_v", db_push_press: "push_v",
+  push_up: "push_h", push_up_incline: "push_h", db_bench_press: "push_h", decline_push_up: "push_h", db_press: "push_v", db_push_press: "push_v",
   db_row: "pull", band_row: "pull", band_pulldown: "pull", farmer_carry: "carry",
-  plank: "core_iso", side_plank: "core_iso", hollow_hold: "core_iso", dead_bug: "core_flex", sit_up: "core_flex", tuck_up: "core_flex",
+  plank: "core_iso", side_plank: "core_iso", dead_bug: "core_flex", sit_up: "core_flex", jackknife: "core_flex",
   mountain_climber: "core_dyn", superman: "core_ext", burpee: "burpee", burpee_step: "burpee", bike: "mono", run: "mono", march: "mono",
 };
 const ISOLATED = new Set(["db_curl", "triceps_ext"]);
@@ -402,7 +296,7 @@ const ALIASES = {
   "step up": "step_up", "echo bike": "bike", "assault bike": "bike", "bike": "bike", "pull-up": "pull_up", "pull up": "pull_up", "chin-up": "pull_up",
   "barra fixa": "pull_up", "z-press": "db_press", "strict press": "db_press", "shoulder press": "db_press", "push press": "db_push_press", "push-up": "push_up",
   "flexao": "push_up", "squat": "air_squat", "agachamento": "air_squat", "sit-up": "sit_up", "abdominal": "sit_up", "plank": "plank", "prancha": "plank",
-  "hollow": "hollow_hold", "v-up": "tuck_up", "mountain climber": "mountain_climber", "goblet": "goblet_squat", "sandbag": "sandbag_clean",
+  "hollow": "jackknife", "v-up": "jackknife", "jackknife": "jackknife", "mountain climber": "mountain_climber", "goblet": "goblet_squat", "sandbag": "sandbag_clean",
   "remada": "db_row", "bent over row": "db_row", "farmer": "farmer_carry", "ski": "ski", "muscle-up": "muscle_up", "rope climb": "rope_climb",
 };
 const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -531,7 +425,7 @@ function generate(brief, seed) {
   const considered = last2.length ? `Considerei seus últimos treinos: ${last2.map((w) => `${esc(w.titulo || "treino")} (${fmtDate(w.data)})`).join(" e ")}.` : "";
 
   if (estado === "dor") {
-    const ids = ["cat_cow", "hip_hinge", "glute_bridge", "dead_bug", "march"].filter((id) => usable(LIB[id], local));
+    const ids = ["cat_cow", "inchworm", "glute_bridge", "dead_bug", "march"].filter((id) => usable(LIB[id], local));
     return {
       seed, foco: "recuperacao", titulo: "Recuperação leve", local, tempo: 20, why: "Você marcou dor ou mal-estar: hoje é movimento leve.",
       aviso: "Com febre, dor no peito, falta de ar fora do normal ou tontura, não treine e procure atendimento.",
@@ -546,6 +440,7 @@ function generate(brief, seed) {
   // 1) Aquecimento: geral (cardio) + específico (movimentos leves)
   const warmCardio = pickN(Object.values(LIB).filter((e) => e.warm && e.g === "cardio" && usable(e, local)), 1);
   const warmSpec = pickN(Object.values(LIB).filter((e) => e.warm && e.g !== "cardio" && usable(e, local)), 2);
+  for (const e of [...warmCardio, ...warmSpec]) used.add(e.id);
   partes.push({ tipo: "warm", nome: `Aquecimento · ${a.warm} min`, regra: "Geral + específico: 2 voltas tranquilas.", itens: [...warmCardio, ...warmSpec].map((e) => item(e, local, { factor: 0.7 })) });
 
   // 2) Força ou Skill
@@ -705,8 +600,8 @@ function exCard(it, pi, ii, current) {
     </div></article>`;
 }
 function miniRow(it) {
-  const e = LIB[it.id], fr = FIG[it.id].frames;
-  return `<div class="mini"><div class="thumb" style="grid-template-columns:${fr.length > 1 ? "1fr 1fr" : "1fr"}">${stepSVG(it.id, 0)}${fr.length > 1 ? stepSVG(it.id, fr.length - 1) : ""}</div><div><b>${esc(e.pt)}</b><span class="small muted">${esc(it.qty)}${it.impl ? " · " + esc(it.impl) : ""} · ${esc(e.steps.join(" → "))}</span></div></div>`;
+  const e = LIB[it.id], ph = PH[it.id] || [];
+  return `<div class="mini"><div class="thumb">${ph[0] ? `<img src="${IMG(ph[ph.length > 1 ? 1 : 0][0])}" alt="${esc(e.pt)}" loading="lazy">` : ""}</div><div><b>${esc(e.pt)}</b><span class="small muted">${esc(it.qty)}${it.impl ? " · " + esc(it.impl) : ""} · ${esc(ph.map((x) => x[1]).join(" → "))}</span></div></div>`;
 }
 const mmss = (s) => { s = Math.max(0, Math.floor(s)); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
 function elapsed() { const T = S.timer; return T.start ? ((T.stoppedAt || T.pausedAt || Date.now()) - T.start - T.paused) / 1000 : 0; }
@@ -809,6 +704,7 @@ function renderHistorico() {
       <li><a href="https://www.crossfit.com/crossfit-methodology" target="_blank" rel="noopener">Metodologia</a></li>
     </ul>
     <p class="small muted">Datas de competições mudam a cada temporada: confira sempre na fonte oficial. App pessoal, sem vínculo com a CrossFit.</p>
+    <p class="small muted">Fotos dos exercícios: Free Exercise DB (domínio público). Algumas fotos usam outro equipamento (kettlebell, polia); a legenda indica como fazer em casa.</p>
   </section>`;
 }
 function render() {
@@ -932,5 +828,5 @@ window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 
 render();
 initCapabilities();
-window.CG = { LIB, FIG, stepSVG, generate, S };
+window.CG = { LIB, PH, generate, S };
 </script>
