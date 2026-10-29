@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
 <style>
-/* Layout: uma coluna de app de bolso — mapa do corpo → briefing → treino. Cores dos grupos = código das anilhas bumper. */
+/* Layout: uma coluna de app de bolso — mapa do corpo (7 dias) → briefing → aula no formato CrossFit. Cores dos grupos = código das anilhas bumper. */
 :root {
   --bg: #e9ece8;        /* giz no piso de borracha */
   --surface: #ffffff;
@@ -20,8 +20,9 @@
   --warn-bg: #fff3d6;
   --warn-fg: #6b4a00;
   --fig: #18201d;
-  --fig-far: #9aa5a0;
+  --fig-far: #a6b0ab;
   --prop: #5d6965;
+  --arrow: #cc3d31;
   --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --body: "Barlow", "Segoe UI", system-ui, sans-serif;
 }
@@ -30,14 +31,14 @@
     --bg: #111513; --surface: #1a201d; --ink: #e8ece8; --muted: #9aa69f; --line: #2c3430; --soft: #222925;
     --core: #e5b23a; --sup: #5b8ff0; --pernas: #ec6a5c; --cardio: #45b874;
     --btn: #e8ece8; --btn-fg: #111513; --warn-bg: #3a3014; --warn-fg: #f3d58a;
-    --fig: #eef1ee; --fig-far: #6c7772; --prop: #9aa69f; color-scheme: dark;
+    --fig: #eef1ee; --fig-far: #5f6a65; --prop: #9aa69f; --arrow: #ff7d6e; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #111513; --surface: #1a201d; --ink: #e8ece8; --muted: #9aa69f; --line: #2c3430; --soft: #222925;
   --core: #e5b23a; --sup: #5b8ff0; --pernas: #ec6a5c; --cardio: #45b874;
   --btn: #e8ece8; --btn-fg: #111513; --warn-bg: #3a3014; --warn-fg: #f3d58a;
-  --fig: #eef1ee; --fig-far: #6c7772; --prop: #9aa69f; color-scheme: dark;
+  --fig: #eef1ee; --fig-far: #5f6a65; --prop: #9aa69f; --arrow: #ff7d6e; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
@@ -54,25 +55,26 @@ p { margin: 0; }
 .eyebrow { font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
 .muted { color: var(--muted); }
 .small { font-size: 14px; }
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .between { justify-content: space-between; }
-button, .linkbtn { font: inherit; cursor: pointer; }
+button { font: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--sup); outline-offset: 2px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border: 1.5px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 14px; font-weight: 500; font-size: 15px; }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-.btn { border: 0; border-radius: 12px; padding: 15px 18px; background: var(--btn); color: var(--btn-fg); font: 700 19px/1 var(--display); text-transform: uppercase; letter-spacing: .04em; width: 100%; }
+.btn { border: 0; border-radius: 12px; padding: 15px 18px; background: var(--btn); color: var(--btn-fg); font: 700 19px/1 var(--display); text-transform: uppercase; letter-spacing: .04em; width: 100%; text-align: center; text-decoration: none; display: inline-block; }
 .btn.secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.small { width: auto; padding: 11px 22px; font-size: 17px; }
 .btn:disabled { opacity: .45; cursor: default; }
 .ghost { background: none; border: 0; color: var(--muted); padding: 6px 8px; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-weight: 600; font-size: 14px; }
-input[type="date"], input[type="text"], textarea { font: inherit; color: var(--ink); background: var(--soft); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label, .lbl { font-weight: 600; font-size: 14px; }
+input[type="date"], input[type="text"], input[type="number"], textarea { font: inherit; color: var(--ink); background: var(--soft); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; }
 textarea { min-height: 90px; resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .notice { background: var(--warn-bg); color: var(--warn-fg); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
 
-/* Barra inferior */
 nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--surface); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -91,36 +93,50 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .suggest { border-left: 6px solid var(--core); padding-left: 12px; display: flex; flex-direction: column; gap: 4px; }
 .suggest strong { font: 800 26px/1.05 var(--display); text-transform: uppercase; }
+.recent { display: flex; flex-direction: column; gap: 6px; }
+.recent .r { display: grid; grid-template-columns: 62px 1fr; gap: 8px; font-size: 14px; align-items: baseline; }
+.recent .r .d { font-variant-numeric: tabular-nums; color: var(--muted); }
 
-/* Treino */
-.clock { text-align: center; display: flex; flex-direction: column; gap: 6px; }
+/* Aula */
+.part { display: flex; align-items: baseline; gap: 10px; }
+.part .tag { font: 800 13px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; background: var(--ink); color: var(--surface); padding: 5px 8px; border-radius: 6px; }
+.clock { text-align: center; display: flex; flex-direction: column; gap: 6px; padding: 8px 0; border-block: 1px solid var(--line); }
 .clock .time { font: 800 64px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-.ex { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.ex { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .ex.now { outline: 3px solid var(--ink); }
-.stage { background: var(--soft); aspect-ratio: 4 / 3; max-width: 100%; max-height: 360px; display: flex; align-items: center; justify-content: center; }
-.stage svg { width: 100%; height: 100%; display: block; }
-.ex .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+.steps { display: grid; gap: 1px; background: var(--line); }
+.steps.c1 { grid-template-columns: 1fr; }
+.steps.c2 { grid-template-columns: 1fr 1fr; }
+.steps.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.step { background: var(--soft); display: flex; flex-direction: column; min-width: 0; }
+.step svg { width: 100%; height: auto; display: block; }
+.steps.c1 .step svg { max-height: 210px; }
+.step .cap { display: flex; gap: 6px; padding: 6px 8px 8px; font-size: 13px; line-height: 1.3; }
+.step .n { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: var(--surface); font: 700 13px/20px var(--display); text-align: center; }
+.ex .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--surface); }
 .ex .qty { font: 800 28px/1 var(--display); }
 .ex .name { font: 700 22px/1.1 var(--display); text-transform: uppercase; }
-.ex ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
-.mini { display: grid; grid-template-columns: 76px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
-.mini:first-child { border-top: 0; }
-.mini .thumb { width: 76px; height: 57px; background: var(--soft); border-radius: 8px; overflow: hidden; }
-.mini .thumb svg { width: 100%; height: 100%; display: block; }
+.ex ul { margin: 2px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+.last { font-size: 14px; font-weight: 600; color: var(--sup); }
+.mini { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.mini:first-of-type { border-top: 0; }
+.mini .thumb { width: 96px; background: var(--soft); border-radius: 8px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
+.mini .thumb svg { width: 100%; height: auto; display: block; }
 .mini b { display: block; font-size: 16px; }
-.gtag { font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 4px 8px; border-radius: 6px; color: #fff; }
+.gtag { font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 4px 8px; border-radius: 6px; color: #fff; display: inline-block; }
 .done-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.res { display: grid; grid-template-columns: 1fr 120px; gap: 8px; align-items: center; }
+.res span { font-size: 15px; min-width: 0; }
 
-/* Histórico */
 .hist { display: flex; flex-direction: column; }
 .hist .item { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
 .hist .item:first-child { border-top: 0; }
 .hist .item .t { font-weight: 600; min-width: 0; }
 .hist .item .d { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+.hist .item .x { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
 .links a { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }
 .links li { padding: 4px 0; }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
-@media (max-width: 380px) { .balance { grid-template-columns: 1fr; justify-items: center; } .balance .bars { width: 100%; } }
+@media (max-width: 380px) { .balance { grid-template-columns: 1fr; justify-items: center; } .balance .bars { width: 100%; } .steps.c3 { grid-template-columns: 1fr 1fr; } }
 </style>
 
 <div class="wrap" id="app"><p class="muted">Carregando…</p></div>
@@ -140,7 +156,6 @@ const GROUPS = {
   cardio: { label: "Fôlego",     color: "var(--cardio)", target: 0.18 },
 };
 const GK = ["core", "sup", "pernas", "cardio"];
-
 const LOCAIS = {
   casa:   { label: "Casa", eq: ["halter", "sandbag", "barra", "banco", "bike", "elastico", "kb"], quiet: false },
   sem:    { label: "Sem equipamento", eq: [], quiet: false },
@@ -149,7 +164,7 @@ const LOCAIS = {
 };
 const EQ_LABEL = { halter: "halteres", sandbag: "sandbag", barra: "barra", banco: "banco", bike: "bike", elastico: "elástico", kb: "alça de kettlebell", esteira: "esteira" };
 
-// Peso de cada grupo por movimento (soma ≈ 1). Inclui movimentos do box que não estão na biblioteca de casa.
+// Peso de cada grupo por movimento [core, superiores, pernas, fôlego]. Inclui movimentos do box fora da biblioteca de casa.
 const W = {
   deadlift: [.2,.15,.65,0], hspu: [.2,.8,0,0], front_squat: [.2,.1,.7,0], snatch: [.15,.35,.4,.1], bench_press: [0,1,0,0],
   handstand: [.3,.7,0,0], kb_swing: [.25,.15,.5,.1], thruster: [.1,.35,.45,.1], burpee: [.15,.25,.25,.35], back_squat: [.15,0,.85,0],
@@ -165,58 +180,59 @@ const W = {
   hip_hinge: [.2,0,.4,0], hamstring: [0,0,.3,0], ski: [.1,.4,.2,.3], muscle_up: [.2,.8,0,0], rope_climb: [.2,.8,0,0],
 };
 
-/* ============================== ANIMAÇÃO ============================== */
-// Boneco em vista lateral. Ângulos em graus: 0 = para baixo, 90 = para frente, 180 = para cima, -90 = para trás.
-const L = { torso: 50, ua: 27, la: 25, th: 38, sh: 38, head: 10 };
+/* ============================== FIGURAS ============================== */
+// Boneco em vista lateral; ângulos em graus: 0 = para baixo, 90 = para frente, 180 = para cima, -90 = para trás.
+const L = { torso: 50, ua: 27, la: 25, th: 38, sh: 38, head: 11 };
 const GROUND = 182;
 const P = (o) => Object.assign({ hx: 100, torso: 180, ua: 0, la: 0, th: 0, sh: 0 }, o);
 const STAND = P({}), ARMS_FWD = P({ ua: 90, la: 90 }), SQUAT = P({ torso: 145, th: 100, sh: -28, ua: 95, la: 95 });
 const RACK = { ua: 100, la: -150 }, OVER = { ua: 180, la: 180 };
 const PLANK_TOP = P({ torso: 115, th: -65, sh: -65 }), PLANK_LOW = P({ torso: 99, th: -81, sh: -81, ua: -100, la: 10 });
 const LYING = { torso: -90, th: 90, sh: 0 }, QUAD = P({ torso: 90, th: 0, sh: -90 });
-const A = (frames, cycle, extra) => Object.assign({ frames, cycle, anchor: "ground", props: [] }, extra || {});
-
-const ANIM = {
-  march: A([P({ th: 90, sh: 0, ua: 60, la: 120, ua2: -30, la2: 20 }), P({ th2: 90, sh2: 0, ua2: 60, la2: 120, ua: -30, la: 20 })], 1.6),
-  shoulder_pass: A([P({ ua: 60, la: 60 }), P(OVER), P({ ua: -60, la: -60 })], 3.4, { hand: "band" }),
-  cat_cow: A([P(Object.assign({}, QUAD, { bend: 14, head: 30 })), P(Object.assign({}, QUAD, { bend: -12, head: -25 }))], 4),
-  hip_hinge: A([P({ ua: 30, la: 60 }), P({ torso: 100, th: 12, sh: -4, ua: 30, la: 60 })], 3),
-  hamstring: A([P({ torso: 110, th: 15, sh: 0, ua: 10, la: 10 }), P({ torso: 95, th: 18, sh: 0, ua: 5, la: 5 })], 4),
-  air_squat: A([ARMS_FWD, SQUAT], 2.4),
-  goblet_squat: A([P({ ua: 25, la: 165 }), P({ torso: 155, th: 100, sh: -28, ua: 50, la: 175 })], 2.8, { hand: "dumbbell" }),
-  lunge: A([STAND, P({ th: 85, sh: 0, th2: -15, sh2: -95 })], 2.8),
-  bulgarian: A([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], 3.2, { props: ["bench_back"] }),
-  deadlift: A([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], 3.4, { hand: "dumbbell", hold: .15 }),
-  kb_swing: A([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ ua: 90, la: 90 })], 2.2, { hand: "kettlebell" }),
-  glute_bridge: A([P({ torso: -90, th: 135, sh: 45, ua: -100, la: -100 }), P({ torso: -112, th: 108, sh: 15, ua: -100, la: -100 })], 2.6),
-  jump_squat: A([SQUAT, P({ ua: 160, la: 160, lift: 25 })], 2.2),
-  thruster: A([P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(RACK), P(OVER)], 2.8, { hand: "dumbbell" }),
-  db_snatch: A([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 30, la2: 60 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], 3, { hand: "dumbbell1" }),
-  sandbag_clean: A([P({ torso: 105, th: 70, sh: -15, ua: 10, la: 60 }), P({ torso: 160, th: 60, sh: -20, ua: 40, la: 150 }), P({ ua: -150, la: 30 })], 4, { hand: "sandbag" }),
-  farmer_carry: A([P({ th: 25, sh: -10, th2: -20, sh2: -20 }), P({ th2: 25, sh2: -10, th: -20, sh: -20 })], 1.3, { hand: "dumbbell" }),
-  push_up: A([PLANK_TOP, PLANK_LOW], 2.6),
-  push_up_incline: A([P({ torso: 128, th: -52, sh: -52, ua: 30, la: 30 }), P({ torso: 115, th: -65, sh: -65, ua: -80, la: 40 })], 2.6, { props: ["bench_hands"] }),
-  pike_push_up: A([P({ torso: 45, th: -35, sh: -35, ua: 5, la: 5 }), P({ torso: 50, th: -35, sh: -35, ua: -70, la: 30 })], 3),
-  db_press: A([P({ ua: 60, la: 170 }), P(OVER)], 2.8, { hand: "dumbbell" }),
-  db_push_press: A([P({ ua: 60, la: 170 }), P({ torso: 178, th: 30, sh: -20, ua: 60, la: 170 }), P(OVER)], 2.6, { hand: "dumbbell" }),
-  db_row: A([P({ torso: 110, th: 25, sh: -10, ua: 0, la: 0 }), P({ torso: 110, th: 25, sh: -10, ua: -70, la: 20 })], 2.8, { hand: "dumbbell" }),
-  band_row: A([P({ torso: 178, th: 90, sh: 90, ua: 90, la: 90 }), P({ torso: 185, th: 90, sh: 90, ua: -30, la: 85 })], 2.6, { hand: "band" }),
-  band_pulldown: A([P(Object.assign({ th: 0, sh: -90 }, OVER)), P({ th: 0, sh: -90, ua: 25, la: 160 })], 2.6, { hand: "band_up" }),
-  db_curl: A([P({}), P({ ua: 5, la: 150 })], 2.6, { hand: "dumbbell" }),
-  triceps_ext: A([P({ ua: 170, la: 20 }), P(OVER)], 2.6, { hand: "dumbbell" }),
-  db_bench_press: A([P(Object.assign({}, LYING, OVER)), P(Object.assign({}, LYING, { ua: 30, la: 175 }))], 3, { hand: "dumbbell", props: ["bench_under"] }),
-  plank: A([P({ torso: 98, th: -82, sh: -82, ua: 0, la: 90 }), P({ torso: 99, th: -81, sh: -81, ua: 0, la: 90, bend: 3 })], 3),
-  side_plank: A([P({ torso: 112, th: -68, sh: -68, ua: 0, la: 0, ua2: 180, la2: 180 }), P({ torso: 116, th: -64, sh: -64, ua: 0, la: 0, ua2: 180, la2: 180 })], 3),
-  dead_bug: A([P(Object.assign({}, LYING, { th: 180, sh: 90 }, OVER)), P(Object.assign({}, LYING, { th: 120, sh: 115, th2: 180, sh2: 90, ua: -100, la: -100, ua2: 180, la2: 180 }))], 3.2),
-  hollow_hold: A([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100, bend: 5 }), P({ torso: -96, th: 98, sh: 98, ua: -96, la: -96, bend: 6 })], 2.4),
-  sit_up: A([P({ torso: -90, th: 60, sh: -40, ua: -90, la: -90 }), P({ torso: 145, th: 60, sh: -40, ua: 120, la: 120 })], 2.6),
-  tuck_up: A([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100 }), P({ torso: -140, th: 150, sh: 10, ua: 100, la: 100, bend: 8 })], 2.6),
-  mountain_climber: A([P(Object.assign({}, PLANK_TOP, { th: 70, sh: -60 })), P(Object.assign({}, PLANK_TOP, { th2: 70, sh2: -60 }))], 1.1),
-  superman: A([P({ torso: 90, th: -90, sh: -90, ua: 90, la: 90 }), P({ torso: 100, th: -100, sh: -100, ua: 100, la: 100 })], 3),
-  burpee: A([STAND, P({ torso: 140, th: 105, sh: -35 }), PLANK_TOP, P({ torso: 92, th: -88, sh: -88, ua: -110, la: 10 }), PLANK_TOP, P({ torso: 140, th: 105, sh: -35 }), P(Object.assign({ lift: 20 }, OVER))], 4.4),
-  burpee_step: A([STAND, P({ torso: 140, th: 105, sh: -35 }), P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55 }), PLANK_TOP, P({ torso: 140, th: 105, sh: -35 }), STAND], 5),
-  bike: A([P({ torso: 130, ua: 100, la: 100, th: 100, sh: 10, th2: 45, sh2: -20 }), P({ torso: 130, ua: 100, la: 100, th: 60, sh: -30, th2: 95, sh2: 20 }), P({ torso: 130, ua: 100, la: 100, th: 45, sh: -20, th2: 100, sh2: 10 }), P({ torso: 130, ua: 100, la: 100, th: 95, sh: 20, th2: 60, sh2: -30 })], 1.4, { anchor: "seat", props: ["bike"] }),
-  run: A([P({ torso: 172, th: 45, sh: -10, th2: -30, sh2: -80, ua: -40, la: 50, ua2: 40, la2: 110 }), P({ torso: 172, th2: 45, sh2: -10, th: -30, sh: -80, ua2: -40, la2: 50, ua: 40, la: 110, lift: 6 })], 1),
+const SQ_LOW = P({ torso: 140, th: 105, sh: -35 });
+// F(frames, opções). Cada frame = uma etapa ilustrada.
+const F = (frames, extra) => Object.assign({ frames, anchor: "ground", props: [] }, extra || {});
+const FIG = {
+  march: F([P({ th: 90, sh: 0, ua: 60, la: 120, ua2: -30, la2: 20 }), P({ th2: 90, sh2: 0, ua2: 60, la2: 120, ua: -30, la: 20 })]),
+  shoulder_pass: F([P({ ua: 60, la: 60 }), P(OVER), P({ ua: -60, la: -60 })], { hand: "band" }),
+  cat_cow: F([P(Object.assign({}, QUAD, { bend: 14, head: 30 })), P(Object.assign({}, QUAD, { bend: -12, head: -25 }))]),
+  hip_hinge: F([P({ ua: 30, la: 60 }), P({ torso: 100, th: 12, sh: -4, ua: 30, la: 60 })]),
+  hamstring: F([P({ ua: 0, la: 0 }), P({ torso: 95, th: 18, sh: 0, ua: 5, la: 5 })]),
+  air_squat: F([ARMS_FWD, SQUAT]),
+  goblet_squat: F([P({ ua: 25, la: 165 }), P({ torso: 155, th: 100, sh: -28, ua: 50, la: 175 })], { hand: "dumbbell1" }),
+  lunge: F([STAND, P({ th: 85, sh: 0, th2: -15, sh2: -95 })]),
+  bulgarian: F([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], { props: ["bench_back"] }),
+  deadlift: F([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell" }),
+  kb_swing: F([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ torso: 150, th: 10, sh: -2, ua: 30, la: 30 }), P({ ua: 90, la: 90 })], { hand: "kettlebell" }),
+  glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: -100, la: -100 }), P({ torso: -112, th: 108, sh: 15, ua: -100, la: -100 })]),
+  jump_squat: F([SQUAT, P({ ua: 160, la: 160, lift: 25 })]),
+  thruster: F([P(RACK), P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(OVER)], { hand: "dumbbell" }),
+  db_snatch: F([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 30, la2: 60 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], { hand: "dumbbell1" }),
+  sandbag_clean: F([P({ torso: 105, th: 70, sh: -15, ua: 10, la: 60 }), P({ torso: 160, th: 60, sh: -20, ua: 40, la: 150 }), P({ ua: -150, la: 30 })], { hand: "sandbag" }),
+  farmer_carry: F([P({ th: 25, sh: -10, th2: -20, sh2: -20 })], { hand: "dumbbell" }),
+  push_up: F([PLANK_TOP, PLANK_LOW]),
+  push_up_incline: F([P({ torso: 128, th: -52, sh: -52, ua: 30, la: 30 }), P({ torso: 115, th: -65, sh: -65, ua: -80, la: 40 })], { props: ["bench_hands"] }),
+  pike_push_up: F([P({ torso: 45, th: -35, sh: -35, ua: 5, la: 5 }), P({ torso: 50, th: -35, sh: -35, ua: -70, la: 30 })]),
+  db_press: F([P({ ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell" }),
+  db_push_press: F([P({ ua: 60, la: 170 }), P({ torso: 178, th: 30, sh: -20, ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell" }),
+  db_row: F([P({ torso: 110, th: 25, sh: -10, ua: 0, la: 0 }), P({ torso: 110, th: 25, sh: -10, ua: -70, la: 20 })], { hand: "dumbbell" }),
+  band_row: F([P({ torso: 178, th: 90, sh: 90, ua: 90, la: 90 }), P({ torso: 185, th: 90, sh: 90, ua: -30, la: 85 })], { hand: "band" }),
+  band_pulldown: F([P(Object.assign({ th: 0, sh: -90 }, OVER)), P({ th: 0, sh: -90, ua: 25, la: 160 })], { hand: "band_up" }),
+  db_curl: F([P({}), P({ ua: 5, la: 150 })], { hand: "dumbbell" }),
+  triceps_ext: F([P({ ua: 170, la: 20 }), P(OVER)], { hand: "dumbbell" }),
+  db_bench_press: F([P(Object.assign({}, LYING, { ua: 30, la: 175 })), P(Object.assign({}, LYING, OVER))], { hand: "dumbbell", props: ["bench_under"] }),
+  plank: F([P({ torso: 98, th: -82, sh: -82, ua: 0, la: 90 })]),
+  side_plank: F([P({ torso: 114, th: -66, sh: -66, ua: 0, la: 0, ua2: 180, la2: 180 })]),
+  dead_bug: F([P(Object.assign({}, LYING, { th: 180, sh: 90 }, OVER)), P(Object.assign({}, LYING, { th: 120, sh: 115, th2: 180, sh2: 90, ua: -100, la: -100, ua2: 180, la2: 180 }))]),
+  hollow_hold: F([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100, bend: 5 })]),
+  sit_up: F([P({ torso: -90, th: 60, sh: -40, ua: -90, la: -90 }), P({ torso: 145, th: 60, sh: -40, ua: 120, la: 120 })]),
+  tuck_up: F([P({ torso: -100, th: 102, sh: 102, ua: -100, la: -100 }), P({ torso: -140, th: 150, sh: 10, ua: 100, la: 100, bend: 8 })]),
+  mountain_climber: F([P(Object.assign({}, PLANK_TOP, { th: 70, sh: -60 })), P(Object.assign({}, PLANK_TOP, { th2: 70, sh2: -60 }))]),
+  superman: F([P({ torso: 90, th: -90, sh: -90, ua: 90, la: 90 }), P({ torso: 100, th: -100, sh: -100, ua: 100, la: 100 })]),
+  burpee: F([STAND, SQ_LOW, PLANK_TOP, P({ torso: 92, th: -88, sh: -88, ua: -110, la: 10 }), P(Object.assign({ lift: 20 }, OVER))]),
+  burpee_step: F([SQ_LOW, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55 }), PLANK_TOP, STAND]),
+  bike: F([P({ torso: 130, ua: 100, la: 100, th: 100, sh: 10, th2: 45, sh2: -20 })], { anchor: "seat", props: ["bike"] }),
+  run: F([P({ torso: 172, th: 45, sh: -10, th2: -30, sh2: -80, ua: -40, la: 50, ua2: 40, la2: 110 })]),
 };
 
 const dirv = (d) => [Math.sin(d * Math.PI / 180), Math.cos(d * Math.PI / 180)];
@@ -224,13 +240,13 @@ const add = (p, d, l) => [p[0] + d[0] * l, p[1] + d[1] * l];
 function skeleton(p, anchor) {
   const hip = [p.hx, 0], td = dirv(p.torso), sho = add(hip, td, L.torso);
   const mid = [(hip[0] + sho[0]) / 2, (hip[1] + sho[1]) / 2], perp = [-td[1], td[0]];
-  const s = {
-    hip, sho, ctrl: add(mid, perp, -(p.bend || 0)), head: add(sho, dirv(p.torso + (p.head || 0)), L.head + 3),
-  };
+  const s = { hip, sho, ctrl: add(mid, perp, -(p.bend || 0)), head: add(sho, dirv(p.torso + (p.head || 0)), L.head + 3) };
   s.elb = add(sho, dirv(p.ua), L.ua); s.hand = add(s.elb, dirv(p.la), L.la);
   s.elb2 = add(sho, dirv(p.ua2 ?? p.ua), L.ua); s.hand2 = add(s.elb2, dirv(p.la2 ?? p.la), L.la);
   s.knee = add(hip, dirv(p.th), L.th); s.foot = add(s.knee, dirv(p.sh), L.sh);
   s.knee2 = add(hip, dirv(p.th2 ?? p.th), L.th); s.foot2 = add(s.knee2, dirv(p.sh2 ?? p.sh), L.sh);
+  s.toe = add(s.foot, [Math.cos(p.sh * Math.PI / 180), -Math.sin(p.sh * Math.PI / 180)], 10);
+  const sh2 = p.sh2 ?? p.sh; s.toe2 = add(s.foot2, [Math.cos(sh2 * Math.PI / 180), -Math.sin(sh2 * Math.PI / 180)], 10);
   let dy;
   if (anchor === "seat") dy = 112 - hip[1];
   else {
@@ -240,141 +256,142 @@ function skeleton(p, anchor) {
   for (const k in s) s[k] = [s[k][0], s[k][1] + dy];
   return s;
 }
-const ease = (t) => t * t * (3 - 2 * t);
-function lerp(a, b, t) {
-  const k = ease(t), l = (x, y, d = 0) => (x ?? d) + ((y ?? d) - (x ?? d)) * k, o = {};
-  for (const key of ["hx", "torso", "bend", "head", "ua", "la", "th", "sh", "lift"]) o[key] = l(a[key], b[key]);
-  o.ua2 = l(a.ua2 ?? a.ua, b.ua2 ?? b.ua); o.la2 = l(a.la2 ?? a.la, b.la2 ?? b.la);
-  o.th2 = l(a.th2 ?? a.th, b.th2 ?? b.th); o.sh2 = l(a.sh2 ?? a.sh, b.sh2 ?? b.sh);
-  return o;
-}
-function poseAt(an, ph) {
-  const f = an.frames; if (f.length === 1) return f[0];
-  const seq = [...f, f[0]], segs = seq.length - 1, hold = an.hold || 0, segT = (1 - hold) / segs, holdAt = Math.floor(segs / 2);
-  let acc = 0; const p = ph % 1;
-  for (let i = 0; i < segs; i++) {
-    if (hold && i === holdAt) { if (p < acc + hold) return seq[i]; acc += hold; }
-    if (p < acc + segT) return lerp(seq[i], seq[i + 1], (p - acc) / segT);
-    acc += segT;
+const f1 = (n) => n.toFixed(1);
+const pt = (p) => `${f1(p[0])},${f1(p[1])}`;
+function propSVG(fig, s) {
+  const out = [];
+  for (const pr of fig.props) {
+    if (pr === "bench_under") out.push(`<rect x="${f1(s.hip[0] - 62)}" y="${f1(s.hip[1] + 8)}" width="74" height="9" rx="3" fill="var(--prop)"/><rect x="${f1(s.hip[0] - 50)}" y="${f1(s.hip[1] + 15)}" width="6" height="${f1(GROUND + 6 - s.hip[1] - 15)}" fill="var(--prop)"/><rect x="${f1(s.hip[0] - 2)}" y="${f1(s.hip[1] + 15)}" width="6" height="${f1(GROUND + 6 - s.hip[1] - 15)}" fill="var(--prop)"/>`);
+    if (pr === "bench_hands") out.push(`<rect x="${f1(s.hand[0] - 24)}" y="${f1(s.hand[1] + 5)}" width="44" height="${f1(GROUND + 6 - s.hand[1] - 5)}" rx="3" fill="var(--prop)" opacity=".5"/>`);
+    if (pr === "bench_back") out.push(`<rect x="${f1(s.foot2[0] - 22)}" y="${f1(s.foot2[1] + 6)}" width="36" height="${f1(GROUND + 6 - s.foot2[1] - 6)}" rx="3" fill="var(--prop)" opacity=".5"/>`);
+    if (pr === "bike") out.push(`<g stroke="var(--prop)" stroke-width="5" fill="none" stroke-linecap="round"><line x1="${s.hip[0] - 14}" y1="${f1(s.hip[1] + 9)}" x2="${s.hip[0] + 12}" y2="${f1(s.hip[1] + 9)}"/><line x1="${s.hip[0]}" y1="${f1(s.hip[1] + 9)}" x2="${s.hip[0] + 14}" y2="${GROUND}"/><line x1="${s.hip[0] - 10}" y1="${GROUND}" x2="${s.hip[0] + 80}" y2="${GROUND}"/><line x1="${s.hip[0] + 64}" y1="${GROUND}" x2="${s.hip[0] + 70}" y2="${f1(s.hand[1] + 6)}"/><circle cx="${s.hip[0] + 22}" cy="${f1(s.hip[1] + 54)}" r="15"/></g>`);
   }
-  return seq[segs];
-}
-const pt = (p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
-function figureSVG(id, s) {
-  const an = ANIM[id], out = [];
-  const limb = (a, b, c, far) => `<polyline points="${pt(a)} ${pt(b)} ${pt(c)}" fill="none" stroke="var(${far ? "--fig-far" : "--fig"})" stroke-width="${far ? 10 : 12}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  out.push(`<line x1="-40" y1="${GROUND + 6}" x2="240" y2="${GROUND + 6}" stroke="var(--line)" stroke-width="3"/>`);
-  for (const pr of an.props) {
-    if (pr === "bench_under") out.push(`<rect x="${(s.hip[0] - 62).toFixed(1)}" y="${(s.hip[1] + 7).toFixed(1)}" width="74" height="9" rx="3" fill="var(--prop)"/><rect x="${(s.hip[0] - 50).toFixed(1)}" y="${(s.hip[1] + 14).toFixed(1)}" width="6" height="${(GROUND + 6 - s.hip[1] - 14).toFixed(1)}" fill="var(--prop)"/><rect x="${(s.hip[0] - 2).toFixed(1)}" y="${(s.hip[1] + 14).toFixed(1)}" width="6" height="${(GROUND + 6 - s.hip[1] - 14).toFixed(1)}" fill="var(--prop)"/>`);
-    if (pr === "bench_hands") out.push(`<rect x="${(s.hand[0] - 24).toFixed(1)}" y="${(s.hand[1] + 4).toFixed(1)}" width="44" height="${(GROUND + 6 - s.hand[1] - 4).toFixed(1)}" rx="3" fill="var(--prop)" opacity=".55"/>`);
-    if (pr === "bench_back") out.push(`<rect x="${(s.foot2[0] - 22).toFixed(1)}" y="${(s.foot2[1] + 5).toFixed(1)}" width="36" height="${(GROUND + 6 - s.foot2[1] - 5).toFixed(1)}" rx="3" fill="var(--prop)" opacity=".55"/>`);
-    if (pr === "bike") out.push(`<g stroke="var(--prop)" stroke-width="5" fill="none" stroke-linecap="round"><line x1="${s.hip[0] - 14}" y1="${s.hip[1] + 8}" x2="${s.hip[0] + 12}" y2="${s.hip[1] + 8}"/><line x1="${s.hip[0]}" y1="${s.hip[1] + 8}" x2="${s.hip[0] + 14}" y2="${GROUND}"/><line x1="${s.hip[0] - 10}" y1="${GROUND}" x2="${s.hip[0] + 80}" y2="${GROUND}"/><line x1="${s.hip[0] + 64}" y1="${GROUND}" x2="${s.hip[0] + 70}" y2="${s.hand[1] + 6}"/><circle cx="${s.hip[0] + 22}" cy="${s.hip[1] + 54}" r="15"/></g>`);
-  }
-  out.push(limb(s.hip, s.knee2, s.foot2, true), limb(s.sho, s.elb2, s.hand2, true));
-  out.push(`<path d="M${pt(s.hip)} Q${pt(s.ctrl)} ${pt(s.sho)}" fill="none" stroke="var(--fig)" stroke-width="17" stroke-linecap="round"/>`);
-  out.push(limb(s.hip, s.knee, s.foot, false), limb(s.sho, s.elb, s.hand, false));
-  out.push(`<circle cx="${s.head[0].toFixed(1)}" cy="${s.head[1].toFixed(1)}" r="${L.head + 1}" fill="var(--fig)"/>`);
-  const h = an.hand;
-  const db = (p) => `<g fill="var(--sup)"><rect x="${(p[0] - 11).toFixed(1)}" y="${(p[1] - 5).toFixed(1)}" width="22" height="10" rx="3"/><rect x="${(p[0] - 13).toFixed(1)}" y="${(p[1] - 8).toFixed(1)}" width="7" height="16" rx="2"/><rect x="${(p[0] + 6).toFixed(1)}" y="${(p[1] - 8).toFixed(1)}" width="7" height="16" rx="2"/></g>`;
-  if (h === "dumbbell") out.push(db(s.hand2), db(s.hand));
-  if (h === "dumbbell1") out.push(db(s.hand));
-  if (h === "kettlebell") out.push(`<circle cx="${s.hand[0].toFixed(1)}" cy="${(s.hand[1] + 11).toFixed(1)}" r="10" fill="var(--pernas)"/><path d="M${(s.hand[0] - 6).toFixed(1)},${(s.hand[1] + 4).toFixed(1)} Q${s.hand[0].toFixed(1)},${(s.hand[1] - 6).toFixed(1)} ${(s.hand[0] + 6).toFixed(1)},${(s.hand[1] + 4).toFixed(1)}" stroke="var(--pernas)" stroke-width="3.5" fill="none"/>`);
-  if (h === "sandbag") out.push(`<rect x="${(s.hand[0] - 19).toFixed(1)}" y="${(s.hand[1] - 9).toFixed(1)}" width="38" height="18" rx="8" fill="var(--prop)"/>`);
-  if (h === "band") out.push(`<path d="M${pt(s.hand)} Q${((s.hand[0] + s.foot[0]) / 2 + 12).toFixed(1)},${((s.hand[1] + s.foot[1]) / 2).toFixed(1)} ${pt(s.foot)}" stroke="var(--cardio)" stroke-width="4" fill="none" stroke-dasharray="7 4"/>`);
-  if (h === "band_up") out.push(`<line x1="${pt(s.hand).split(",")[0]}" y1="${pt(s.hand).split(",")[1]}" x2="${s.hand[0].toFixed(1)}" y2="-20" stroke="var(--cardio)" stroke-width="4" stroke-dasharray="7 4"/>`);
   return out.join("");
 }
-// Enquadra o movimento: calcula a caixa de todas as poses para o boneco ocupar o quadro.
+function handSVG(fig, s) {
+  const h = fig.hand, out = [];
+  const db = (p) => `<g fill="var(--sup)"><rect x="${f1(p[0] - 11)}" y="${f1(p[1] - 5)}" width="22" height="10" rx="3"/><rect x="${f1(p[0] - 13)}" y="${f1(p[1] - 9)}" width="7" height="18" rx="2"/><rect x="${f1(p[0] + 6)}" y="${f1(p[1] - 9)}" width="7" height="18" rx="2"/></g>`;
+  if (h === "dumbbell") out.push(db(s.hand2), db(s.hand));
+  if (h === "dumbbell1") out.push(db(s.hand));
+  if (h === "kettlebell") out.push(`<circle cx="${f1(s.hand[0])}" cy="${f1(s.hand[1] + 12)}" r="11" fill="var(--pernas)"/><path d="M${f1(s.hand[0] - 6)},${f1(s.hand[1] + 4)} Q${f1(s.hand[0])},${f1(s.hand[1] - 6)} ${f1(s.hand[0] + 6)},${f1(s.hand[1] + 4)}" stroke="var(--pernas)" stroke-width="3.5" fill="none"/>`);
+  if (h === "sandbag") out.push(`<rect x="${f1(s.hand[0] - 20)}" y="${f1(s.hand[1] - 10)}" width="40" height="20" rx="9" fill="var(--prop)"/>`);
+  if (h === "band") out.push(`<path d="M${pt(s.hand)} Q${f1((s.hand[0] + s.foot[0]) / 2 + 12)},${f1((s.hand[1] + s.foot[1]) / 2)} ${pt(s.foot)}" stroke="var(--cardio)" stroke-width="4" fill="none" stroke-dasharray="7 4"/>`);
+  if (h === "band_up") out.push(`<line x1="${f1(s.hand[0])}" y1="${f1(s.hand[1])}" x2="${f1(s.hand[0])}" y2="-30" stroke="var(--cardio)" stroke-width="4" stroke-dasharray="7 4"/>`);
+  return out.join("");
+}
+function bodySVGFig(s) {
+  const limb = (a, b, c, far) => `<polyline points="${pt(a)} ${pt(b)} ${pt(c)}" fill="none" stroke="var(${far ? "--fig-far" : "--fig"})" stroke-width="${far ? 11 : 13}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const foot = (a, b, far) => `<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="var(${far ? "--fig-far" : "--fig"})" stroke-width="${far ? 8 : 9}" stroke-linecap="round"/>`;
+  return [
+    limb(s.hip, s.knee2, s.foot2, true), foot(s.foot2, s.toe2, true), limb(s.sho, s.elb2, s.hand2, true),
+    `<path d="M${pt(s.hip)} Q${pt(s.ctrl)} ${pt(s.sho)}" fill="none" stroke="var(--fig)" stroke-width="20" stroke-linecap="round"/>`,
+    limb(s.hip, s.knee, s.foot, false), foot(s.foot, s.toe, false), limb(s.sho, s.elb, s.hand, false),
+    `<circle cx="${f1(s.head[0])}" cy="${f1(s.head[1])}" r="${L.head + 1}" fill="var(--fig)"/>`,
+  ].join("");
+}
+// Seta do movimento: aponta do ponto que mais se desloca até onde ele vai na etapa seguinte.
+function arrowSVG(a, b) {
+  let best = null;
+  for (const k of ["hand", "hip", "head", "knee", "foot", "sho"]) {
+    const d = Math.hypot(b[k][0] - a[k][0], b[k][1] - a[k][1]);
+    if (!best || d > best.d) best = { k, d };
+  }
+  if (!best || best.d < 14) return "";
+  const p0 = a[best.k], p1 = b[best.k];
+  const ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+  const off = 18; // afasta a seta do corpo
+  const nx = -Math.sin(ang) * off, ny = Math.cos(ang) * off;
+  const len = Math.min(best.d * 0.75, 70);
+  const sx = p0[0] + nx, sy = p0[1] + ny, ex = sx + Math.cos(ang) * len, ey = sy + Math.sin(ang) * len;
+  const h1 = [ex - Math.cos(ang - 0.5) * 11, ey - Math.sin(ang - 0.5) * 11], h2 = [ex - Math.cos(ang + 0.5) * 11, ey - Math.sin(ang + 0.5) * 11];
+  return `<g stroke="var(--arrow)" stroke-width="4" stroke-linecap="round" fill="none"><line x1="${f1(sx)}" y1="${f1(sy)}" x2="${f1(ex)}" y2="${f1(ey)}"/><polyline points="${pt(h1)} ${f1(ex)},${f1(ey)} ${pt(h2)}"/></g>`;
+}
 const VB = {};
 function viewBoxFor(id) {
   if (VB[id]) return VB[id];
-  const an = ANIM[id]; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-  for (let i = 0; i < 24; i++) {
-    const s = skeleton(poseAt(an, i / 24), an.anchor);
-    for (const k in s) { const r = k === "head" ? L.head + 8 : 14; x0 = Math.min(x0, s[k][0] - r); x1 = Math.max(x1, s[k][0] + r); y0 = Math.min(y0, s[k][1] - r); y1 = Math.max(y1, s[k][1] + r); }
+  const fig = FIG[id]; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const fr of fig.frames) {
+    const s = skeleton(fr, fig.anchor);
+    for (const k in s) { const r = k === "head" ? L.head + 8 : 16; x0 = Math.min(x0, s[k][0] - r); x1 = Math.max(x1, s[k][0] + r); y0 = Math.min(y0, s[k][1] - r); y1 = Math.max(y1, s[k][1] + r); }
   }
-  if (an.props.includes("bike")) x1 = Math.max(x1, 190);
-  if (an.props.includes("bench_under")) x0 -= 8;
+  if (fig.props.includes("bike")) x1 = Math.max(x1, 192);
+  if (fig.props.includes("bench_under")) x0 -= 8;
   y1 = Math.max(y1, GROUND + 12);
   let w = x1 - x0, h = y1 - y0;
-  // O quadro segue o formato do movimento (de pé = mais alto; deitado = mais largo), entre 1,1:1 e 2,4:1.
-  const ar = Math.min(2.4, Math.max(1.1, w / h));
+  const ar = Math.min(2.2, Math.max(0.85, w / h));
   if (w / h < ar) { const nw = h * ar; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ar; y0 -= (nh - h); h = nh; }
-  return (VB[id] = { box: `${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`, ar });
+  return (VB[id] = { box: `${f1(x0)} ${f1(y0)} ${f1(w)} ${f1(h)}`, ar });
 }
-function animSVG(id, phase) {
-  const an = ANIM[id]; if (!an) return "";
-  return `<svg viewBox="${viewBoxFor(id).box}" role="img" aria-label="Demonstração: ${LIB[id]?.pt ?? id}">${figureSVG(id, skeleton(poseAt(an, phase), an.anchor))}</svg>`;
+function stepSVG(id, i) {
+  const fig = FIG[id], fr = fig.frames, s = skeleton(fr[i], fig.anchor);
+  const next = i + 1 < fr.length ? skeleton(fr[i + 1], fig.anchor) : null;
+  return `<svg viewBox="${viewBoxFor(id).box}" role="img" aria-label="Etapa ${i + 1}: ${esc(LIB[id]?.steps?.[i] ?? "")}">
+    <line x1="-60" y1="${GROUND + 6}" x2="260" y2="${GROUND + 6}" stroke="var(--line)" stroke-width="3"/>
+    ${propSVG(fig, s)}${bodySVGFig(s)}${handSVG(fig, s)}${next ? arrowSVG(s, next) : ""}</svg>`;
 }
-// Um único laço anima todos os quadros visíveis.
-const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const visible = new Set();
-const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting ? visible.add(e.target) : visible.delete(e.target))) : null;
-function mountStage(el, id, slow) {
-  el.dataset.anim = id; el.dataset.slow = slow ? "1" : "";
-  el.innerHTML = animSVG(id, REDUCED ? 0.25 : 0);
-  if (el.classList.contains("stage")) el.style.aspectRatio = String(viewBoxFor(id).ar);
-  if (io) io.observe(el); else visible.add(el);
+function stepsHTML(id) {
+  const fig = FIG[id], n = fig.frames.length, e = LIB[id];
+  const wide = viewBoxFor(id).ar > 1.5;
+  const cols = n === 1 || (wide && n <= 2) ? (n === 1 ? "c1" : "c1") : n === 2 ? "c2" : n === 3 ? "c3" : "c2";
+  return `<div class="steps ${wide && n > 1 ? "c1" : cols}">${fig.frames.map((_, i) => `<div class="step">${stepSVG(id, i)}<div class="cap">${n > 1 ? `<span class="n">${i + 1}</span>` : ""}<span>${esc(e.steps[i] || "")}</span></div></div>`).join("")}</div>`;
 }
-let t0 = performance.now();
-function tick(t) {
-  if (!REDUCED) for (const el of visible) {
-    if (!el.isConnected) { visible.delete(el); continue; }
-    const an = ANIM[el.dataset.anim]; if (!an) continue;
-    const cyc = an.cycle * (el.dataset.slow ? 1.5 : 1.25);
-    el.innerHTML = animSVG(el.dataset.anim, ((t - t0) / 1000 / cyc) % 1);
-  }
-  requestAnimationFrame(tick);
-}
-requestAnimationFrame(tick);
 
 /* ============================== BIBLIOTECA ============================== */
-// g = grupo principal; eq = alternativas de equipamento ([] = peso do corpo); quiet = serve no quarto.
-const X = (id, pt, en, g, eq, o) => Object.assign({ id, pt, en, g, eq, quiet: true, unit: "reps", base: 10, sec: 2.5, load: false, tips: [] }, o);
+// g = grupo principal; eq = alternativas de equipamento ([] = peso do corpo); m = modalidade CrossFit (M cardio, G ginástica, W levantamento).
+const X = (id, pt, en, g, eq, steps, o) => Object.assign({ id, pt, en, g, eq, steps, quiet: true, unit: "reps", base: 10, sec: 2.5, load: false, tips: [] }, o);
 const LIB = Object.fromEntries([
-  X("march", "Marcha com joelho alto", "High-knee march", "cardio", [[]], { unit: "s", base: 45, warm: true, tips: ["Joelho na altura do quadril", "Braços acompanham, sem bater o pé"] }),
-  X("shoulder_pass", "Rotação de ombro com elástico", "Band pass-through", "mob", [["elastico"], []], { warm: true, base: 10, sec: 4, tips: ["Braços esticados, pegada larga", "Sem elástico: use uma toalha"] }),
-  X("cat_cow", "Gato e camelo", "Cat-cow", "mob", [[]], { warm: true, cool: true, base: 8, sec: 4, tips: ["Arredonde e estenda a coluna devagar", "Siga a respiração"] }),
-  X("hip_hinge", "Dobradiça de quadril", "Hip hinge", "mob", [[]], { warm: true, base: 10, sec: 3, tips: ["Quadril vai para trás, costas retas", "Sinta o alongamento atrás da coxa"] }),
-  X("hamstring", "Alongamento de posterior", "Hamstring stretch", "mob", [[]], { cool: true, unit: "s", base: 40, tips: ["Joelhos levemente soltos", "Respire fundo, sem forçar"] }),
-  X("air_squat", "Agachamento livre", "Air squat", "pernas", [[]], { base: 15, sec: 2, warm: true, tips: ["Quadril abaixo do joelho se der", "Calcanhar no chão, joelho aponta para o pé"] }),
-  X("goblet_squat", "Agachamento goblet", "Goblet squat", "pernas", [["halter"], ["kb"], ["sandbag"]], { base: 12, sec: 2.8, load: true, tips: ["Carga colada no peito", "Desça entre os joelhos com o peito aberto"] }),
-  X("lunge", "Avanço", "Lunge", "pernas", [[]], { base: 12, sec: 2.6, tips: ["Joelho de trás quase toca o chão", "Tronco reto, alterne as pernas"] }),
-  X("bulgarian", "Agachamento búlgaro", "Bulgarian split squat", "pernas", [["banco"]], { base: 8, sec: 3, tips: ["Pé de trás apoiado no banco", "Desça na vertical; faça os dois lados"] }),
-  X("deadlift", "Levantamento terra", "Deadlift", "pernas", [["halter"], ["sandbag"], ["barra"]], { base: 10, sec: 3.5, load: true, quiet: false, tips: ["Costas retas, carga perto das pernas", "Empurre o chão e estenda o quadril"] }),
-  X("kb_swing", "Kettlebell swing", "Kettlebell swing", "pernas", [["kb"], ["halter"]], { base: 15, sec: 2.2, load: true, quiet: false, tips: ["O impulso vem do quadril, não dos braços", "Suba até a altura dos olhos"] }),
-  X("glute_bridge", "Ponte de glúteo", "Glute bridge", "pernas", [[]], { base: 15, sec: 2.5, warm: true, tips: ["Suba o quadril apertando o glúteo", "Desça devagar"] }),
-  X("jump_squat", "Agachamento com salto", "Jump squat", "pernas", [[]], { base: 10, sec: 2.2, quiet: false, jump: true, tips: ["Aterrisse macio", "Emende o próximo salto"] }),
-  X("thruster", "Thruster", "Thruster", "full", [["halter"], ["sandbag"], ["barra"]], { base: 10, sec: 3, load: true, quiet: false, tips: ["Agache com a carga nos ombros", "Use a subida para empurrar acima da cabeça"] }),
-  X("db_snatch", "Snatch com halter", "Dumbbell snatch", "full", [["halter"]], { base: 10, sec: 2.8, load: true, quiet: false, tips: ["Explosão do quadril leva o halter", "Alterne o braço a cada repetição"] }),
-  X("sandbag_clean", "Sandbag ao ombro", "Sandbag to shoulder", "full", [["sandbag"]], { base: 8, sec: 4.5, load: true, quiet: false, tips: ["Abrace o saco com as costas retas", "Jogue sobre um ombro; alterne os lados"] }),
-  X("farmer_carry", "Caminhada do fazendeiro", "Farmer's carry", "core", [["halter"], ["sandbag"]], { unit: "s", base: 40, load: true, tips: ["Ombros para trás, abdômen firme", "Passos curtos"] }),
-  X("push_up", "Flexão de braço", "Push-up", "sup", [[]], { base: 12, sec: 2.5, tips: ["Corpo reto como uma prancha", "Peito quase no chão"] }),
-  X("push_up_incline", "Flexão inclinada", "Incline push-up", "sup", [["banco"], []], { base: 12, sec: 2.3, tips: ["Mãos no banco ou na cama", "Mais fácil que a flexão no chão"] }),
-  X("pike_push_up", "Flexão pike", "Pike push-up", "sup", [[]], { base: 8, sec: 3, tips: ["Quadril alto, em V invertido", "Cabeça desce à frente das mãos"] }),
-  X("db_press", "Desenvolvimento com halter", "Dumbbell press", "sup", [["halter"]], { base: 10, sec: 3, load: true, tips: ["Abdômen e glúteo firmes", "Empurre até esticar os braços"] }),
-  X("db_push_press", "Push press com halter", "Dumbbell push press", "sup", [["halter"]], { base: 10, sec: 2.6, load: true, tips: ["Pequena flexão de joelho", "As pernas ajudam a subir a carga"] }),
-  X("db_row", "Remada curvada", "Bent-over row", "sup", [["halter"], ["sandbag"]], { base: 12, sec: 2.8, load: true, tips: ["Tronco inclinado, costas retas", "Puxe o cotovelo para trás"] }),
-  X("band_row", "Remada com elástico", "Band row", "sup", [["elastico"]], { base: 15, sec: 2.5, tips: ["Sentado, elástico nos pés", "Aproxime as escápulas"] }),
-  X("band_pulldown", "Puxada com elástico", "Band pulldown", "sup", [["elastico"]], { base: 15, sec: 2.5, tips: ["Elástico preso no alto da porta", "Cotovelos descem até o tronco"] }),
-  X("db_curl", "Rosca bíceps", "Biceps curl", "sup", [["halter"], ["elastico"]], { base: 12, sec: 2.5, load: true, tips: ["Cotovelos colados no corpo", "Desça devagar"] }),
-  X("triceps_ext", "Tríceps acima da cabeça", "Overhead triceps extension", "sup", [["halter"], ["elastico"]], { base: 12, sec: 2.5, load: true, tips: ["Cotovelos apontam para cima", "Estique os braços por completo"] }),
-  X("db_bench_press", "Supino com halteres", "Dumbbell bench press", "sup", [["halter", "banco"]], { base: 10, sec: 3, load: true, tips: ["Escápulas apoiadas no banco", "Cotovelos a 45° do corpo"] }),
-  X("plank", "Prancha", "Plank", "core", [[]], { unit: "s", base: 40, tips: ["Cotovelos abaixo dos ombros", "Quadril alinhado, respire"] }),
-  X("side_plank", "Prancha lateral", "Side plank", "core", [[]], { unit: "s", base: 30, tips: ["Quadril alto", "Faça os dois lados"] }),
-  X("dead_bug", "Dead bug", "Dead bug", "core", [[]], { base: 12, sec: 3, warm: true, tips: ["Lombar colada no chão", "Estique braço e perna opostos"] }),
-  X("hollow_hold", "Canoinha (hollow hold)", "Hollow hold", "core", [[]], { unit: "s", base: 25, tips: ["Lombar no chão", "Dobre os joelhos para facilitar"] }),
-  X("sit_up", "Abdominal completo", "Sit-up", "core", [[]], { base: 15, sec: 2.5, tips: ["Sola dos pés juntas", "Toque o chão atrás e à frente"] }),
-  X("tuck_up", "Abdominal grupado", "Tuck-up", "core", [[]], { base: 12, sec: 2.5, tips: ["Joelhos e peito se encontram", "Volte controlando"] }),
-  X("mountain_climber", "Escalador", "Mountain climber", "core", [[]], { base: 30, sec: 0.8, tips: ["Prancha alta, quadril baixo", "Joelhos alternam rápido"] }),
-  X("superman", "Super-homem", "Superman", "core", [[]], { base: 12, sec: 3, cool: true, tips: ["Eleve braços e pernas juntos", "Segure 2 segundos em cima"] }),
-  X("burpee", "Burpee", "Burpee", "cardio", [[]], { base: 10, sec: 4, quiet: false, jump: true, tips: ["Peito no chão", "Pule batendo palmas acima da cabeça"] }),
-  X("burpee_step", "Burpee sem salto", "Step-back burpee", "cardio", [[]], { base: 10, sec: 4.5, tips: ["Um pé de cada vez para trás", "Silencioso, ótimo para o quarto"] }),
-  X("bike", "Bike", "Bike", "cardio", [["bike"]], { unit: "s", base: 60, quiet: false, warm: true, tips: ["Ritmo em que dá para falar frases curtas", "Banco na altura do quadril"] }),
-  X("run", "Corrida na esteira", "Treadmill run", "cardio", [["esteira"]], { unit: "s", base: 60, quiet: false, warm: true, tips: ["Passadas curtas", "Comece leve e acelere aos poucos"] }),
+  X("march", "Marcha com joelho alto", "High-knee march", "cardio", [[]], ["Suba um joelho até o quadril", "Troque de perna no ritmo"], { m: "M", unit: "s", base: 45, warm: true, tips: ["Braços acompanham", "Sem bater o pé no chão"] }),
+  X("shoulder_pass", "Rotação de ombro com elástico", "Band pass-through", "mob", [["elastico"], []], ["Braços esticados à frente", "Passe por cima da cabeça", "Leve para trás do corpo"], { warm: true, base: 10, sec: 4, tips: ["Sem elástico: use uma toalha"] }),
+  X("cat_cow", "Gato e camelo", "Cat-cow", "mob", [[]], ["Arredonde as costas", "Afunde a coluna e olhe à frente"], { warm: true, cool: true, base: 8, sec: 4, tips: ["Siga a respiração"] }),
+  X("hip_hinge", "Dobradiça de quadril", "Hip hinge", "mob", [[]], ["Em pé, mãos no quadril", "Quadril para trás, costas retas"], { warm: true, base: 10, sec: 3, tips: ["Sinta alongar atrás da coxa"] }),
+  X("hamstring", "Alongamento de posterior", "Hamstring stretch", "mob", [[]], ["Em pé, pernas estendidas", "Desça o tronco e segure"], { cool: true, unit: "s", base: 40, tips: ["Joelhos levemente soltos", "Sem forçar"] }),
+  X("air_squat", "Agachamento livre", "Air squat", "pernas", [[]], ["Pés na largura dos ombros", "Quadril abaixo do joelho, volte"], { m: "G", base: 15, sec: 2, warm: true, tips: ["Calcanhar no chão", "Joelho aponta para o pé"] }),
+  X("goblet_squat", "Agachamento goblet", "Goblet squat", "pernas", [["halter"], ["kb"], ["sandbag"]], ["Carga colada no peito", "Agache com o peito aberto"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Desça entre os joelhos"] }),
+  X("lunge", "Avanço", "Lunge", "pernas", [[]], ["Em pé", "Passo à frente, joelho de trás perto do chão"], { m: "G", base: 12, sec: 2.6, tips: ["Tronco reto", "Alterne as pernas"] }),
+  X("bulgarian", "Agachamento búlgaro", "Bulgarian split squat", "pernas", [["banco"]], ["Pé de trás no banco", "Desça na vertical"], { m: "G", base: 8, sec: 3, strength: true, tips: ["Faça os dois lados"] }),
+  X("deadlift", "Levantamento terra", "Deadlift", "pernas", [["halter"], ["sandbag"], ["barra"]], ["Costas retas, carga junto às canelas", "Empurre o chão", "Termine em pé, quadril estendido"], { m: "W", base: 10, sec: 3.5, load: true, quiet: false, strength: true, tips: ["Carga sempre perto das pernas"] }),
+  X("kb_swing", "Kettlebell swing", "Kettlebell swing", "pernas", [["kb"], ["halter"]], ["Quadril para trás, carga entre as pernas", "Estenda o quadril com força", "Carga na altura dos olhos"], { m: "W", base: 15, sec: 2.2, load: true, quiet: false, tips: ["O impulso vem do quadril"] }),
+  X("glute_bridge", "Ponte de glúteo", "Glute bridge", "pernas", [[]], ["Deitado, joelhos dobrados", "Suba o quadril apertando o glúteo"], { m: "G", base: 15, sec: 2.5, warm: true, tips: ["Desça devagar"] }),
+  X("jump_squat", "Agachamento com salto", "Jump squat", "pernas", [[]], ["Agache", "Salte estendendo tudo"], { m: "G", base: 10, sec: 2.2, quiet: false, jump: true, tips: ["Aterrisse macio"] }),
+  X("thruster", "Thruster", "Thruster", "full", [["halter"], ["sandbag"], ["barra"]], ["Carga nos ombros", "Agachamento completo", "Suba e empurre acima da cabeça"], { m: "W", base: 10, sec: 3, load: true, quiet: false, tips: ["A subida das pernas ajuda o empurre"] }),
+  X("db_snatch", "Snatch com halter", "Dumbbell snatch", "full", [["halter"]], ["Halter entre os pés, costas retas", "Explosão do quadril, puxe alto", "Braço travado acima da cabeça"], { m: "W", base: 10, sec: 2.8, load: true, quiet: false, tips: ["Alterne o braço"] }),
+  X("sandbag_clean", "Sandbag ao ombro", "Sandbag to shoulder", "full", [["sandbag"]], ["Abrace o saco no chão", "Leve ao colo", "Jogue sobre um ombro"], { m: "W", base: 8, sec: 4.5, load: true, quiet: false, tips: ["Alterne o ombro"] }),
+  X("farmer_carry", "Caminhada do fazendeiro", "Farmer's carry", "core", [["halter"], ["sandbag"]], ["Carga ao lado do corpo, ombros para trás, passos curtos"], { m: "W", unit: "s", base: 40, load: true, tips: ["Abdômen firme"] }),
+  X("push_up", "Flexão de braço", "Push-up", "sup", [[]], ["Corpo reto, braços estendidos", "Desça até o peito quase tocar"], { m: "G", base: 12, sec: 2.5, tips: ["Quadril alinhado"] }),
+  X("push_up_incline", "Flexão inclinada", "Incline push-up", "sup", [["banco"], []], ["Mãos no banco, corpo reto", "Desça o peito até o banco"], { m: "G", base: 12, sec: 2.3, tips: ["Versão mais leve da flexão"] }),
+  X("pike_push_up", "Flexão pike", "Pike push-up", "sup", [[]], ["Quadril alto, em V invertido", "Cabeça desce à frente das mãos"], { m: "G", base: 8, sec: 3, strength: true, tips: ["Prepara para o HSPU"] }),
+  X("db_press", "Desenvolvimento com halter", "Dumbbell strict press", "sup", [["halter"]], ["Halteres nos ombros", "Empurre até esticar os braços"], { m: "W", base: 10, sec: 3, load: true, strength: true, tips: ["Abdômen e glúteo firmes"] }),
+  X("db_push_press", "Push press com halter", "Dumbbell push press", "sup", [["halter"]], ["Halteres nos ombros", "Flexione um pouco os joelhos", "Estenda as pernas e empurre"], { m: "W", base: 10, sec: 2.6, load: true, tips: ["As pernas dão o impulso"] }),
+  X("db_row", "Remada curvada", "Bent-over row", "sup", [["halter"], ["sandbag"]], ["Tronco inclinado, braços estendidos", "Puxe o cotovelo para trás"], { m: "W", base: 12, sec: 2.8, load: true, strength: true, tips: ["Costas retas"] }),
+  X("band_row", "Remada com elástico", "Band row", "sup", [["elastico"]], ["Sentado, elástico nos pés", "Puxe até as costelas"], { m: "G", base: 15, sec: 2.5, tips: ["Aproxime as escápulas"] }),
+  X("band_pulldown", "Puxada com elástico", "Band pulldown", "sup", [["elastico"]], ["Ajoelhado, braços para cima", "Puxe os cotovelos até o tronco"], { m: "G", base: 15, sec: 2.5, tips: ["Elástico preso no alto da porta"] }),
+  X("db_curl", "Rosca bíceps", "Biceps curl", "sup", [["halter"], ["elastico"]], ["Braços estendidos", "Dobre os cotovelos colados no corpo"], { m: "W", base: 12, sec: 2.5, load: true, tips: ["Desça devagar"] }),
+  X("triceps_ext", "Tríceps acima da cabeça", "Overhead triceps extension", "sup", [["halter"], ["elastico"]], ["Cotovelos para cima, carga atrás da cabeça", "Estique os braços"], { m: "W", base: 12, sec: 2.5, load: true, tips: ["Cotovelos não abrem"] }),
+  X("db_bench_press", "Supino com halteres", "Dumbbell bench press", "sup", [["halter", "banco"]], ["Deitado, halteres na linha do peito", "Empurre até esticar"], { m: "W", base: 10, sec: 3, load: true, strength: true, tips: ["Cotovelos a 45°"] }),
+  X("plank", "Prancha", "Plank", "core", [[]], ["Cotovelos abaixo dos ombros, corpo reto, respire"], { m: "G", unit: "s", base: 40, tips: ["Quadril alinhado"] }),
+  X("side_plank", "Prancha lateral", "Side plank", "core", [[]], ["Apoio em um braço, quadril alto; troque o lado"], { m: "G", unit: "s", base: 30, tips: ["Faça os dois lados"] }),
+  X("dead_bug", "Dead bug", "Dead bug", "core", [[]], ["Deitado, braços e joelhos para cima", "Estique braço e perna opostos"], { m: "G", base: 12, sec: 3, warm: true, tips: ["Lombar colada no chão"] }),
+  X("hollow_hold", "Canoinha (hollow hold)", "Hollow hold", "core", [[]], ["Lombar no chão, braços e pernas suspensos"], { m: "G", unit: "s", base: 25, tips: ["Dobre os joelhos para facilitar"] }),
+  X("sit_up", "Abdominal completo", "Sit-up", "core", [[]], ["Deitado, mãos atrás da cabeça", "Suba e toque à frente dos pés"], { m: "G", base: 15, sec: 2.5, tips: ["Sola dos pés juntas"] }),
+  X("tuck_up", "Abdominal grupado", "Tuck-up", "core", [[]], ["Deitado, corpo estendido", "Joelhos e peito se encontram"], { m: "G", base: 12, sec: 2.5, tips: ["Volte controlando"] }),
+  X("mountain_climber", "Escalador", "Mountain climber", "core", [[]], ["Prancha alta, um joelho no peito", "Troque as pernas rápido"], { m: "G", base: 30, sec: 0.8, tips: ["Quadril baixo"] }),
+  X("superman", "Super-homem", "Superman", "core", [[]], ["De bruços, braços à frente", "Eleve braços e pernas juntos"], { m: "G", base: 12, sec: 3, cool: true, tips: ["Segure 2 segundos em cima"] }),
+  X("burpee", "Burpee", "Burpee", "cardio", [[]], ["Em pé", "Agache e apoie as mãos", "Pule para a prancha", "Peito no chão", "Volte e salte com palmas"], { m: "G", base: 10, sec: 4, quiet: false, jump: true, tips: ["Ritmo constante, sem estourar"] }),
+  X("burpee_step", "Burpee sem salto", "Step-back burpee", "cardio", [[]], ["Agache e apoie as mãos", "Um pé de cada vez para trás", "Prancha", "Volte e fique em pé"], { m: "G", base: 10, sec: 4.5, tips: ["Silencioso: bom para o quarto"] }),
+  X("bike", "Bike", "Bike", "cardio", [["bike"]], ["Banco na altura do quadril, pedale em ritmo forte"], { m: "M", unit: "s", base: 60, quiet: false, warm: true, tips: ["Moderado: dá para falar frases curtas"] }),
+  X("run", "Corrida na esteira", "Treadmill run", "cardio", [["esteira"]], ["Passadas curtas, tronco levemente à frente"], { m: "M", unit: "s", base: 60, quiet: false, warm: true, tips: ["Acelere aos poucos"] }),
 ].map((e) => [e.id, e]));
 
-// Nomes que aparecem em prints/textos do box → movimento conhecido.
+// Padrão de movimento: o WOD não repete o mesmo padrão. Isolados (rosca, tríceps) ficam fora do WOD.
+const PAT = {
+  air_squat: "squat", goblet_squat: "squat", jump_squat: "squat", thruster: "squat", lunge: "lunge", bulgarian: "lunge",
+  deadlift: "hinge", kb_swing: "hinge", db_snatch: "hinge", sandbag_clean: "hinge", glute_bridge: "hinge",
+  push_up: "push_h", push_up_incline: "push_h", db_bench_press: "push_h", pike_push_up: "push_v", db_press: "push_v", db_push_press: "push_v",
+  db_row: "pull", band_row: "pull", band_pulldown: "pull", farmer_carry: "carry",
+  plank: "core_iso", side_plank: "core_iso", hollow_hold: "core_iso", dead_bug: "core_flex", sit_up: "core_flex", tuck_up: "core_flex",
+  mountain_climber: "core_dyn", superman: "core_ext", burpee: "burpee", burpee_step: "burpee", bike: "mono", run: "mono", march: "mono",
+};
+const ISOLATED = new Set(["db_curl", "triceps_ext"]);
 const ALIASES = {
   "deadlift": "deadlift", "levantamento terra": "deadlift", "terra": "deadlift", "hspu": "hspu", "handstand push": "hspu", "handstand": "handstand",
   "front squat": "front_squat", "back squat": "back_squat", "overhead squat": "front_squat", "snatch": "snatch", "bench press": "bench_press", "supino": "bench_press",
@@ -408,54 +425,55 @@ function groupsOf(moves) {
 
 /* ============================== ESTADO ============================== */
 const S = {
-  workouts: [], dbReady: false, db: null, sample: null, canImages: false,
-  brief: { local: "casa", tempo: 30, foco: "sugerido", estado: "bem" },
-  plan: null, timer: { start: null, paused: 0, pausedAt: null },
-  addMode: null, draft: null, msg: "", busy: false,
+  workouts: [], db: null, sample: null, canImages: false,
+  brief: { local: "casa", tempo: 30, livre: false, foco: "sugerido", estado: "bem" },
+  plan: null, timer: { start: null, paused: 0, pausedAt: null, stoppedAt: null },
+  reg: {}, addMode: null, draft: null, msg: "", busy: false, confirmDel: null,
 };
 const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* armazenamento indisponível */ } },
 };
 Object.assign(S.brief, LS.get("cg.brief", {}));
-S.plan = LS.get("cg.plan", null);
-S.timer = LS.get("cg.timer", S.timer);
+S.plan = LS.get("cg.plan2", null);
+S.timer = LS.get("cg.timer2", S.timer);
+S.reg = LS.get("cg.reg", {});
 
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const daysAgo = (iso) => Math.round((new Date(todayISO() + "T12:00") - new Date(iso + "T12:00")) / 864e5);
-const fmtDate = (iso) => { const [y, m, d] = iso.split("-"); return `${d}/${m}/${y.slice(2)}`; };
+const fmtDate = (iso) => { const [y, m, d] = iso.split("-"); return `${d}/${m}`; };
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const sorted = () => [...S.workouts].filter((w) => w.data).sort((a, b) => b.data.localeCompare(a.data) || String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")));
 
 /* ============================== EQUILÍBRIO E SUGESTÃO ============================== */
-function balance(days = 14) {
-  const sum = { core: 0, sup: 0, pernas: 0, cardio: 0 }; let count = 0, last = null;
+function balance(days) {
+  const sum = { core: 0, sup: 0, pernas: 0, cardio: 0 }; const used = [];
   for (const w of S.workouts) {
     const a = daysAgo(w.data); if (a < 0 || a >= days) continue;
     const g = w.grupos || groupsOf(w.movimentos || []); if (!g) continue;
-    const f = w.esforco === "leve" ? 0.6 : w.esforco === "puxado" ? 1.3 : 1;
-    GK.forEach((k) => sum[k] += (g[k] || 0) * f); count++;
-    if (!last || w.data > last.data) last = w;
+    const f = (w.esforco === "leve" ? 0.6 : w.esforco === "puxado" ? 1.3 : 1) * (a <= 2 ? 1.2 : 1);
+    GK.forEach((k) => sum[k] += (g[k] || 0) * f); used.push(w);
   }
   const tot = GK.reduce((a, k) => a + sum[k], 0);
-  const share = Object.fromEntries(GK.map((k) => [k, tot ? sum[k] / tot : 0]));
-  return { share, count, last };
+  return { share: Object.fromEntries(GK.map((k) => [k, tot ? sum[k] / tot : 0])), count: used.length, used };
 }
 function suggestion() {
-  const b = balance(14);
-  if (!b.count) return { foco: "core", why: "Sem treinos nos últimos 14 dias: começamos pelo core, sua prioridade." };
-  const lastG = b.last && (b.last.grupos || groupsOf(b.last.movimentos || []));
+  let win = 7, b = balance(7);
+  if (b.count === 0) { win = 14; b = balance(14); }
+  if (!b.count) return { foco: "core", win, why: "Sem treinos registrados nas últimas 2 semanas: começamos pelo core, sua prioridade." };
+  const last = sorted()[0];
+  const lastG = last && (last.grupos || groupsOf(last.movimentos || []));
   const lastTop = lastG ? GK.reduce((a, k) => (lastG[k] > lastG[a] ? k : a), "core") : null;
-  const yesterday = b.last && daysAgo(b.last.data) <= 1;
-  const cands = GK.map((k) => ({ k, gap: GROUPS[k].target - b.share[k] - (yesterday && k === lastTop ? 0.2 : 0) + (k === "core" || k === "sup" ? 0.03 : 0) }))
-    .sort((x, y) => y.gap - x.gap);
-  const k = cands[0].k;
-  const pct = Math.round(b.share[k] * 100);
-  let why = `${GROUPS[k].label} está com ${pct}% do seu treino nos últimos 14 dias; a meta é ${Math.round(GROUPS[k].target * 100)}%.`;
-  if (yesterday && lastTop && lastTop !== k) why += ` Seu último treino focou ${GROUPS[lastTop].label.toLowerCase()}.`;
-  return { foco: k === "cardio" ? "cardio" : k, why };
+  const recent = last && daysAgo(last.data) <= 1;
+  const k = GK.map((g) => ({ g, gap: GROUPS[g].target - b.share[g] - (recent && g === lastTop ? 0.2 : 0) + (g === "core" || g === "sup" ? 0.03 : 0) }))
+    .sort((x, y) => y.gap - x.gap)[0].g;
+  let why = `${GROUPS[k].label}: ${Math.round(b.share[k] * 100)}% do que você treinou nos últimos ${win} dias (meta ${Math.round(GROUPS[k].target * 100)}%).`;
+  if (win === 14) why = "Nenhum treino nos últimos 7 dias, então olhei 14. " + why;
+  if (recent && lastTop && lastTop !== k) why += ` O último treino (${fmtDate(last.data)}) focou ${GROUPS[lastTop].label.toLowerCase()}.`;
+  return { foco: k, win, why };
 }
 
-/* ============================== GERADOR ============================== */
+/* ============================== GERADOR (aula CrossFit) ============================== */
 const FOCOS = { core: "Core", sup: "Superiores", pernas: "Pernas", corpo: "Corpo todo", cardio: "Fôlego" };
 function rnd(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function usable(e, local) {
@@ -464,81 +482,140 @@ function usable(e, local) {
   for (const alt of e.eq) if (alt.every((q) => L0.eq.includes(q))) return alt;
   return null;
 }
+const wOf = (id) => { const w = W[id] || [0, 0, 0, 0]; return { core: w[0], sup: w[1], pernas: w[2], cardio: w[3] }; };
 function relevance(e, foco) {
-  const w = W[e.id] || [0, 0, 0, 0], m = { core: w[0], sup: w[1], pernas: w[2], cardio: w[3] };
-  if (foco === "corpo") return 0.6 + (e.g === "full" ? 0.6 : 0) + Math.min(m.core, m.sup, m.pernas);
+  const m = wOf(e.id);
+  if (foco === "corpo") return 0.5 + (e.g === "full" ? 0.6 : 0) + Math.min(m.core, m.sup, m.pernas) * 2;
   return m[foco] + (foco === "cardio" && e.g === "full" ? 0.3 : 0);
 }
-function pickMoves(foco, local, n, used, r, avoidJump) {
-  const pool = Object.values(LIB).filter((e) => e.g !== "mob" && !used.has(e.id) && usable(e, local) && !(avoidJump && e.jump));
-  const scored = pool.map((e) => ({ e, s: relevance(e, foco) + r() * 0.35 })).sort((a, b) => b.s - a.s);
-  const out = [], groups = new Set();
-  for (const { e } of scored) {
-    if (out.length >= n) break;
-    if (foco === "corpo" && groups.has(e.g) && scored.length > n + 2) continue;
-    out.push(e); groups.add(e.g); used.add(e.id);
-  }
-  return out;
+// Movimentos dos 2 últimos treinos (box ou app) perdem prioridade: variação constante.
+function recentMoves() { return new Set(sorted().slice(0, 2).flatMap((w) => w.movimentos || [])); }
+function choose(filter, score, used, r) {
+  const rec = recentMoves();
+  const c = Object.values(LIB).filter((e) => e.g !== "mob" && !used.has(e.id) && filter(e))
+    .map((e) => ({ e, s: score(e) - (rec.has(e.id) ? 0.35 : 0) + r() * 0.3 })).sort((a, b) => b.s - a.s)[0];
+  if (c) used.add(c.e.id);
+  return c ? c.e : null;
 }
-function item(e, local, factor, workSec) {
+function lastLoad(id) {
+  for (const w of sorted()) { const kg = w.cargas?.[id]; if (kg) return { kg, data: w.data }; }
+  return null;
+}
+function item(e, local, opts = {}) {
   const alt = usable(e, local) || [];
+  const f = opts.factor ?? 1;
   let qty;
-  if (e.unit === "s") qty = `${Math.round(Math.min(e.base * factor, workSec || 999) / 5) * 5}s`;
-  else qty = `${Math.max(4, Math.round((workSec ? (workSec * 0.8) / e.sec : e.base * factor)))}`;
-  const impl = alt.length ? alt.map((q) => EQ_LABEL[q]).join(" + ") : "";
-  let carga = "";
-  if (e.load && alt.includes("sandbag") && local === "casa") carga = "sandbag 20 kg";
-  else if (e.load) carga = "carga em que sobram 2–3 repetições";
-  return { id: e.id, qty, impl, carga };
+  if (opts.reps) qty = opts.reps;
+  else if (e.unit === "s") qty = `${Math.round(Math.min(e.base * f, opts.workSec || 999) / 5) * 5}s`;
+  else qty = `${Math.max(4, Math.round(opts.workSec ? (opts.workSec * 0.8) / e.sec : e.base * f))}`;
+  return { id: e.id, qty, impl: alt.length ? alt.map((q) => EQ_LABEL[q]).join(" + ") : "", load: e.load && alt.length > 0 && !alt.every((q) => q === "banco" || q === "elastico") };
+}
+function alloc(T) {
+  const warm = T <= 20 ? 4 : T <= 30 ? 5 : T <= 45 ? 7 : 10;
+  const cool = T <= 20 ? 2 : T <= 45 ? 3 : 5;
+  const strength = T < 25 ? 0 : T <= 30 ? 8 : T <= 45 ? 12 : 15;
+  const core = T < 40 ? 0 : T <= 50 ? 5 : 10;
+  return { warm, cool, strength, core, wod: Math.max(8, T - warm - cool - strength - core) };
 }
 function generate(brief, seed) {
-  const r = rnd(seed), foco = brief.foco === "sugerido" ? suggestion().foco : brief.foco;
-  const estado = brief.estado, local = brief.local, T = brief.tempo;
-  const factor = estado === "cansado" ? 0.7 : 1;
+  const r = rnd(seed), sug = suggestion();
+  const foco = brief.foco === "sugerido" ? sug.foco : brief.foco;
+  const { estado, local } = brief, T = brief.tempo;
+  const tired = estado === "cansado", factor = tired ? 0.7 : 1;
   const used = new Set();
-  const warmIds = Object.values(LIB).filter((e) => e.warm && usable(e, local)).map((e) => e.id);
-  const pick = (arr, n) => arr.map((x) => [x, r()]).sort((a, b) => a[1] - b[1]).slice(0, n).map((x) => x[0]);
-  const cardioWarm = warmIds.filter((id) => LIB[id].g === "cardio");
-  const warm = [...pick(cardioWarm, 1), ...pick(warmIds.filter((id) => LIB[id].g !== "cardio"), 2)].map((id) => item(LIB[id], local, 0.8));
-  const coolOf = () => pick(Object.values(LIB).filter((e) => e.cool && usable(e, local) && !used.has(e.id)).map((e) => e.id), 2).map((id) => item(LIB[id], local, 1));
+  const avoidJump = tired || LOCAIS[local].quiet;
+  const ok = (e) => usable(e, local) && !(avoidJump && e.jump);
+  const pickN = (arr, n) => arr.map((x) => [x, r()]).sort((a, b) => a[1] - b[1]).slice(0, n).map((x) => x[0]);
+  const coolOf = (n) => pickN(Object.values(LIB).filter((e) => e.cool && usable(e, local) && !used.has(e.id)), n).map((e) => item(e, local));
+  const last2 = sorted().slice(0, 2);
+  const considered = last2.length ? `Considerei seus últimos treinos: ${last2.map((w) => `${esc(w.titulo || "treino")} (${fmtDate(w.data)})`).join(" e ")}.` : "";
 
   if (estado === "dor") {
     const ids = ["cat_cow", "hip_hinge", "glute_bridge", "dead_bug", "march"].filter((id) => usable(LIB[id], local));
     return {
-      seed, foco: "recuperacao", titulo: "Recuperação leve", local, tempo: 20, why: "Você marcou dor ou mal-estar: hoje é dia de movimento leve.",
+      seed, foco: "recuperacao", titulo: "Recuperação leve", local, tempo: 20, why: "Você marcou dor ou mal-estar: hoje é movimento leve.",
       aviso: "Com febre, dor no peito, falta de ar fora do normal ou tontura, não treine e procure atendimento.",
-      blocos: [{ nome: "Circuito leve", formato: "flow", min: 15, regra: "2 a 3 voltas sem pressa, respirando pelo nariz.", itens: ids.map((id) => item(LIB[id], local, 0.7)) }],
-      aquec: [], volta: coolOf(),
+      partes: [
+        { tipo: "wod", nome: "Circuito leve · 15 min", formato: "flow", min: 15, regra: "2 a 3 voltas sem pressa, respirando pelo nariz.", itens: ids.map((id) => item(LIB[id], local, { factor: 0.7 })) },
+        { tipo: "cool", nome: "Volta à calma · 3 min", itens: coolOf(2) },
+      ],
     };
   }
-  const blocos = [];
-  const mainMin = T === 20 ? 12 : T === 30 ? 20 : 18;
-  const fmt = foco === "core" ? "emom" : foco === "cardio" ? "intervalos" : (r() < 0.6 ? "amrap" : "emom");
-  const nMain = fmt === "emom" ? (mainMin >= 16 ? 4 : 3) : 3;
-  const work = estado === "cansado" ? 30 : 40;
-  const mainMoves = pickMoves(foco, local, nMain, used, r, estado === "cansado");
-  const mk = (fmtX, min, moves) => {
-    if (fmtX === "emom") return { nome: `EMOM ${min - (min % moves.length)} min`, formato: "emom", min: min - (min % moves.length), regra: `A cada minuto, um exercício (${moves.length} se alternando). O que sobrar do minuto é descanso.`, itens: moves.map((e) => item(e, local, factor, work)) };
-    if (fmtX === "intervalos") return { nome: `${Math.floor((min * 60) / 60)} rounds de 40s / 20s`, formato: "intervalos", min, work: 40, rest: 20, regra: "40 segundos forte, 20 de descanso, trocando de exercício a cada round.", itens: moves.map((e) => item(e, local, factor, 40)) };
-    return { nome: `AMRAP ${min} min`, formato: "amrap", min, regra: "Faça o máximo de voltas possível com boa técnica. Anote as voltas.", itens: moves.map((e) => item(e, local, factor)) };
-  };
-  blocos.push(mk(fmt, mainMin, mainMoves));
-  if (T === 45) {
-    const second = foco === "core" ? "sup" : "core";
-    blocos.push(mk(second === "core" ? "emom" : "amrap", 12, pickMoves(second, local, 3, used, r, estado === "cansado")));
+  const a = alloc(T), partes = [];
+
+  // 1) Aquecimento: geral (cardio) + específico (movimentos leves)
+  const warmCardio = pickN(Object.values(LIB).filter((e) => e.warm && e.g === "cardio" && usable(e, local)), 1);
+  const warmSpec = pickN(Object.values(LIB).filter((e) => e.warm && e.g !== "cardio" && usable(e, local)), 2);
+  partes.push({ tipo: "warm", nome: `Aquecimento · ${a.warm} min`, regra: "Geral + específico: 2 voltas tranquilas.", itens: [...warmCardio, ...warmSpec].map((e) => item(e, local, { factor: 0.7 })) });
+
+  // 2) Força ou Skill
+  if (a.strength) {
+    const sFoco = foco === "core" || foco === "cardio" ? "sup" : foco === "corpo" ? (r() < 0.5 ? "pernas" : "sup") : foco;
+    const lift = choose((e) => e.strength && ok(e), (e) => relevance(e, sFoco) + (e.load ? 0.3 : 0), used, r);
+    if (lift) {
+      const weighted = lift.load && usable(lift, local).length;
+      const scheme = weighted ? (sFoco === "pernas" ? { sets: 5, reps: 5, rest: 120 } : { sets: 4, reps: 8, rest: 90 }) : { sets: 4, reps: tired ? 6 : 8, rest: 60 };
+      const sets = Math.max(3, Math.min(6, Math.round((a.strength * 60) / (scheme.reps * lift.sec + scheme.rest))));
+      partes.push({
+        tipo: "strength", nome: `${weighted ? "Força" : "Skill"} · ${a.strength} min`, formato: "sets",
+        regra: weighted ? `${sets} séries de ${scheme.reps} · descanso ${scheme.rest}s. Suba a carga a cada série até ficar pesada com boa técnica.` : `${sets} séries de ${scheme.reps}, descendo em 3 segundos · descanso ${scheme.rest}s.`,
+        itens: [item(lift, local, { reps: `${sets}×${scheme.reps}` })], peso: weighted,
+      });
+    } else a.wod += a.strength;
   }
-  const s = suggestion();
-  const why = brief.foco === "sugerido" ? s.why : (foco !== s.foco ? `Você escolheu ${FOCOS[foco].toLowerCase()}; a sugestão era ${FOCOS[s.foco].toLowerCase()}.` : s.why);
-  return { seed, foco, titulo: `${FOCOS[foco]} · ${T} min`, local, tempo: T, why, aviso: estado === "cansado" ? "Cansado: menos repetições e nada de saltos hoje." : "", blocos, aquec: warm, volta: coolOf() };
+
+  // 3) WOD: mistura cardio (M) + ginástica (G) + levantamento (W)
+  const fmtOpts = foco === "cardio" ? ["intervalos", "fortime"] : foco === "core" ? ["emom", "amrap"] : ["amrap", "fortime", "emom"];
+  const fmt = fmtOpts[Math.floor(r() * fmtOpts.length)];
+  const slots = fmt === "fortime" && a.wod <= 12 ? ["W", "G"] : fmt === "emom" ? ["G", "W", "M", "G"].slice(0, a.wod >= 16 ? 4 : 3) : ["M", "W", "G"];
+  const moves = [], pats = new Set();
+  const wodOk = (x) => ok(x) && !ISOLATED.has(x.id) && !pats.has(PAT[x.id]);
+  for (const m of slots) {
+    const e = choose((x) => wodOk(x) && (x.m === m || (m === "M" && x.g === "cardio")), (x) => relevance(x, foco) + (foco !== "cardio" && m === "M" ? 0.4 : 0), used, r)
+      || choose((x) => wodOk(x), (x) => relevance(x, foco), used, r);
+    if (e) { moves.push(e); pats.add(PAT[e.id]); }
+  }
+  const work = tired ? 30 : 40;
+  let wod;
+  if (fmt === "emom") {
+    const min = a.wod - (a.wod % moves.length);
+    wod = { nome: `EMOM ${min} min`, formato: "emom", min, regra: `A cada minuto, um exercício (${moves.length} em rodízio). O que sobrar do minuto é descanso.`, itens: moves.map((e) => item(e, local, { factor, workSec: work })) };
+  } else if (fmt === "intervalos") {
+    const rounds = a.wod;
+    wod = { nome: `${rounds} rounds · 40s/20s`, formato: "intervalos", min: rounds, work: 40, rest: 20, regra: "40 segundos forte, 20 de descanso, trocando de exercício a cada round. Conte o total de repetições.", itens: moves.map((e) => item(e, local, { factor, workSec: 40 })) };
+  } else if (fmt === "fortime" && moves.length === 2) {
+    wod = { nome: `21-15-9 for time · cap ${a.wod} min`, formato: "fortime", min: a.wod, regra: "Rodadas de 21, 15 e 9 repetições de cada exercício, o mais rápido possível. Pare o relógio ao terminar.", itens: moves.map((e) => item(e, local, { reps: e.unit === "s" ? "45s" : "21-15-9" })) };
+  } else if (fmt === "fortime") {
+    const its = moves.map((e) => item(e, local, { factor }));
+    const per = moves.reduce((s, e, i) => s + (e.unit === "s" ? parseInt(its[i].qty) : parseInt(its[i].qty) * e.sec) + 10, 0);
+    const rounds = Math.max(2, Math.min(8, Math.floor((a.wod * 60 * 0.85) / per)));
+    wod = { nome: `${rounds} rounds for time · cap ${a.wod} min`, formato: "fortime", min: a.wod, regra: `${rounds} voltas completas o mais rápido possível. Pare o relógio ao terminar.`, itens: its };
+  } else {
+    wod = { nome: `AMRAP ${a.wod} min`, formato: "amrap", min: a.wod, regra: "Máximo de voltas possível com boa técnica. Anote voltas + repetições.", itens: moves.map((e) => item(e, local, { factor })) };
+  }
+  partes.push(Object.assign({ tipo: "wod" }, wod));
+
+  // 4) Core (aulas de 40 min ou mais)
+  if (a.core) {
+    const cm = [];
+    const cp = new Set();
+    for (let i = 0; i < 3; i++) { const e = choose((x) => x.g === "core" && x.m === "G" && ok(x) && !cp.has(PAT[x.id]), (x) => relevance(x, "core"), used, r); if (e) { cm.push(e); cp.add(PAT[e.id]); } }
+    if (cm.length) partes.push({ tipo: "core", nome: `Core · ${a.core} min`, regra: `${a.core >= 10 ? 4 : 3} voltas, 30s de descanso entre elas.`, itens: cm.map((e) => item(e, local, { factor })) });
+  }
+  // 5) Volta à calma
+  partes.push({ tipo: "cool", nome: `Volta à calma · ${a.cool} min`, itens: coolOf(2) });
+
+  const why = (brief.foco === "sugerido" ? sug.why : foco !== sug.foco ? `Você escolheu ${FOCOS[foco].toLowerCase()} (a sugestão era ${FOCOS[sug.foco].toLowerCase()}).` : sug.why) + (considered ? " " + considered : "");
+  return { seed, foco, titulo: `${FOCOS[foco]} · ${T} min`, local, tempo: T, why, aviso: tired ? "Cansado: menos repetições e nada de saltos hoje." : "", partes };
 }
-function swapMove(plan, bi, ii) {
-  const b = plan.blocos[bi], cur = LIB[b.itens[ii].id];
-  const usedIds = new Set(plan.blocos.flatMap((x) => x.itens.map((i) => i.id)));
-  const foco = plan.foco === "corpo" ? "corpo" : plan.foco;
-  const cands = Object.values(LIB).filter((e) => e.g !== "mob" && !usedIds.has(e.id) && usable(e, plan.local) && (e.g === cur.g || relevance(e, foco) > 0.5));
+function swapMove(plan, pi, ii) {
+  const part = plan.partes[pi], cur = LIB[part.itens[ii].id];
+  const usedIds = new Set(plan.partes.flatMap((x) => x.itens.map((i) => i.id)));
+  const cands = Object.values(LIB).filter((e) => e.g !== "mob" && !usedIds.has(e.id) && usable(e, plan.local) && (part.tipo === "strength" ? e.strength : e.m === cur.m || e.g === cur.g));
   if (!cands.length) return;
   const e = cands[Math.floor(Math.random() * cands.length)];
-  b.itens[ii] = item(e, plan.local, 1, b.formato === "emom" ? 40 : b.formato === "intervalos" ? 40 : 0);
+  const old = part.itens[ii];
+  part.itens[ii] = item(e, plan.local, part.tipo === "strength" || part.formato === "fortime" ? { reps: old.qty } : part.formato === "emom" || part.formato === "intervalos" ? { workSec: 40 } : {});
 }
 
 /* ============================== BANCO DE DADOS ============================== */
@@ -547,19 +624,13 @@ async function initCapabilities() {
     const db = window.claude ? await window.claude.use("db") : null;
     if (db) {
       S.db = db;
-      db.collection("treinos").onSnapshot((snap) => {
-        S.workouts = snap.docs.map((d) => Object.assign({ _id: d.id }, d.data()));
-        S.dbReady = true; render();
-      }, () => { S.dbReady = false; loadLocal(); render(); });
+      db.collection("treinos").onSnapshot((snap) => { S.workouts = snap.docs.map((d) => Object.assign({ _id: d.id }, d.data())); render(); },
+        () => { S.db = null; loadLocal(); render(); });
     } else { loadLocal(); render(); }
   } catch { loadLocal(); render(); }
   try {
     const sample = window.claude ? await window.claude.use("sample") : null;
-    if (sample) {
-      S.sample = sample;
-      const lim = await sample.limits().catch(() => null);
-      S.canImages = !!lim?.images; render();
-    }
+    if (sample) { S.sample = sample; const lim = await sample.limits().catch(() => null); S.canImages = !!lim?.images; render(); }
   } catch { /* sem Claude na página */ }
 }
 function loadLocal() { S.workouts = LS.get("cg.local.treinos", []); }
@@ -567,7 +638,7 @@ async function saveWorkout(w) {
   w.criadoEm = new Date().toISOString();
   if (S.db) {
     try { await S.db.collection("treinos").add(w); return true; }
-    catch (e) { S.msg = e.code === "quota_exceeded" ? "Limite de registros atingido." : "Não consegui salvar agora. Tente de novo em instantes."; render(); return false; }
+    catch (e) { S.msg = e?.code === "quota_exceeded" ? "Limite de registros atingido." : "Não consegui salvar agora. Tente de novo em instantes."; render(); return false; }
   }
   const list = LS.get("cg.local.treinos", []); w._id = "l" + Date.now(); list.push(w); LS.set("cg.local.treinos", list); S.workouts = list; return true;
 }
@@ -580,121 +651,154 @@ async function deleteWorkout(id) {
 /* ============================== TELAS ============================== */
 const app = document.getElementById("app");
 const view = () => (["hoje", "treino", "historico"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "hoje");
-
-function bodySVG(share) {
+function bodyMap(share) {
   const max = Math.max(0.01, ...GK.map((k) => share[k]));
-  const op = (k) => (0.18 + 0.82 * (share[k] / max)).toFixed(2);
+  const op = (k) => (0.15 + 0.85 * (share[k] / max)).toFixed(2);
   return `<svg viewBox="0 0 100 200" width="112" height="224" role="img" aria-label="Mapa do corpo">
     <g opacity="${op("sup")}" fill="var(--sup)"><rect x="30" y="36" width="40" height="26" rx="10"/><rect x="14" y="40" width="14" height="52" rx="7"/><rect x="72" y="40" width="14" height="52" rx="7"/></g>
     <g opacity="${op("core")}" fill="var(--core)"><rect x="33" y="64" width="34" height="40" rx="8"/></g>
     <g opacity="${op("pernas")}" fill="var(--pernas)"><rect x="32" y="106" width="16" height="84" rx="8"/><rect x="52" y="106" width="16" height="84" rx="8"/></g>
     <circle cx="50" cy="20" r="13" fill="var(--fig-far)"/>
-    <path d="M50 46 l-4 6 h3 l-2 6 6-8 h-3 l2-4z" fill="var(--cardio)" opacity="${op("cardio")}" transform="translate(-2 -2) scale(1)"/>
+    <path d="M50 44 c-4 -6 -12 -2 -8 5 l8 7 8 -7 c4 -7 -4 -11 -8 -5z" fill="var(--cardio)" opacity="${op("cardio")}"/>
   </svg>`;
 }
 function chips(name, opts, val) {
   return `<div class="chips" role="group" aria-label="${name}">${opts.map(([v, l]) => `<button class="chip" data-set="${name}" data-val="${v}" aria-pressed="${String(val) === String(v)}">${esc(l)}</button>`).join("")}</div>`;
 }
+const gTags = (w) => { const g = w.grupos || groupsOf(w.movimentos || []) || {}; return GK.filter((k) => (g[k] || 0) >= 0.2).map((k) => `<span class="gtag" style="background:${GROUPS[k].color}">${GROUPS[k].label}</span>`).join(" "); };
 function renderHoje() {
-  const b = balance(14), s = suggestion();
+  const s = suggestion(), b = balance(s.win === 14 ? 14 : 7), fb = S.brief, recent = sorted().slice(0, 4);
   const dateLabel = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
-  const fb = S.brief;
   return `
-  <header class="row between"><div><p class="eyebrow">${esc(dateLabel)}</p><h1>CG CrossFit Evolution</h1></div></header>
+  <header><p class="eyebrow">${esc(dateLabel)}</p><h1>CG CrossFit Evolution</h1></header>
   <section class="panel" aria-labelledby="mapa">
-    <div class="row between"><h2 id="mapa">Seu corpo · 14 dias</h2><span class="small muted">${b.count} treino${b.count === 1 ? "" : "s"}</span></div>
-    <div class="balance">${bodySVG(b.share)}
+    <div class="row between"><h2 id="mapa">Seu corpo · ${s.win === 14 ? 14 : 7} dias</h2><span class="small muted">${b.count} treino${b.count === 1 ? "" : "s"}</span></div>
+    <div class="balance">${bodyMap(b.share)}
       <div class="bars">${GK.map((k) => `<div class="bar"><div class="lab"><span><span class="dot" style="background:${GROUPS[k].color}"></span> ${GROUPS[k].label}</span><span>${Math.round(b.share[k] * 100)}%</span></div>
-        <div class="track"><div class="fill" style="width:${Math.min(100, b.share[k] * 100 / 0.5)}%;background:${GROUPS[k].color}"></div><div class="target" style="left:${GROUPS[k].target * 100 / 0.5}%" title="meta"></div></div></div>`).join("")}
+        <div class="track"><div class="fill" style="width:${Math.min(100, b.share[k] * 200)}%;background:${GROUPS[k].color}"></div><div class="target" style="left:${GROUPS[k].target * 200}%"></div></div></div>`).join("")}
         <p class="small muted">Traço = meta. Prioridade: core e superiores.</p></div>
     </div>
-    <div class="suggest" style="border-color:${GROUPS[s.foco === "cardio" ? "cardio" : s.foco].color}"><span class="eyebrow">Sugestão de hoje</span><strong>${FOCOS[s.foco]}</strong><p class="small muted">${esc(s.why)}</p></div>
+    <div class="suggest" style="border-color:${GROUPS[s.foco].color}"><span class="eyebrow">Sugestão de hoje</span><strong>${FOCOS[s.foco]}</strong><p class="small muted">${esc(s.why)}</p></div>
+    ${recent.length ? `<div class="recent"><span class="eyebrow">Últimos treinos considerados</span>${recent.map((w) => `<div class="r"><span class="d">${fmtDate(w.data)}</span><span>${esc(w.titulo || "Treino")} <span class="muted">· ${w.origem === "box" ? "box" : w.origem === "app" ? "app" : "manual"}</span> ${gTags(w)}</span></div>`).join("")}</div>` : ""}
   </section>
   <section class="panel" aria-labelledby="brief">
     <h2 id="brief">Monte o treino</h2>
-    <div class="field"><label>Onde</label>${chips("local", Object.entries(LOCAIS).map(([k, v]) => [k, v.label]), fb.local)}</div>
-    <div class="field"><label>Tempo</label>${chips("tempo", [[20, "20 min"], [30, "30 min"], [45, "45 min"]], fb.tempo)}</div>
-    <div class="field"><label>Foco</label>${chips("foco", [["sugerido", `Sugerido: ${FOCOS[s.foco]}`], ["core", "Core"], ["sup", "Superiores"], ["pernas", "Pernas"], ["corpo", "Corpo todo"], ["cardio", "Fôlego"]], fb.foco)}</div>
-    <div class="field"><label>Como você está</label>${chips("estado", [["bem", "Bem"], ["cansado", "Cansado"], ["dor", "Com dor ou doente"]], fb.estado)}</div>
-    ${fb.local === "casa" ? `<p class="small muted">Casa: halteres, sandbag 20 kg, barra, banco, bike, elásticos e alça de kettlebell.</p>` : ""}
-    ${fb.local === "quarto" ? `<p class="small muted">Quarto: só exercícios silenciosos, sem saltos.</p>` : ""}
+    <div class="field"><span class="lbl">Onde</span>${chips("local", Object.entries(LOCAIS).map(([k, v]) => [k, v.label]), fb.local)}</div>
+    <div class="field"><span class="lbl">Tempo</span>${chips("tempo", [[20, "20 min"], [30, "30 min"], [45, "45 min"], [60, "60 min"], ["livre", "Livre"]], fb.livre ? "livre" : fb.tempo)}
+      ${fb.livre ? `<div class="row"><input type="number" id="livre" min="10" max="90" step="5" value="${fb.tempo}" style="width:110px" aria-label="Minutos"><span class="small muted">minutos (10 a 90)</span></div>` : ""}</div>
+    <div class="field"><span class="lbl">Foco</span>${chips("foco", [["sugerido", `Sugerido: ${FOCOS[s.foco]}`], ["core", "Core"], ["sup", "Superiores"], ["pernas", "Pernas"], ["corpo", "Corpo todo"], ["cardio", "Fôlego"]], fb.foco)}</div>
+    <div class="field"><span class="lbl">Como você está</span>${chips("estado", [["bem", "Bem"], ["cansado", "Cansado"], ["dor", "Com dor ou doente"]], fb.estado)}</div>
+    ${fb.local === "casa" ? `<p class="small muted">Casa: halteres, sandbag 20 kg, barra, banco, bike, elásticos e alça de kettlebell.</p>` : fb.local === "quarto" ? `<p class="small muted">Quarto: só exercícios silenciosos, sem saltos.</p>` : ""}
     <button class="btn" data-act="gerar">Montar treino</button>
   </section>`;
 }
-function exCard(it, bi, ii, current) {
-  const e = LIB[it.id];
-  return `<article class="ex ${current ? "now" : ""}">
-    <div class="stage" data-stage="${it.id}"></div>
+function exCard(it, pi, ii, current) {
+  const e = LIB[it.id], last = it.load ? lastLoad(it.id) : null;
+  return `<article class="ex ${current ? "now" : ""}" data-ex="${pi}-${ii}">
+    ${stepsHTML(it.id)}
     <div class="body">
-      <div class="row between"><span class="qty">${esc(it.qty)}</span>${bi >= 0 ? `<button class="ghost" data-act="trocar" data-b="${bi}" data-i="${ii}">Trocar</button>` : ""}</div>
+      <div class="row between"><span class="qty">${esc(it.qty)}</span><button class="ghost" data-act="trocar" data-p="${pi}" data-i="${ii}">Trocar</button></div>
       <span class="name">${esc(e.pt)}</span>
-      <span class="small muted">${esc(e.en)}${it.impl ? ` · ${esc(it.impl)}` : ""}${it.carga ? ` · ${esc(it.carga)}` : ""}</span>
+      <span class="small muted">${esc(e.en)}${it.impl ? ` · ${esc(it.impl)}` : ""}</span>
+      ${it.load ? `<span class="last">${last ? `Última vez: ${last.kg} kg (${fmtDate(last.data)})` : "Carga: escolha uma em que sobrem 2–3 repetições"}</span>` : ""}
       <ul>${e.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
     </div></article>`;
 }
 function miniRow(it) {
-  const e = LIB[it.id];
-  return `<div class="mini"><div class="thumb" data-stage="${it.id}" data-slow="1"></div><div><b>${esc(e.pt)}</b><span class="small muted">${esc(it.qty)}${it.impl ? " · " + esc(it.impl) : ""}</span></div><span></span></div>`;
+  const e = LIB[it.id], fr = FIG[it.id].frames;
+  return `<div class="mini"><div class="thumb" style="grid-template-columns:${fr.length > 1 ? "1fr 1fr" : "1fr"}">${stepSVG(it.id, 0)}${fr.length > 1 ? stepSVG(it.id, fr.length - 1) : ""}</div><div><b>${esc(e.pt)}</b><span class="small muted">${esc(it.qty)}${it.impl ? " · " + esc(it.impl) : ""} · ${esc(e.steps.join(" → "))}</span></div></div>`;
 }
+const mmss = (s) => { s = Math.max(0, Math.floor(s)); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
+function elapsed() { const T = S.timer; return T.start ? ((T.stoppedAt || T.pausedAt || Date.now()) - T.start - T.paused) / 1000 : 0; }
 function clockState(b) {
-  const T = S.timer;
-  const el = T.start ? ((T.pausedAt || Date.now()) - T.start - T.paused) / 1000 : 0;
-  const total = b.min * 60;
-  if (b.formato === "emom") { const m = Math.floor(el / 60), left = 60 - (el % 60); return { txt: mmss(el >= total ? 0 : left), sub: el >= total ? "Fim do bloco" : `Minuto ${m + 1} de ${b.min}`, cur: m % b.itens.length, done: el >= total }; }
-  if (b.formato === "intervalos") { const seg = b.work + b.rest, i = Math.floor(el / seg), inS = el % seg, w = inS < b.work; const rounds = b.min; return { txt: mmss(w ? b.work - inS : seg - inS), sub: i >= rounds ? "Fim do bloco" : `${w ? "Forte" : "Descanso"} · round ${i + 1} de ${rounds}`, cur: i % b.itens.length, done: i >= rounds }; }
-  return { txt: mmss(Math.max(0, total - el)), sub: el >= total ? "Fim do bloco" : "Tempo restante", cur: -1, done: el >= total };
+  const el = elapsed(), total = b.min * 60;
+  if (b.formato === "emom") { const m = Math.floor(el / 60); return { txt: mmss(el >= total ? 0 : 60 - (el % 60)), sub: el >= total ? "Fim do WOD" : `Minuto ${m + 1} de ${b.min}`, cur: m % b.itens.length }; }
+  if (b.formato === "intervalos") { const seg = b.work + b.rest, i = Math.floor(el / seg), inS = el % seg, w = inS < b.work; return { txt: mmss(w ? b.work - inS : seg - inS), sub: i >= b.min ? "Fim do WOD" : `${w ? "Forte" : "Descanso"} · round ${i + 1} de ${b.min}`, cur: i % b.itens.length }; }
+  if (b.formato === "fortime") return { txt: mmss(Math.min(el, total)), sub: S.timer.stoppedAt ? "Tempo final" : el >= total ? "Time cap" : `Cap ${b.min} min`, cur: -1 };
+  return { txt: mmss(total - el), sub: el >= total ? "Fim do WOD" : "Tempo restante", cur: -1 };
 }
-const mmss = (s) => { s = Math.max(0, Math.ceil(s)); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
+const TAG = { warm: "Aquecimento", strength: "Força", wod: "WOD", core: "Core", cool: "Calma" };
+function regField(id, label, ph, type = "text") {
+  return `<label class="res"><span>${esc(label)}</span><input type="${type}" ${type === "number" ? 'inputmode="decimal" step="0.5" min="0"' : ""} data-reg="${id}" value="${esc(S.reg[id] ?? "")}" placeholder="${esc(ph)}"></label>`;
+}
 function renderTreino() {
   const p = S.plan;
-  if (!p) return `<section class="panel"><h2>Nenhum treino montado</h2><p class="muted">Vá em Hoje, escolha onde, tempo e foco, e toque em Montar treino.</p><a class="btn" href="#hoje" style="text-align:center;text-decoration:none">Ir para Hoje</a></section>`;
-  const b0 = p.blocos[0], cs = clockState(b0), T = S.timer;
+  if (!p || !p.partes) return `<section class="panel"><h2>Nenhum treino montado</h2><p class="muted">Vá em Hoje, escolha onde, tempo e foco, e toque em Montar treino.</p><a class="btn" href="#hoje">Ir para Hoje</a></section>`;
+  const T = S.timer;
+  const wodIdx = p.partes.findIndex((x) => x.tipo === "wod");
+  const parts = p.partes.map((part, pi) => {
+    if (part.tipo === "warm" || part.tipo === "cool") return `<section class="panel"><div class="part"><span class="tag">${TAG[part.tipo]}</span><h3>${esc(part.nome)}</h3></div>${part.regra ? `<p class="small muted">${esc(part.regra)}</p>` : ""}<div>${part.itens.map(miniRow).join("")}</div></section>`;
+    let clock = "";
+    if (pi === wodIdx && part.formato !== "flow") {
+      const cs = clockState(part);
+      const btns = !T.start ? `<button class="btn small" data-act="start">Iniciar</button>`
+        : T.stoppedAt ? `<button class="ghost" data-act="reset">Zerar</button>`
+        : T.pausedAt ? `<button class="btn small" data-act="resume">Continuar</button><button class="ghost" data-act="reset">Zerar</button>`
+        : `<button class="btn secondary small" data-act="pause">Pausar</button>${part.formato === "fortime" ? `<button class="btn small" data-act="stop">Terminei</button>` : ""}`;
+      clock = `<div class="clock" aria-live="polite"><span class="time" id="clk">${cs.txt}</span><span class="small muted" id="clksub">${cs.sub}</span><div class="row" style="justify-content:center">${btns}</div></div>`;
+    }
+    return `<section class="panel" id="parte${pi}">
+      <div class="part"><span class="tag">${TAG[part.tipo]}</span><h2>${esc(part.nome)}</h2></div>
+      <p class="small muted">${esc(part.regra || "")}</p>${clock}
+      ${part.itens.map((it, ii) => exCard(it, pi, ii, false)).join("")}
+    </section>`;
+  }).join("");
+  // Registro: tempo e peso
+  const loadItems = p.partes.filter((x) => x.tipo === "wod" || x.tipo === "core").flatMap((x) => x.itens).filter((i) => i.load);
+  const strength = p.partes.find((x) => x.tipo === "strength");
+  const wod = p.partes[wodIdx];
+  const wodPh = wod?.formato === "fortime" ? "ex.: 12:45" : wod?.formato === "amrap" ? "ex.: 5 voltas + 8" : "ex.: completo / total de reps";
   return `
-  <header><p class="eyebrow">${esc(LOCAIS[p.local].label)}</p><h1>${esc(p.titulo)}</h1><p class="muted small" style="margin-top:6px">${esc(p.why)}</p></header>
+  <header><p class="eyebrow">${esc(LOCAIS[p.local].label)}</p><h1>${esc(p.titulo)}</h1><p class="muted small" style="margin-top:6px">${p.why}</p></header>
   ${p.aviso ? `<div class="notice">${esc(p.aviso)}</div>` : ""}
-  ${p.aquec.length ? `<section class="panel"><h3>Aquecimento · 5 min</h3><p class="small muted">Uma volta tranquila de cada.</p><div>${p.aquec.map(miniRow).join("")}</div></section>` : ""}
-  ${p.blocos.map((b, bi) => `
-    <section class="panel" id="bloco${bi}">
-      <div><h2>${esc(b.nome)}</h2><p class="small muted">${esc(b.regra)}</p></div>
-      ${bi === 0 ? `<div class="clock" aria-live="polite"><span class="time" id="clk">${cs.txt}</span><span class="small muted" id="clksub">${cs.sub}</span>
-        <div class="row" style="justify-content:center">${!T.start ? `<button class="btn" style="width:auto;padding:12px 28px" data-act="start">Iniciar</button>` : T.pausedAt ? `<button class="btn" style="width:auto;padding:12px 28px" data-act="resume">Continuar</button>` : `<button class="btn secondary" style="width:auto;padding:12px 28px" data-act="pause">Pausar</button>`}
-        ${T.start ? `<button class="ghost" data-act="reset">Zerar</button>` : ""}</div></div>` : ""}
-      ${b.itens.map((it, ii) => exCard(it, bi, ii, bi === 0 && T.start && !T.pausedAt && cs.cur === ii)).join("")}
-    </section>`).join("")}
-  ${p.volta.length ? `<section class="panel"><h3>Volta à calma · 3 min</h3><div>${p.volta.map(miniRow).join("")}</div></section>` : ""}
-  <section class="panel">
-    <h2>Terminou?</h2><p class="small muted">Como foi o esforço? Isso entra no seu mapa.</p>
+  ${parts}
+  <section class="panel" id="registro">
+    <h2>Registrar treino</h2>
+    ${strength && strength.peso ? regField("forca", `${LIB[strength.itens[0].id].pt}: carga da série mais pesada (kg)`, lastLoad(strength.itens[0].id) ? `última: ${lastLoad(strength.itens[0].id).kg}` : "kg", "number") : ""}
+    ${wod && wod.formato !== "flow" ? regField("wod", `Resultado do ${wod.nome.split(" · ")[0]}`, wodPh) : ""}
+    ${loadItems.map((i) => regField("kg_" + i.id, `${LIB[i.id].pt} (kg)`, lastLoad(i.id) ? `última: ${lastLoad(i.id).kg}` : "kg", "number")).join("")}
+    ${regField("duracao", "Duração total (min)", String(p.tempo), "number")}
+    ${regField("nota", "Observação", "opcional")}
+    <span class="lbl">Como foi o esforço?</span>
     <div class="done-pick">${[["leve", "Leve"], ["bom", "Na medida"], ["puxado", "Puxado"]].map(([v, l]) => `<button class="btn secondary" data-act="concluir" data-val="${v}">${l}</button>`).join("")}</div>
     <button class="ghost" data-act="outro">Gerar outro treino com as mesmas escolhas</button>
   </section>`;
 }
-const reconHTML = (ms) => "Reconhecidos: " + (ms.length ? ms.map((m) => `<span class="gtag" style="background:var(--muted);margin:2px;display:inline-block">${esc(LIB[m]?.pt || m.replace(/_/g, " "))}</span>`).join("") : '<span class="muted">nenhum ainda</span>');
+const reconHTML = (ms) => "Reconhecidos: " + (ms.length ? ms.map((m) => `<span class="gtag" style="background:var(--muted);margin:2px">${esc(LIB[m]?.pt || m.replace(/_/g, " "))}</span>`).join("") : '<span class="muted">nenhum ainda</span>');
 function renderHistorico() {
-  const list = [...S.workouts].sort((a, b) => (b.data || "").localeCompare(a.data || ""));
-  const d = S.draft;
+  const list = sorted(), d = S.draft;
   const addPanel = !S.addMode ? `
-    <div class="row">${S.sample && S.canImages ? `<label class="btn" style="flex:1;text-align:center">Foto do treino do box<input type="file" id="foto" accept="image/*" hidden></label>` : ""}
+    <div class="row">${S.sample && S.canImages ? `<label class="btn" style="flex:1;cursor:pointer">Foto do treino do box<input type="file" id="foto" accept="image/*" hidden></label>` : ""}
     <button class="btn secondary" style="flex:1" data-act="add-manual">Digitar treino</button></div>
-    <p class="small muted">${S.sample && S.canImages ? "Mande o print do app do box ou a foto do quadro: o Claude lê os exercícios e você confirma." : "Escreva os exercícios do treino; o app reconhece os nomes."}</p>`
+    <p class="small muted">${S.sample && S.canImages ? "Mande o print do app do box ou a foto do quadro: o Claude lê e você confirma." : "Escreva os exercícios; o app reconhece os nomes."}</p>`
     : `
     ${S.busy ? `<p class="muted">Lendo a imagem…</p>` : ""}
-    <div class="field"><label for="d-data">Data</label><input type="date" id="d-data" value="${esc(d.data)}"></div>
+    <div class="grid2"><div class="field"><label for="d-data">Data</label><input type="date" id="d-data" value="${esc(d.data)}"></div>
+    <div class="field"><label for="d-dur">Duração (min)</label><input type="number" id="d-dur" min="1" value="${esc(d.duracao || "")}" placeholder="ex.: 60"></div></div>
     <div class="field"><label for="d-titulo">Nome do treino</label><input type="text" id="d-titulo" value="${esc(d.titulo)}" placeholder="Ex.: Bugs Bunny"></div>
     <div class="field"><label for="d-texto">Exercícios</label><textarea id="d-texto" placeholder="Ex.: 21-15-9 thrusters, pull-ups, 400m run">${esc(d.texto)}</textarea></div>
     <p class="small" id="d-recon">${reconHTML(d.movimentos)}</p>
+    <div class="grid2"><div class="field"><label for="d-res">Resultado (tempo ou voltas)</label><input type="text" id="d-res" value="${esc(d.resultado || "")}" placeholder="ex.: 14:32"></div>
+    <div class="field"><label for="d-cargas">Pesos usados</label><input type="text" id="d-cargas" value="${esc(d.cargasTexto || "")}" placeholder="ex.: thruster 20 kg"></div></div>
     <div class="row"><button class="btn" style="flex:1" id="d-save" data-act="salvar-draft" ${d.movimentos.length ? "" : "disabled"}>Salvar</button><button class="btn secondary" style="flex:1" data-act="cancelar-draft">Cancelar</button></div>`;
+  const extra = (w) => {
+    const bits = [];
+    if (w.duracaoMin) bits.push(`${w.duracaoMin} min`);
+    for (const r of w.resultados || []) if (r.valor) bits.push(`${r.bloco}: ${r.valor}`);
+    if (w.resultado) bits.push(w.resultado);
+    if (w.cargas) for (const [id, kg] of Object.entries(w.cargas)) bits.push(`${LIB[id]?.pt || id} ${kg} kg`);
+    if (w.cargasTexto) bits.push(w.cargasTexto);
+    return bits.length ? `<span class="x">${esc(bits.join(" · "))}</span>` : "";
+  };
   return `
   <header><h1>Histórico</h1><p class="muted small" style="margin-top:6px">Treinos do box, de casa e de viagem. Quanto mais você registra, melhor fica a sugestão.</p></header>
   ${S.msg ? `<div class="notice">${esc(S.msg)}</div>` : ""}
   <section class="panel"><h2>Adicionar treino</h2>${addPanel}</section>
   <section class="panel"><div class="row between"><h2>Registrados</h2><span class="small muted">${list.length}</span></div>
-    ${list.length ? `<div class="hist">${list.map((w) => {
-      const g = w.grupos || groupsOf(w.movimentos || []) || {};
-      const top = GK.filter((k) => (g[k] || 0) >= 0.2);
-      return `<div class="item"><span class="t">${esc(w.titulo || "Treino")}</span><span class="d">${fmtDate(w.data)}</span>
-        <span class="row">${top.map((k) => `<span class="gtag" style="background:${GROUPS[k].color}">${GROUPS[k].label}</span>`).join("")}<span class="small muted">${w.origem === "box" ? "box" : w.origem === "app" ? "app" : "manual"}${w.esforco ? " · " + w.esforco : ""}</span></span>
-        <span>${S.confirmDel === w._id ? `<button class="ghost" style="color:var(--pernas)" data-act="del-ok" data-id="${w._id}">Confirmar</button>` : `<button class="ghost" data-act="del" data-id="${w._id}">Apagar</button>`}</span></div>`;
-    }).join("")}</div>` : `<p class="muted">Nenhum treino ainda. Adicione o último treino do box acima.</p>`}
+    ${list.length ? `<div class="hist">${list.map((w) => `<div class="item"><span class="t">${esc(w.titulo || "Treino")}</span><span class="d">${fmtDate(w.data)}</span>
+        <span class="row">${gTags(w)}<span class="small muted">${w.origem === "box" ? "box" : w.origem === "app" ? "app" : "manual"}${w.esforco ? " · " + esc(w.esforco) : ""}</span></span>
+        <span>${S.confirmDel === w._id ? `<button class="ghost" style="color:var(--pernas)" data-act="del-ok" data-id="${w._id}">Confirmar</button>` : `<button class="ghost" data-act="del" data-id="${w._id}">Apagar</button>`}</span>${extra(w)}</div>`).join("")}</div>`
+      : `<p class="muted">Nenhum treino ainda. Adicione o último treino do box acima.</p>`}
   </section>
   <section class="panel links"><h2>CrossFit oficial</h2>
     <ul style="margin:0;padding-left:18px">
@@ -711,7 +815,6 @@ function render() {
   const v = view();
   document.querySelectorAll("nav.tabs a").forEach((a) => a.setAttribute("aria-current", a.dataset.tab === v ? "page" : "false"));
   app.innerHTML = v === "treino" ? renderTreino() : v === "historico" ? renderHistorico() : renderHoje();
-  app.querySelectorAll("[data-stage]").forEach((el) => mountStage(el, el.dataset.stage, !!el.dataset.slow));
   const f = document.getElementById("foto");
   if (f) f.addEventListener("change", () => readPhoto(f.files[0]));
   const tx = document.getElementById("d-texto");
@@ -720,26 +823,26 @@ function render() {
     document.getElementById("d-recon").innerHTML = reconHTML(S.draft.movimentos);
     document.getElementById("d-save").disabled = !S.draft.movimentos.length;
   });
+  highlightCurrent();
 }
 
 /* ============================== AÇÕES ============================== */
-function persist() { LS.set("cg.brief", S.brief); LS.set("cg.plan", S.plan); LS.set("cg.timer", S.timer); }
+function persist() { LS.set("cg.brief", S.brief); LS.set("cg.plan2", S.plan); LS.set("cg.timer2", S.timer); LS.set("cg.reg", S.reg); }
 function captureDraft() {
   if (!S.draft) return;
-  const g = (id) => document.getElementById(id);
-  if (g("d-data")) S.draft.data = g("d-data").value || todayISO();
-  if (g("d-titulo")) S.draft.titulo = g("d-titulo").value;
+  const g = (id) => document.getElementById(id)?.value;
+  if (g("d-data") !== undefined) S.draft.data = g("d-data") || todayISO();
+  for (const [id, k] of [["d-titulo", "titulo"], ["d-dur", "duracao"], ["d-res", "resultado"], ["d-cargas", "cargasTexto"]]) if (g(id) !== undefined) S.draft[k] = g(id);
 }
 async function readPhoto(file) {
   if (!file || !S.sample) return;
   S.addMode = "foto"; S.draft = { data: todayISO(), titulo: "", texto: "", movimentos: [] }; S.busy = true; S.msg = ""; render();
-  const known = Object.keys(ALIASES).join(", ");
   try {
     const r = await S.sample.json(
       `A imagem é um print do app de um box de CrossFit ou a foto de um quadro com o treino do dia.
 Extraia o treino e responda só com JSON: {"data":"AAAA-MM-DD ou vazio","titulo":"nome do WOD ou vazio","texto":"o treino em texto simples, uma linha por exercício, com reps e cargas"}.
-Use nomes de exercícios em inglês como aparecem (ex.: ${known.slice(0, 600)}). Hoje é ${todayISO()}; se a data não tiver ano, use o ano mais próximo de hoje.`,
-      { images: [file], modelTier: "default" });
+Use os nomes dos exercícios em inglês como aparecem (deadlift, thruster, pull-up, toes-to-bar, wall ball, double under, run, row, snatch, clean...). Hoje é ${todayISO()}; se a data não tiver ano, use o ano mais próximo de hoje.`,
+      { images: [file] });
     S.draft.data = /^\d{4}-\d{2}-\d{2}$/.test(r?.data || "") ? r.data : todayISO();
     S.draft.titulo = String(r?.titulo || "");
     S.draft.texto = String(r?.texto || "");
@@ -750,27 +853,42 @@ Use nomes de exercícios em inglês como aparecem (ex.: ${known.slice(0, 600)}).
   }
   S.busy = false; render();
 }
+function newPlan() {
+  S.plan = generate(S.brief, Math.floor(Math.random() * 1e9));
+  S.timer = { start: null, paused: 0, pausedAt: null, stoppedAt: null }; S.reg = {}; persist();
+}
 document.addEventListener("click", async (ev) => {
   const t = ev.target.closest("button");
   if (!t) return;
   if (t.dataset.set) {
-    const k = t.dataset.set; S.brief[k] = k === "tempo" ? Number(t.dataset.val) : t.dataset.val; persist(); render(); return;
+    const k = t.dataset.set, v = t.dataset.val;
+    if (k === "tempo") { if (v === "livre") { S.brief.livre = true; } else { S.brief.livre = false; S.brief.tempo = Number(v); } }
+    else S.brief[k] = v;
+    persist(); render(); return;
   }
   const act = t.dataset.act;
-  if (act === "gerar" || act === "outro") {
-    S.plan = generate(S.brief, Math.floor(Math.random() * 1e9)); S.timer = { start: null, paused: 0, pausedAt: null }; persist();
-    if (location.hash !== "#treino") location.hash = "treino"; else { render(); scrollTo(0, 0); }
-    return;
-  }
-  if (act === "trocar") { swapMove(S.plan, +t.dataset.b, +t.dataset.i); persist(); render(); return; }
-  if (act === "start") { S.timer = { start: Date.now(), paused: 0, pausedAt: null }; persist(); render(); requestWake(); return; }
+  if (act === "gerar" || act === "outro") { newPlan(); if (location.hash !== "#treino") location.hash = "treino"; else { render(); scrollTo(0, 0); } return; }
+  if (act === "trocar") { swapMove(S.plan, +t.dataset.p, +t.dataset.i); persist(); render(); return; }
+  if (act === "start") { S.timer = { start: Date.now(), paused: 0, pausedAt: null, stoppedAt: null }; persist(); render(); try { await navigator.wakeLock?.request("screen"); } catch { /* opcional */ } return; }
   if (act === "pause") { S.timer.pausedAt = Date.now(); persist(); render(); return; }
   if (act === "resume") { S.timer.paused += Date.now() - S.timer.pausedAt; S.timer.pausedAt = null; persist(); render(); return; }
-  if (act === "reset") { S.timer = { start: null, paused: 0, pausedAt: null }; persist(); render(); return; }
+  if (act === "stop") { S.timer.stoppedAt = Date.now(); S.reg.wod = mmss(elapsed()); persist(); render(); document.getElementById("registro")?.scrollIntoView({ behavior: "smooth" }); return; }
+  if (act === "reset") { S.timer = { start: null, paused: 0, pausedAt: null, stoppedAt: null }; persist(); render(); return; }
   if (act === "concluir") {
-    const p = S.plan, moves = p.blocos.flatMap((b) => b.itens.map((i) => i.id));
-    const ok = await saveWorkout({ data: todayISO(), titulo: p.titulo, origem: "app", local: p.local, foco: p.foco, movimentos: moves, grupos: groupsOf(moves), esforco: t.dataset.val });
-    if (ok) { S.plan = null; S.timer = { start: null, paused: 0, pausedAt: null }; persist(); S.msg = "Treino salvo. O mapa do corpo já foi atualizado."; location.hash = "historico"; render(); }
+    const p = S.plan, moves = [...new Set(p.partes.filter((x) => x.tipo !== "warm" && x.tipo !== "cool").flatMap((x) => x.itens.map((i) => i.id)))];
+    const cargas = {};
+    for (const [k, v] of Object.entries(S.reg)) if (k.startsWith("kg_") && Number(v) > 0) cargas[k.slice(3)] = Number(v);
+    const strength = p.partes.find((x) => x.tipo === "strength");
+    if (strength && Number(S.reg.forca) > 0) cargas[strength.itens[0].id] = Number(S.reg.forca);
+    const wod = p.partes.find((x) => x.tipo === "wod");
+    const resultados = [];
+    if (strength && S.reg.forca) resultados.push({ bloco: "Força", valor: `${S.reg.forca} kg` });
+    if (wod && S.reg.wod) resultados.push({ bloco: wod.nome.split(" · ")[0], valor: S.reg.wod });
+    const doc = { data: todayISO(), titulo: p.titulo, origem: "app", local: p.local, foco: p.foco, movimentos: moves, grupos: groupsOf(moves), esforco: t.dataset.val,
+      duracaoMin: Number(S.reg.duracao) || p.tempo, resultados, cargas };
+    if (S.reg.nota) doc.nota = String(S.reg.nota).slice(0, 500);
+    const ok = await saveWorkout(doc);
+    if (ok) { S.plan = null; S.reg = {}; S.timer = { start: null, paused: 0, pausedAt: null, stoppedAt: null }; persist(); S.msg = "Treino salvo. O mapa do corpo e as cargas já foram atualizados."; location.hash = "historico"; render(); }
     return;
   }
   if (act === "add-manual") { S.addMode = "manual"; S.draft = { data: todayISO(), titulo: "", texto: "", movimentos: [] }; S.msg = ""; render(); return; }
@@ -778,27 +896,41 @@ document.addEventListener("click", async (ev) => {
   if (act === "salvar-draft") {
     captureDraft();
     const d = S.draft;
-    const ok = await saveWorkout({ data: d.data, titulo: d.titulo || "Treino do box", origem: S.addMode === "foto" ? "box" : "manual", movimentos: d.movimentos, grupos: groupsOf(d.movimentos), texto: d.texto.slice(0, 2000) });
+    const doc = { data: d.data, titulo: d.titulo || "Treino do box", origem: S.addMode === "foto" ? "box" : "manual", movimentos: d.movimentos, grupos: groupsOf(d.movimentos), texto: (d.texto || "").slice(0, 2000) };
+    if (Number(d.duracao) > 0) doc.duracaoMin = Number(d.duracao);
+    if (d.resultado) doc.resultado = d.resultado.slice(0, 200);
+    if (d.cargasTexto) doc.cargasTexto = d.cargasTexto.slice(0, 300);
+    const ok = await saveWorkout(doc);
     if (ok) { S.addMode = null; S.draft = null; S.msg = "Treino adicionado. A sugestão de hoje já considera ele."; render(); }
     return;
   }
   if (act === "del") { S.confirmDel = t.dataset.id; render(); return; }
   if (act === "del-ok") { S.confirmDel = null; await deleteWorkout(t.dataset.id); return; }
 });
-document.addEventListener("input", (ev) => { if (ev.target.id === "d-data" || ev.target.id === "d-titulo") captureDraft(); });
-async function requestWake() { try { await navigator.wakeLock?.request("screen"); } catch { /* opcional */ } }
-let lastBeep = "";
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (el.dataset?.reg) { S.reg[el.dataset.reg] = el.value; LS.set("cg.reg", S.reg); return; }
+  if (el.id === "livre") { const v = Math.max(10, Math.min(90, Number(el.value) || 30)); S.brief.tempo = v; LS.set("cg.brief", S.brief); return; }
+  if (el.id?.startsWith("d-") && el.id !== "d-texto") captureDraft();
+});
+function highlightCurrent() {
+  if (view() !== "treino" || !S.plan?.partes) return;
+  const pi = S.plan.partes.findIndex((x) => x.tipo === "wod"); if (pi < 0) return;
+  const cs = clockState(S.plan.partes[pi]);
+  const running = S.timer.start && !S.timer.pausedAt && !S.timer.stoppedAt;
+  document.querySelectorAll(`#parte${pi} .ex`).forEach((el, i) => el.classList.toggle("now", !!running && i === cs.cur));
+}
 setInterval(() => {
-  if (view() !== "treino" || !S.plan || !S.timer.start || S.timer.pausedAt) return;
-  const b = S.plan.blocos[0], cs = clockState(b);
+  if (view() !== "treino" || !S.plan?.partes || !S.timer.start || S.timer.pausedAt || S.timer.stoppedAt) return;
+  const b = S.plan.partes.find((x) => x.tipo === "wod"); if (!b || b.formato === "flow") return;
+  const cs = clockState(b);
   const c = document.getElementById("clk"), sub = document.getElementById("clksub");
   if (c) c.textContent = cs.txt; if (sub) sub.textContent = cs.sub;
-  const key = `${cs.sub}`;
-  if (key !== lastBeep) { lastBeep = key; document.querySelectorAll("#bloco0 .ex").forEach((el, i) => el.classList.toggle("now", i === cs.cur)); }
+  highlightCurrent();
 }, 250);
 window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 
 render();
 initCapabilities();
-window.CG = { LIB, ANIM, animSVG, generate, balance };
+window.CG = { LIB, FIG, stepSVG, generate, S };
 </script>
