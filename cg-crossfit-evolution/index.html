@@ -109,6 +109,11 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
 .steps.c2 { grid-template-columns: 1fr 1fr; }
 .steps.c3 { grid-template-columns: 1fr 1fr 1fr; }
 .step { background: var(--soft); display: flex; flex-direction: column; min-width: 0; }
+.media { background: var(--soft); }
+.stage3d { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; background: radial-gradient(ellipse at 50% 85%, var(--surface) 0%, var(--soft) 70%); }
+.mtoggle { width: max-content; margin: 8px 8px 0 auto; display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.mtoggle button { border: 0; background: transparent; color: var(--muted); font: 600 13px/1 var(--body); padding: 7px 11px; border-radius: 999px; }
+.mtoggle button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 .step { margin: 0; }
 .step img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: var(--soft); }
 .step .cap { display: flex; gap: 6px; padding: 6px 8px 8px; font-size: 13px; line-height: 1.3; }
@@ -146,6 +151,7 @@ nav.tabs a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 3px 0 v
   <a href="#historico" data-tab="historico">Histórico</a>
 </div></nav>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>
 "use strict";
 /* ============================== DADOS FIXOS ============================== */
@@ -225,10 +231,251 @@ const PH = {
   run: [["run_0", "Passadas curtas"], ["run_1", "Acelere aos poucos"]],
 };
 const IMG = (k) => `img/${k}.jpg`;
+function mediaHTML(id) {
+  const anim = M3.ok && FIG[id] && M3.mode === "anim";
+  return `<div class="media">
+    ${M3.ok && FIG[id] ? `<div class="mtoggle" role="group" aria-label="Ver como"><button data-act="view" data-mode="anim" aria-pressed="${anim}">Animação</button><button data-act="view" data-mode="foto" aria-pressed="${!anim}">Fotos</button></div>` : ""}
+    ${anim ? `<canvas class="stage3d" data-anim="${id}" width="900" height="600" role="img" aria-label="Animação 3D: ${esc(LIB[id]?.pt || id)}"></canvas>` : stepsHTML(id)}
+  </div>`;
+}
 function stepsHTML(id) {
   const ph = PH[id] || [], cols = ph.length === 1 ? "c1" : "c2";
   return `<div class="steps ${cols}">${ph.map(([k, cap], i) => `<figure class="step"><img src="${IMG(k)}" alt="${esc(cap)}" loading="lazy" width="600" height="400"><figcaption class="cap"><span class="n">${i + 1}</span><span>${esc(cap)}</span></figcaption></figure>`).join("")}</div>`;
 }
+
+/* ============================== MANEQUIM 3D ============================== */
+// Poses em vista lateral (graus): 0 = para baixo, 90 = para frente, 180 = para cima, -90 = para trás.
+// O esqueleto 2D vira um manequim 3D (lado direito na frente, esquerdo atrás) desenhado com three.js.
+const L = { torso: 50, ua: 27, la: 25, th: 38, sh: 38, head: 11 };
+const GROUND = 182;
+const P = (o) => Object.assign({ hx: 100, torso: 180, ua: 0, la: 0, th: 0, sh: 0 }, o);
+const STAND = P({}), ARMS_FWD = P({ ua: 90, la: 90 }), SQUAT = P({ torso: 145, th: 100, sh: -28, ua: 95, la: 95 });
+const RACK = { ua: 100, la: -150 }, OVER = { ua: 180, la: 180 };
+const PLANK_TOP = P({ torso: 115, th: -65, sh: -65 }), PLANK_LOW = P({ torso: 99, th: -81, sh: -81, ua: -100, la: 10 });
+const LYING = { torso: -90, th: 90, sh: 0 }, QUAD = P({ torso: 90, th: 0, sh: -90 });
+const SQ_LOW = P({ torso: 140, th: 105, sh: -35, ua: 5, la: 5 });
+const F = (frames, extra) => Object.assign({ frames, anchor: "ground", props: [], cycle: 2.8 }, extra || {});
+const FIG = {
+  march: F([P({ th: 90, sh: 0, ua: 60, la: 120, ua2: -30, la2: 20 }), P({ th2: 90, sh2: 0, ua2: 60, la2: 120, ua: -30, la: 20 })], { cycle: 1.6 }),
+  arm_circles: F([P({ ua: 0, la: 0 }), P({ ua: 90, la: 90 }), P({ ua: 180, la: 180 }), P({ ua: 270, la: 270 }), P({ ua: 360, la: 360 })], { open: true, cycle: 2.4 }),
+  cat_cow: F([P(Object.assign({}, QUAD, { bend: 14, head: 30 })), P(Object.assign({}, QUAD, { bend: -12, head: -25 }))], { cycle: 4 }),
+  inchworm: F([STAND, P({ torso: 22, th: 0, sh: 0, ua: 12, la: 12 }), P({ torso: 70, th: -30, sh: -30, ua: 5, la: 5 }), PLANK_TOP], { cycle: 5 }),
+  hamstring: F([P({}), P({ torso: 20, th: 0, sh: 0, ua: 15, la: 15 })], { cycle: 4 }),
+  air_squat: F([ARMS_FWD, SQUAT], { cycle: 2.4 }),
+  goblet_squat: F([P({ ua: 25, la: 165 }), P({ torso: 155, th: 100, sh: -28, ua: 50, la: 175 })], { hand: "dumbbell1" }),
+  lunge: F([STAND, P({ th: 85, sh: 0, th2: -15, sh2: -95 })]),
+  bulgarian: F([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], { props: ["bench_back"], cycle: 3.2 }),
+  deadlift: F([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell", cycle: 3.4 }),
+  kb_swing: F([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ torso: 150, th: 10, sh: -2, ua: 30, la: 30 }), P({ ua: 90, la: 90 })], { hand: "kettlebell", cycle: 2.2 }),
+  glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: -100, la: -100 }), P({ torso: -112, th: 108, sh: 15, ua: -100, la: -100 })]),
+  jump_squat: F([SQUAT, P({ ua: 160, la: 160, lift: 25 })], { cycle: 2 }),
+  thruster: F([P(RACK), P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(OVER)], { hand: "dumbbell" }),
+  db_snatch: F([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 30, la2: 60 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], { hand: "dumbbell1" }),
+  sandbag_clean: F([P({ torso: 105, th: 70, sh: -15, ua: 10, la: 60 }), P({ torso: 160, th: 60, sh: -20, ua: 40, la: 150 }), P({ ua: -150, la: 30 })], { hand: "sandbag", cycle: 4 }),
+  farmer_carry: F([P({ th: 25, sh: -10, th2: -20, sh2: -20 }), P({ th2: 25, sh2: -10, th: -20, sh: -20 })], { hand: "dumbbell", cycle: 1.4 }),
+  push_up: F([PLANK_TOP, PLANK_LOW], { cycle: 2.6 }),
+  push_up_incline: F([P({ torso: 128, th: -52, sh: -52, ua: 30, la: 30 }), P({ torso: 115, th: -65, sh: -65, ua: -80, la: 40 })], { props: ["bench_hands"] }),
+  decline_push_up: F([P({ torso: 82, th: -98, sh: -98, ua: 0, la: 0 }), P({ torso: 78, th: -102, sh: -102, ua: -100, la: 12 })], { props: ["bench_feet"] }),
+  db_press: F([P({ ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell" }),
+  db_push_press: F([P({ ua: 60, la: 170 }), P({ torso: 178, th: 30, sh: -20, ua: 60, la: 170 }), P(OVER)], { hand: "dumbbell", cycle: 2.6 }),
+  db_row: F([P({ torso: 110, th: 25, sh: -10, ua: 0, la: 0 }), P({ torso: 110, th: 25, sh: -10, ua: -70, la: 20 })], { hand: "dumbbell" }),
+  band_row: F([P({ torso: 178, th: 90, sh: 90, ua: 90, la: 90 }), P({ torso: 185, th: 90, sh: 90, ua: -30, la: 85 })], { hand: "band" }),
+  band_pulldown: F([P(Object.assign({ th: 0, sh: -90 }, OVER)), P({ th: 0, sh: -90, ua: 25, la: 160 })], { hand: "band_up" }),
+  db_curl: F([P({}), P({ ua: 5, la: 150 })], { hand: "dumbbell" }),
+  triceps_ext: F([P({ ua: 170, la: 20 }), P(OVER)], { hand: "dumbbell" }),
+  db_bench_press: F([P(Object.assign({}, LYING, { ua: 30, la: 175 })), P(Object.assign({}, LYING, OVER))], { hand: "dumbbell", props: ["bench_under"], cycle: 3 }),
+  plank: F([P({ torso: 98, th: -82, sh: -82, ua: 0, la: 90 }), P({ torso: 99, th: -81, sh: -81, ua: 0, la: 90, bend: 3 })], { cycle: 3 }),
+  side_plank: F([P({ torso: 112, th: -68, sh: -68, ua: 0, la: 0, ua2: 180, la2: 180 }), P({ torso: 117, th: -63, sh: -63, ua: 0, la: 0, ua2: 180, la2: 180 })], { cycle: 3 }),
+  dead_bug: F([P(Object.assign({}, LYING, { th: 180, sh: 90 }, OVER)), P(Object.assign({}, LYING, { th: 120, sh: 115, th2: 180, sh2: 90, ua: -100, la: -100, ua2: 180, la2: 180 }))], { cycle: 3.2 }),
+  sit_up: F([P({ torso: -90, th: 60, sh: -40, ua: -90, la: -90 }), P({ torso: 145, th: 60, sh: -40, ua: 120, la: 120 })], { cycle: 2.6 }),
+  jackknife: F([P({ torso: -90, th: 90, sh: 90, ua: -90, la: -90 }), P({ torso: -140, th: 140, sh: 140, ua: 150, la: 150 })], { cycle: 2.6 }),
+  mountain_climber: F([P(Object.assign({}, PLANK_TOP, { th: 70, sh: -60 })), P(Object.assign({}, PLANK_TOP, { th2: 70, sh2: -60 }))], { cycle: 1 }),
+  superman: F([P({ torso: 90, th: -90, sh: -90, ua: 90, la: 90 }), P({ torso: 100, th: -100, sh: -100, ua: 100, la: 100 })], { cycle: 3 }),
+  burpee: F([STAND, SQ_LOW, PLANK_TOP, P({ torso: 92, th: -88, sh: -88, ua: -110, la: 10 }), PLANK_TOP, SQ_LOW, P(Object.assign({ lift: 20 }, OVER))], { cycle: 4.4 }),
+  burpee_step: F([STAND, SQ_LOW, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55, ua: 5, la: 5 }), PLANK_TOP, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55, ua: 5, la: 5 }), SQ_LOW], { cycle: 5 }),
+  bike: F([P({ torso: 130, ua: 100, la: 100, th: 100, sh: 10, th2: 45, sh2: -20 }), P({ torso: 130, ua: 100, la: 100, th: 60, sh: -30, th2: 95, sh2: 20 }), P({ torso: 130, ua: 100, la: 100, th: 45, sh: -20, th2: 100, sh2: 10 }), P({ torso: 130, ua: 100, la: 100, th: 95, sh: 20, th2: 60, sh2: -30 })], { anchor: "seat", props: ["bike"], cycle: 1.4 }),
+  run: F([P({ torso: 172, th: 45, sh: -10, th2: -30, sh2: -80, ua: -40, la: 50, ua2: 40, la2: 110 }), P({ torso: 172, th2: 45, sh2: -10, th: -30, sh: -80, ua2: -40, la2: 50, ua: 40, la: 110, lift: 6 })], { cycle: 0.9 }),
+};
+
+const dirv = (d) => [Math.sin(d * Math.PI / 180), Math.cos(d * Math.PI / 180)];
+const add2 = (p, d, l) => [p[0] + d[0] * l, p[1] + d[1] * l];
+function skeleton(p, anchor) {
+  const hip = [p.hx, 0], td = dirv(p.torso), sho = add2(hip, td, L.torso);
+  const mid = [(hip[0] + sho[0]) / 2, (hip[1] + sho[1]) / 2], perp = [-td[1], td[0]];
+  const s = { hip, sho, mid: add2(mid, perp, -(p.bend || 0)), head: add2(sho, dirv(p.torso + (p.head || 0)), L.head + 4) };
+  s.neck = add2(sho, dirv(p.torso + (p.head || 0)), 4);
+  s.elb = add2(sho, dirv(p.ua), L.ua); s.hand = add2(s.elb, dirv(p.la), L.la);
+  s.elb2 = add2(sho, dirv(p.ua2 ?? p.ua), L.ua); s.hand2 = add2(s.elb2, dirv(p.la2 ?? p.la), L.la);
+  s.knee = add2(hip, dirv(p.th), L.th); s.foot = add2(s.knee, dirv(p.sh), L.sh);
+  s.knee2 = add2(hip, dirv(p.th2 ?? p.th), L.th); s.foot2 = add2(s.knee2, dirv(p.sh2 ?? p.sh), L.sh);
+  const sh2 = p.sh2 ?? p.sh;
+  s.toe = add2(s.foot, [Math.cos(p.sh * Math.PI / 180), -Math.sin(p.sh * Math.PI / 180)], 12);
+  s.toe2 = add2(s.foot2, [Math.cos(sh2 * Math.PI / 180), -Math.sin(sh2 * Math.PI / 180)], 12);
+  let dy;
+  if (anchor === "seat") dy = 112 - hip[1];
+  else {
+    const ys = [s.foot[1] + 3, s.foot2[1] + 3, s.knee[1] + 5, s.knee2[1] + 5, s.hand[1] + 3, s.hand2[1] + 3, hip[1] + 8, sho[1] + 9, s.head[1] + 10, s.elb[1] + 4, s.elb2[1] + 4];
+    dy = GROUND - Math.max(...ys) - (p.lift || 0);
+  }
+  for (const k in s) s[k] = [s[k][0], s[k][1] + dy];
+  return s;
+}
+const ease = (t) => t * t * (3 - 2 * t);
+function lerpPose(a, b, t) {
+  const k = ease(t), l = (x, y, d = 0) => (x ?? d) + ((y ?? d) - (x ?? d)) * k, o = {};
+  for (const key of ["hx", "torso", "bend", "head", "ua", "la", "th", "sh", "lift"]) o[key] = l(a[key], b[key]);
+  o.ua2 = l(a.ua2 ?? a.ua, b.ua2 ?? b.ua); o.la2 = l(a.la2 ?? a.la, b.la2 ?? b.la);
+  o.th2 = l(a.th2 ?? a.th, b.th2 ?? b.th); o.sh2 = l(a.sh2 ?? a.sh, b.sh2 ?? b.sh);
+  return o;
+}
+function poseAt(fig, ph) {
+  const f = fig.frames; if (f.length === 1) return f[0];
+  const seq = fig.open ? f : [...f, f[0]], segs = seq.length - 1, x = (ph % 1) * segs, i = Math.min(segs - 1, Math.floor(x));
+  return lerpPose(seq[i], seq[i + 1], x - i);
+}
+
+const M3 = { ok: false, active: new Set(), mode: "anim" };
+function init3D() {
+  if (!window.THREE) return false;
+  try {
+    const T = window.THREE;
+    const W0 = 600, H0 = 400;
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(W0, H0, false);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.outputEncoding = T.sRGBEncoding;
+    const scene = new T.Scene();
+    const camera = new T.PerspectiveCamera(30, W0 / H0, 1, 2000);
+    scene.add(new T.HemisphereLight(0xffffff, 0x8a9490, 0.75));
+    const sun = new T.DirectionalLight(0xffffff, 0.85);
+    sun.position.set(80, 220, 160); sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    Object.assign(sun.shadow.camera, { left: -160, right: 160, top: 160, bottom: -160, near: 10, far: 600 });
+    sun.shadow.radius = 4;
+    scene.add(sun); scene.add(sun.target);
+    const ground = new T.Mesh(new T.PlaneGeometry(1200, 1200), new T.ShadowMaterial({ opacity: 0.22 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    const mat = (c, r = 0.75) => new T.MeshStandardMaterial({ color: c, roughness: r, metalness: 0.02 });
+    const SKIN = mat(0xc99271, 0.65), SHIRT = mat(0x2c3e57), SHORTS = mat(0x1f2624), SHOE = mat(0xe6e9e6, 0.6), HAIR = mat(0x2a211c, 0.9);
+    const BLUE = mat(0x2a62c9, 0.4), RED = mat(0xcc3d31, 0.45), GREY = mat(0x59625f, 0.6), BAND = mat(0x24884f, 0.5), STEEL = mat(0x9aa3a0, 0.3);
+    const body = new T.Group(); scene.add(body);
+    const cap = (r, len, m) => { const g = new T.Mesh(new T.CapsuleGeometry(r, len, 6, 14), m); g.castShadow = true; body.add(g); return g; };
+    const sph = (r, m) => { const g = new T.Mesh(new T.SphereGeometry(r, 20, 14), m); g.castShadow = true; body.add(g); return g; };
+    // Segmentos (comprimentos fixos = ossos)
+    const Z = { sho: 12, hip: 7.5 };
+    const parts = {
+      ua: cap(4.4, L.ua - 2, SHIRT), ua2: cap(4.4, L.ua - 2, SHIRT), la: cap(3.6, L.la - 3, SKIN), la2: cap(3.6, L.la - 3, SKIN),
+      th: cap(6.4, L.th - 4, SHORTS), th2: cap(6.4, L.th - 4, SHORTS), sh: cap(4.7, L.sh - 4, SKIN), sh2: cap(4.7, L.sh - 4, SKIN),
+      chest: cap(10, 14, SHIRT), belly: cap(9, 12, SHIRT), pelvis: cap(8, Z.hip * 2, SHORTS), shoulders: cap(5.5, Z.sho * 2, SHIRT),
+      neck: cap(3.4, 4, SKIN), head: sph(9.5, SKIN), hair: sph(9.9, HAIR),
+      hand: sph(3.6, SKIN), hand2: sph(3.6, SKIN),
+    };
+    parts.hair.scale.set(1, 0.62, 1);
+    const shoe = () => { const g = new T.Mesh(new T.BoxGeometry(14, 5, 6.5), SHOE); g.castShadow = true; body.add(g); return g; };
+    parts.foot = shoe(); parts.foot2 = shoe();
+    for (const k of ["chest", "belly"]) parts[k].scale.set(1, 1, 1.35);
+    // Equipamentos
+    const props = new T.Group(); scene.add(props);
+    const dumbbell = () => { const g = new T.Group(); const h = new T.Mesh(new T.CylinderGeometry(1.4, 1.4, 12, 10), STEEL); h.rotation.x = Math.PI / 2; g.add(h);
+      for (const z of [-7, 7]) { const w = new T.Mesh(new T.CylinderGeometry(5, 5, 4, 8), BLUE); w.rotation.x = Math.PI / 2; w.position.z = z; w.castShadow = true; g.add(w); } props.add(g); return g; };
+    const db1 = dumbbell(), db2 = dumbbell();
+    const kb = new T.Group(); { const b = new T.Mesh(new T.SphereGeometry(8, 18, 14), RED); b.position.y = -9; b.castShadow = true; kb.add(b); const h = new T.Mesh(new T.TorusGeometry(4.5, 1.3, 8, 16, Math.PI), RED); h.position.y = -2; h.rotation.y = Math.PI / 2; kb.add(h); props.add(kb); }
+    const sandbag = new T.Mesh(new T.CapsuleGeometry(7.5, 20, 6, 12), GREY); sandbag.rotation.x = Math.PI / 2; sandbag.castShadow = true; props.add(sandbag);
+    const bench = new T.Group(); { const top = new T.Mesh(new T.BoxGeometry(1, 1, 1), GREY); top.castShadow = true; top.receiveShadow = true; bench.add(top); bench.userData.top = top; props.add(bench); }
+    const band = new T.Mesh(new T.CylinderGeometry(1.1, 1.1, 1, 6), BAND); props.add(band);
+    const bike = new T.Group(); {
+      const tube = (a, b, r = 2.4) => { const m = new T.Mesh(new T.CylinderGeometry(r, r, 1, 8), GREY); m.castShadow = true; bike.add(m); m.userData = { a, b }; return m; };
+      bike.userData.tubes = [tube([0, 8], [14, -70]), tube([-10, -70], [80, -70], 3), tube([64, -70], [70, 0]), tube([60, 4], [76, 4], 2)];
+      const wheel = new T.Mesh(new T.TorusGeometry(15, 2.6, 8, 24), GREY); wheel.castShadow = true; bike.add(wheel); bike.userData.wheel = wheel;
+      const seat = new T.Mesh(new T.BoxGeometry(18, 4, 10), SHORTS); bike.add(seat); bike.userData.seat = seat;
+      props.add(bike);
+    }
+    const up = new T.Vector3(0, 1, 0), v1 = new T.Vector3(), v2 = new T.Vector3(), dv = new T.Vector3();
+    const to3 = (p, z) => new T.Vector3(p[0], GROUND + 3 - p[1], z);
+    const seg = (mesh, a, b) => { v1.copy(a); v2.copy(b); mesh.position.copy(v1).add(v2).multiplyScalar(0.5); dv.copy(v2).sub(v1).normalize(); mesh.quaternion.setFromUnitVectors(up, dv); };
+    const place = (mesh, p) => mesh.position.copy(p);
+    function pose(id, s) {
+      const zN = Z.sho, zH = Z.hip;
+      const sho = to3(s.sho, 0), hip = to3(s.hip, 0), mid = to3(s.mid, 0);
+      // braços: lado da frente em +z, lado de trás em -z
+      seg(parts.ua, to3(s.sho, zN), to3(s.elb, zN)); seg(parts.la, to3(s.elb, zN), to3(s.hand, zN)); place(parts.hand, to3(s.hand, zN));
+      seg(parts.ua2, to3(s.sho, -zN), to3(s.elb2, -zN)); seg(parts.la2, to3(s.elb2, -zN), to3(s.hand2, -zN)); place(parts.hand2, to3(s.hand2, -zN));
+      seg(parts.th, to3(s.hip, zH), to3(s.knee, zH)); seg(parts.sh, to3(s.knee, zH), to3(s.foot, zH));
+      seg(parts.th2, to3(s.hip, -zH), to3(s.knee2, -zH)); seg(parts.sh2, to3(s.knee2, -zH), to3(s.foot2, -zH));
+      for (const [m, f, t, z] of [[parts.foot, s.foot, s.toe, zH], [parts.foot2, s.foot2, s.toe2, -zH]]) {
+        const a = to3(f, z), b = to3(t, z); m.position.copy(a).add(b).multiplyScalar(0.5); m.rotation.set(0, 0, Math.atan2(b.y - a.y, b.x - a.x));
+      }
+      seg(parts.belly, hip, mid); seg(parts.chest, mid, sho);
+      parts.pelvis.position.copy(hip); parts.pelvis.quaternion.setFromUnitVectors(up, new T.Vector3(0, 0, 1));
+      parts.shoulders.position.copy(sho); parts.shoulders.quaternion.setFromUnitVectors(up, new T.Vector3(0, 0, 1));
+      const head = to3(s.head, 0), neck = to3(s.neck, 0);
+      seg(parts.neck, sho, neck); place(parts.head, head);
+      dv.copy(head).sub(sho).normalize(); parts.hair.position.copy(head).addScaledVector(dv, 2.2); parts.hair.quaternion.setFromUnitVectors(up, dv);
+      // equipamento
+      const fig = FIG[id];
+      for (const c of props.children) c.visible = false;
+      const hN = to3(s.hand, zN), hF = to3(s.hand2, -zN), hMid = hN.clone().add(hF).multiplyScalar(0.5);
+      if (fig.hand === "dumbbell") { db1.visible = db2.visible = true; db1.position.copy(hN); db2.position.copy(hF); }
+      if (fig.hand === "dumbbell1") { db1.visible = true; db1.position.copy(fig === FIG.goblet_squat ? hMid : hN); }
+      if (fig.hand === "kettlebell") { kb.visible = true; kb.position.copy(hMid); }
+      if (fig.hand === "sandbag") { sandbag.visible = true; sandbag.position.copy(hMid); }
+      if (fig.hand === "band" || fig.hand === "band_up") {
+        band.visible = true; const a = hMid, b = fig.hand === "band" ? to3(s.foot, 0) : new T.Vector3(a.x, a.y + 90, 0);
+        band.scale.set(1, a.distanceTo(b), 1); seg(band, a, b);
+      }
+      const box = (x0, x1, yTop) => { bench.visible = true; const t = bench.userData.top; t.scale.set(x1 - x0, Math.max(2, yTop), 26); t.position.set((x0 + x1) / 2, yTop / 2, 0); };
+      if (fig.props.includes("bench_under")) box(hip.x - 62, hip.x + 10, hip.y - 9);
+      if (fig.props.includes("bench_back")) { const f2 = to3(s.foot2, 0); box(f2.x - 22, f2.x + 12, f2.y - 3); }
+      if (fig.props.includes("bench_hands")) box(hMid.x - 22, hMid.x + 20, hMid.y - 4);
+      if (fig.props.includes("bench_feet")) { const ft = to3(s.foot, 0); box(ft.x - 20, ft.x + 16, ft.y - 3); }
+      if (fig.props.includes("bike")) {
+        bike.visible = true; bike.position.set(hip.x, hip.y - 9, 0);
+        for (const t of bike.userData.tubes) { const { a, b } = t.userData; const A = new T.Vector3(a[0], a[1], 0), B = new T.Vector3(b[0], b[1], 0); t.scale.set(1, A.distanceTo(B), 1); seg(t, A, B); }
+        bike.userData.wheel.position.set(24, -46, 0); bike.userData.seat.position.set(0, 6, 0);
+      }
+    }
+    // Enquadramento: caixa de todas as poses do exercício
+    const frame = {};
+    function framing(id) {
+      if (frame[id]) return frame[id];
+      const fig = FIG[id]; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (let i = 0; i <= 16; i++) { const s = skeleton(poseAt(fig, i / 16), fig.anchor); for (const k in s) { x0 = Math.min(x0, s[k][0]); x1 = Math.max(x1, s[k][0]); y0 = Math.min(y0, s[k][1]); y1 = Math.max(y1, s[k][1]); } }
+      if (fig.props.includes("bike")) x1 = Math.max(x1, x0 + 110);
+      const cx = (x0 + x1) / 2, cy = GROUND + 3 - (y0 + y1) / 2, size = Math.max((x1 - x0 + 30) / 1.5, y1 - y0 + 38);
+      return (frame[id] = { cx, cy, size });
+    }
+    function draw(canvas, id, t) {
+      const fig = FIG[id]; if (!fig) return;
+      const ph = REDUCED_MOTION ? 0.3 : (t / 1000 / (fig.cycle * 1.15)) % 1;
+      pose(id, skeleton(poseAt(fig, ph), fig.anchor));
+      const f = framing(id), dist = f.size / (2 * Math.tan((camera.fov * Math.PI) / 360)) * 0.98;
+      const yaw = 0.55 + (REDUCED_MOTION ? 0 : Math.sin(t / 4200) * 0.18), pitch = 0.2;
+      camera.position.set(f.cx + Math.sin(yaw) * dist * Math.cos(pitch), f.cy + Math.sin(pitch) * dist, Math.cos(yaw) * dist * Math.cos(pitch));
+      camera.lookAt(f.cx, f.cy, 0);
+      sun.target.position.set(f.cx, 0, 0); sun.position.set(f.cx + 60, 240, 140);
+      renderer.render(scene, camera);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
+    }
+    M3.draw = draw; M3.ok = true;
+    const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? M3.active.add(e.target) : M3.active.delete(e.target)))) : null;
+    M3.observe = (c) => { if (io) io.observe(c); else M3.active.add(c); draw(c, c.dataset.anim, performance.now()); };
+    let last = 0;
+    const loop = (t) => {
+      if (t - last > 33) { last = t; for (const c of M3.active) { if (!c.isConnected) { M3.active.delete(c); continue; } draw(c, c.dataset.anim, t); } }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    return true;
+  } catch (e) {
+    console.warn("3D indisponível", e);
+    return false;
+  }
+}
+const REDUCED_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ============================== BIBLIOTECA ============================== */
 // g = grupo principal; eq = alternativas de equipamento ([] = peso do corpo); m = modalidade CrossFit (M cardio, G ginástica, W levantamento).
@@ -590,7 +837,7 @@ function renderHoje() {
 function exCard(it, pi, ii, current) {
   const e = LIB[it.id], last = it.load ? lastLoad(it.id) : null;
   return `<article class="ex ${current ? "now" : ""}" data-ex="${pi}-${ii}">
-    ${stepsHTML(it.id)}
+    ${mediaHTML(it.id)}
     <div class="body">
       <div class="row between"><span class="qty">${esc(it.qty)}</span><button class="ghost" data-act="trocar" data-p="${pi}" data-i="${ii}">Trocar</button></div>
       <span class="name">${esc(e.pt)}</span>
@@ -719,6 +966,7 @@ function render() {
     document.getElementById("d-recon").innerHTML = reconHTML(S.draft.movimentos);
     document.getElementById("d-save").disabled = !S.draft.movimentos.length;
   });
+  if (M3.ok) app.querySelectorAll("canvas.stage3d").forEach((c) => M3.observe(c));
   highlightCurrent();
 }
 
@@ -764,6 +1012,7 @@ document.addEventListener("click", async (ev) => {
   }
   const act = t.dataset.act;
   if (act === "gerar" || act === "outro") { newPlan(); if (location.hash !== "#treino") location.hash = "treino"; else { render(); scrollTo(0, 0); } return; }
+  if (act === "view") { M3.mode = t.dataset.mode; LS.set("cg.media", M3.mode); render(); return; }
   if (act === "trocar") { swapMove(S.plan, +t.dataset.p, +t.dataset.i); persist(); render(); return; }
   if (act === "start") { S.timer = { start: Date.now(), paused: 0, pausedAt: null, stoppedAt: null }; persist(); render(); try { await navigator.wakeLock?.request("screen"); } catch { /* opcional */ } return; }
   if (act === "pause") { S.timer.pausedAt = Date.now(); persist(); render(); return; }
@@ -826,7 +1075,9 @@ setInterval(() => {
 }, 250);
 window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 
+M3.mode = LS.get("cg.media", "anim");
+init3D();
 render();
 initCapabilities();
-window.CG = { LIB, PH, generate, S };
+window.CG = { LIB, PH, FIG, M3, generate, S };
 </script>

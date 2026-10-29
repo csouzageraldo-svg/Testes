@@ -4,7 +4,7 @@ Versão simplificada, em um único arquivo, publicada como artefato do Claude:
 https://claude.ai/artifact/9ycDAbCkawQJUZ6Jvm9F8m (privado).
 
 - **Hoje**: mapa do corpo dos últimos 7 dias (14 se a semana estiver vazia), sugestão de foco, últimos treinos considerados e briefing (onde, tempo 20/30/45/60/livre, foco, como está).
-- **Treino**: aula no formato CrossFit (aquecimento, força/skill, WOD em AMRAP/For Time/EMOM/intervalos, core, volta à calma), fotos reais das etapas de cada exercício (pasta `img/`), cronômetro do WOD, trocar exercício, última carga usada.
+- **Treino**: aula no formato CrossFit (aquecimento, força/skill, WOD em AMRAP/For Time/EMOM/intervalos, core, volta à calma), animação 3D de cada exercício (manequim em three.js 0.149, poses em `FIG`) e fotos reais das etapas (pasta `img/`), alternáveis no cartão, cronômetro do WOD, trocar exercício, última carga usada.
 - **Registro**: carga da série mais pesada, resultado do WOD (tempo ou voltas), kg por exercício, duração e esforço.
 - **Histórico**: adicionar treino do box por foto (o Claude lê o print) ou digitando, com duração, resultado e pesos; os nomes reconhecidos alimentam o mapa. O gerador evita repetir os movimentos dos 2 últimos treinos.
 
