@@ -267,7 +267,7 @@ const FIG = {
   bulgarian: F([P({ th: 20, sh: 0, th2: -40, sh2: -95 }), P({ th: 88, sh: -5, th2: -10, sh2: -85 })], { props: ["bench_back"], cycle: 3.2 }),
   deadlift: F([P({ torso: 112, th: 62, sh: -12, ua: 2, la: 2 }), P({ torso: 140, th: 25, sh: -5 }), STAND], { hand: "dumbbell", cycle: 3.4 }),
   kb_swing: F([P({ torso: 105, th: 18, sh: -6, ua: -25, la: -25 }), P({ torso: 150, th: 10, sh: -2, ua: 30, la: 30 }), P({ ua: 90, la: 90 })], { hand: "kettlebell", cycle: 2.2 }),
-  glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: -100, la: -100 }), P({ torso: -112, th: 108, sh: 15, ua: -100, la: -100 })]),
+  glute_bridge: F([P({ torso: -90, th: 135, sh: 45, ua: 88, la: 88 }), P({ torso: -68, head: -22, th: 110, sh: 25, ua: 90, la: 90 })]),
   jump_squat: F([SQUAT, P({ ua: 160, la: 160, lift: 25 })], { cycle: 2 }),
   thruster: F([P(RACK), P(Object.assign({ torso: 160, th: 100, sh: -28 }, RACK)), P(OVER)], { hand: "dumbbell" }),
   db_snatch: F([P({ torso: 108, th: 50, sh: -10, ua: 0, la: 0, ua2: 30, la2: 60 }), P({ torso: 185, ua: 140, la: 170, ua2: 20, la2: 40 }), P(Object.assign({ ua2: 10, la2: 20 }, OVER))], { hand: "dumbbell1" }),
@@ -287,9 +287,13 @@ const FIG = {
   plank: F([P({ torso: 98, th: -82, sh: -82, ua: 0, la: 90 }), P({ torso: 99, th: -81, sh: -81, ua: 0, la: 90, bend: 3 })], { cycle: 3 }),
   side_plank: F([P({ torso: 112, th: -68, sh: -68, ua: 0, la: 0, ua2: 180, la2: 180 }), P({ torso: 117, th: -63, sh: -63, ua: 0, la: 0, ua2: 180, la2: 180 })], { cycle: 3 }),
   dead_bug: F([P(Object.assign({}, LYING, { th: 180, sh: 90 }, OVER)), P(Object.assign({}, LYING, { th: 120, sh: 115, th2: 180, sh2: 90, ua: -100, la: -100, ua2: 180, la2: 180 }))], { cycle: 3.2 }),
-  sit_up: F([P({ torso: -90, th: 60, sh: -40, ua: -90, la: -90 }), P({ torso: 145, th: 60, sh: -40, ua: 120, la: 120 })], { cycle: 2.6 }),
+  sit_up: F([P({ torso: -90, th: 135, sh: 45, ua: -90, la: -90 }), P({ torso: 155, th: 135, sh: 45, ua: 120, la: 120 })], { cycle: 2.6 }),
   jackknife: F([P({ torso: -90, th: 90, sh: 90, ua: -90, la: -90 }), P({ torso: -140, th: 140, sh: 140, ua: 150, la: 150 })], { cycle: 2.6 }),
-  mountain_climber: F([P(Object.assign({}, PLANK_TOP, { th: 70, sh: -60 })), P(Object.assign({}, PLANK_TOP, { th2: 70, sh2: -60 }))], { cycle: 1 }),
+  mountain_climber: (() => {
+    const pl = (o) => P(Object.assign({}, PLANK_TOP, o));
+    const inR = pl({ th: 70, sh: -60 }), midR = pl({ th: 8, sh: -118 }), inL = pl({ th2: 70, sh2: -60 }), midL = pl({ th2: 8, sh2: -118 });
+    return F([inR, midR, PLANK_TOP, midL, inL, midL, PLANK_TOP, midR], { cycle: 2.2 });
+  })(),
   superman: F([P({ torso: 90, th: -90, sh: -90, ua: 90, la: 90 }), P({ torso: 100, th: -100, sh: -100, ua: 100, la: 100 })], { cycle: 3 }),
   burpee: F([STAND, SQ_LOW, PLANK_TOP, P({ torso: 92, th: -88, sh: -88, ua: -110, la: 10 }), PLANK_TOP, SQ_LOW, P(Object.assign({ lift: 20 }, OVER))], { cycle: 4.4 }),
   burpee_step: F([STAND, SQ_LOW, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55, ua: 5, la: 5 }), PLANK_TOP, P({ torso: 125, th: 90, sh: -40, th2: -55, sh2: -55, ua: 5, la: 5 }), SQ_LOW], { cycle: 5 }),
@@ -322,10 +326,14 @@ function skeleton(p, anchor) {
 }
 const ease = (t) => t * t * (3 - 2 * t);
 function lerpPose(a, b, t) {
-  const k = ease(t), l = (x, y, d = 0) => (x ?? d) + ((y ?? d) - (x ?? d)) * k, o = {};
-  for (const key of ["hx", "torso", "bend", "head", "ua", "la", "th", "sh", "lift"]) o[key] = l(a[key], b[key]);
-  o.ua2 = l(a.ua2 ?? a.ua, b.ua2 ?? b.ua); o.la2 = l(a.la2 ?? a.la, b.la2 ?? b.la);
-  o.th2 = l(a.th2 ?? a.th, b.th2 ?? b.th); o.sh2 = l(a.sh2 ?? a.sh, b.sh2 ?? b.sh);
+  // Ângulos giram sempre pelo caminho mais curto (evita braço/perna atravessando o chão na transição).
+  const k = ease(t), l = (x, y, d = 0) => (x ?? d) + ((y ?? d) - (x ?? d)) * k;
+  const ang = (x, y) => { x = x ?? 0; y = y ?? 0; const dd = ((((y - x) % 360) + 540) % 360) - 180; return x + dd * k; };
+  const o = {};
+  for (const key of ["hx", "bend", "head", "lift"]) o[key] = l(a[key], b[key]);
+  for (const key of ["torso", "ua", "la", "th", "sh"]) o[key] = ang(a[key], b[key]);
+  o.ua2 = ang(a.ua2 ?? a.ua, b.ua2 ?? b.ua); o.la2 = ang(a.la2 ?? a.la, b.la2 ?? b.la);
+  o.th2 = ang(a.th2 ?? a.th, b.th2 ?? b.th); o.sh2 = ang(a.sh2 ?? a.sh, b.sh2 ?? b.sh);
   return o;
 }
 function poseAt(fig, ph) {
