@@ -1,0 +1,6 @@
+# ai-memory: configuracao deste repositorio.
+# Arquivos que casam com estes padroes nunca entram na memoria
+# (leituras e edicoes deles nao sao registradas). Os padroes partem
+# da pasta deste arquivo.
+[capture]
+ignore_paths = [".env", ".env.*", "**/*.pem", "**/*.key", "secrets/**"]
